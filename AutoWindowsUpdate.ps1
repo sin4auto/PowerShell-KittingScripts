@@ -1,223 +1,188 @@
-﻿# =================================================================
-# 【スクリプト名】
-#   Windows Update 全自動化スクリプト
-#
-# 【概要】
-#   Windows Update を「最新の状態です」と表示されるまで、更新の
-#   インストールと再起動を自動で繰り返します。一度実行すれば、
-#   全ての更新が完了するまで完全に放置できます。
-#
-# 【主な機能】
-#   - 必須モジュール(PSWindowsUpdate)の自動インストール
-#   - 更新チェック → インストール → 再起動 のサイクルを自動反復
-#   - 再起動後、スクリプトを自動継続するためのタスクを登録
-#   - 全ての実行履歴をログファイルに記録
-#
-# 【使用方法】
-#   1. このスクリプト(.ps1)をPCに保存します。
-#   2. PowerShellを「管理者として実行」します。
-#   3. PowerShellコンソールで、保存したスクリプトを実行します。
-#
-# 【注意事項】
-#   - このスクリプトは必ず「管理者として実行」してください。
-#   - モジュールの初回インストールにはインターネット接続が必要です。
-# =================================================================
+<#
+.SYNOPSIS
+    Windows Updateを全自動で実行し、システムを最新の状態にします。
 
-# -----------------------------------------------------------------
-# ■ 設定値
-# -----------------------------------------------------------------
-# 再起動後にこのスクリプトを自動実行させるためのタスク名です。
-# 他のタスクと名前が競合しない限り、変更の必要はありません。
+.DESCRIPTION
+    このスクリプトは、更新プログラムの確認、ダウンロード、インストール、そして必要に応じた再起動までの一連のプロセスを、「更新プログラムはありません」と表示されるまで自動で繰り返します。
+    一度実行すれば、すべての更新が適用されるまで完全に無人で処理が継続されます。
+
+    主な動作:
+    - 必須モジュール「PSWindowsUpdate」を自動でインストール・セットアップします。
+    - 再起動後も処理が自動で継続されるように、タスクスケジューラに一時的なタスクを登録します。
+    - 実行されたすべての操作は、スクリプトと同じフォルダ内の「AutoUpdateLog.txt」に記録されます。
+
+.EXAMPLE
+    .\Update-Windows.ps1
+    PowerShellを「管理者として実行」で開き、上記コマンドでスクリプトを実行します。
+    以後の処理はすべて自動で行われます。
+
+.NOTES
+    - 実行には管理者権限が必須です。
+    - 初回実行時やモジュールのインストール時にはインターネット接続が必要です。
+    - 作成者: (もしあれば記入)
+    - バージョン: 1.0
+#>
+
+# =================================================================
+# 設定項目
+# =================================================================
+# 再起動後にこのスクリプトを自動実行させるためにタスクスケジューラに登録するタスクの名前です。
+# 通常は変更する必要はありません。
 $TaskName = "Ultimate-AutoUpdateAfterReboot"
 
-# -----------------------------------------------------------------
-# ■ 実行前準備
-# -----------------------------------------------------------------
-# スクリプト自身の場所を特定し、ログ記録を開始します。
+# =================================================================
+# 初期化処理
+# =================================================================
+# スクリプトの実行に必要なパスの特定と、操作ログの記録を開始します。
 try {
-    # このスクリプトファイルがどこにあるか、そのフルパスを取得します。
+    # スクリプト自身のフルパスと、それが置かれているディレクトリのパスを取得します。
     $ScriptPath = $MyInvocation.MyCommand.Path
-    # スクリプトファイルが置かれているフォルダのパスを取得します。
-    $ScriptDir = Split-Path $ScriptPath -Parent
-    # ログファイル等が意図した場所に作成されるよう、作業場所をスクリプトのあるフォルダに移動します。
+    $ScriptDir  = Split-Path $ScriptPath -Parent
+    # ログファイルなどを正しく配置するため、カレントディレクトリをスクリプトのある場所に変更します。
     Set-Location -Path $ScriptDir
 } catch {
-    # このエラーは、スクリプトをファイルとして保存せず、コードを直接コンソールに貼り付けた場合などに発生します。
+    # .ps1ファイルとして保存せずに実行した場合など、パス取得に失敗した際のエラー処理です。
     Write-Error "スクリプトを.ps1ファイルとして保存してから実行してください。"
     Start-Sleep -Seconds 10
     exit
 }
 
-# 全ての画面表示をログファイルに保存する設定です。
-# 何が起きたかを後から確認するのに役立ちます。
+# スクリプトの全出力をログファイルに記録する設定です。
 $LogFile = Join-Path $ScriptDir "AutoUpdateLog.txt"
 try {
-    # 既存のログに追記する形で、記録を開始します。
+    # 既存のログファイルに追記する形で記録を開始します。
     Start-Transcript -Path $LogFile -Append
 } catch {
-    Write-Warning "ログ記録の開始に失敗しました。エラー: $($_.Exception.Message)"
+    Write-Warning "ログ記録の開始に失敗しました。処理は続行しますが、ログは残りません。エラー: $($_.Exception.Message)"
 }
 
-
 # =================================================================
-# ■ メイン処理関数
-# Windows Updateの確認から再起動までの一連の処理を実行します。
+# メイン処理関数
+# Windows Update の確認から再起動までの一連のサイクルを実行します。
 # =================================================================
 Function Start-WindowsUpdateProcess {
     try {
-        # --- ステップ1: 必須モジュールの確認とセットアップ ---
-        Write-Host "----------------------------------------------------" -ForegroundColor Green
-        Write-Host "[1/6] 必須モジュール(PSWindowsUpdate)のセットアップを開始します..." -ForegroundColor Cyan
-
-        # `PSWindowsUpdate`モジュールがPCにインストールされているか確認します。
+        # --- 1. 必須モジュールの準備 ---
+        Write-Host "----------------------------------------------------"
+        Write-Host "[1/6] 必須モジュール(PSWindowsUpdate)の準備" -ForegroundColor Cyan
+        # Windows UpdateをPowerShellで操作するための「PSWindowsUpdate」モジュールがインストール済みか確認します。
         if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
-            Write-Host "-> モジュールが未導入のため、インストールします..." -ForegroundColor Yellow
-            
-            # 古い環境でエラーが出ないよう、PowerShellのモジュール管理機能を最新化します。
-            if ((Get-Module -ListAvailable -Name PowerShellGet).Version -lt [System.Version]'2.0.0') {
-                Write-Host "--> 依存関係(PowerShellGet)を更新中..."
-                Install-Module PowerShellGet -Force -SkipPublisherCheck
-            }
-            # モジュールをインストールするための基盤(NuGet)を準備します。
-            if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-                Write-Host "--> 依存関係(NuGet)をインストール中..."
-                Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-            }
-            
-            # PSWindowsUpdateモジュールを、このPCの全ユーザーが使えるようにインストールします。
-            Write-Host "--> PSWindowsUpdateモジュールをインストール中..."
+            Write-Host "-> モジュールが未導入のため、インストールを開始します..." -ForegroundColor Yellow
+            # 信頼されたリポジトリからモジュールをインストールできるよう、関連コンポーネントを準備します。
+            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue
+            # PSWindowsUpdateモジュールをインストールします。-Forceで確認プロンプトをスキップします。
             Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers
             Write-Host "-> モジュールのインストールが完了しました。" -ForegroundColor Green
         } else {
-            Write-Host "-> モジュールは既にインストールされています。" -ForegroundColor Green
+            Write-Host "-> モジュールはインストール済みです。" -ForegroundColor Green
         }
-        
-        # モジュールを使えるように、現在のPowerShellセッションに読み込みます。
+        # モジュールを現在のセッションに読み込み、コマンドレットを使えるようにします。
         Import-Module PSWindowsUpdate -Force
 
-        # --- ステップ2: 更新プログラムの有無を確認 ---
-        Write-Host "----------------------------------------------------" -ForegroundColor Green
-        Write-Host "`n[2/6] Windows Updateサーバーに更新を確認します..." -ForegroundColor Cyan
-        
-        # 利用可能な更新プログラムの一覧を取得します。
-        # `-MicrosoftUpdate`オプションにより、Officeなど他のMicrosoft製品も対象になります。
+        # --- 2. 更新プログラムの確認 ---
+        Write-Host "----------------------------------------------------"
+        Write-Host "`n[2/6] 更新プログラムを確認中..." -ForegroundColor Cyan
+        # `-MicrosoftUpdate` を付けることで、WindowsだけでなくOffice等の他のMicrosoft製品の更新も対象にします。
         $updates = Get-WindowsUpdate -MicrosoftUpdate -ErrorAction Stop
 
-        # --- ステップ3: 更新がない場合の終了処理 ---
-        # 更新プログラムの一覧が空だった場合、PCは最新の状態です。
+        # --- 3. 更新がない場合の処理 ---
+        # 利用可能な更新がなければ、$updatesは空($null)になります。
         if ($null -eq $updates) {
-            Write-Host "`n>> システムは最新です。更新プログラムはありません。" -ForegroundColor Green
-            Write-Host ">> 後片付けをして終了します..." -ForegroundColor Yellow
-            
-            # 再起動用に登録したタスクが残っている場合があるので、ここで削除します。
+            Write-Host "`n>> システムは最新の状態です。更新プログラムはありません。" -ForegroundColor Green
+            Write-Host ">> 後片付けを行い、処理を終了します..."
+            # 再起動に備えて登録した自動実行タスクが残っている可能性があるので、念のため削除します。
             Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
-            Write-Host "-> 自動実行タスクを削除しました。" -ForegroundColor Green
+            Write-Host "-> 自動実行タスクをクリーンアップしました。"
             
-            Write-Host "`n全ての処理が完了しました。10秒後にスクリプトを終了します。"
-            
-            # ログの記録を停止します。
+            Write-Host "`n全ての処理が完了しました。10秒後にウィンドウを閉じます。"
             if ($global:Transcript) { Stop-Transcript }
             Start-Sleep -Seconds 10
             exit
         }
 
-        # --- ステップ4: 更新プログラムの一覧表示 ---
+        # --- 4. 更新プログラムの一覧表示 ---
         Write-Host ("`n[3/6] {0}個の更新プログラムが見つかりました。" -f $updates.Count) -ForegroundColor Yellow
-        # 見つかった更新プログラムの詳細を表形式で表示します。
         $updates | Select-Object Title, KB, Size | Format-Table
 
-        # --- ステップ5: 再起動後の自動実行タスクを登録 ---
+        # --- 5. 再起動後の自動実行タスク登録 ---
         Write-Host "`n[4/6] 再起動後に処理を継続するためのタスクを登録します..." -ForegroundColor Cyan
-        
-        # 実行するコマンド（このスクリプト自身）を定義します。
-        $psPath    = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
-        $action    = New-ScheduledTaskAction -Execute $psPath -Argument "-ExecutionPolicy Bypass -File `"$ScriptPath`"" -WorkingDirectory $ScriptDir
-        # 実行するタイミング（PC起動時）を定義します。起動直後の負荷を避けるため、1分間の遅延を設けます。
-        $trigger   = New-ScheduledTaskTrigger -AtStartup -RandomDelay (New-TimeSpan -Minutes 1)
-        # 実行する権限（システムアカウント、最高権限）を定義します。
+        # タスクスケジューラに、PC起動時にこのスクリプトを再度実行するよう設定します。
+        $action    = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-ExecutionPolicy Bypass -File `"$ScriptPath`""
+        $trigger   = New-ScheduledTaskTrigger -AtStartup
+        # SYSTEM権限で実行することで、ログオン不要かつ最高権限でタスクを実行できます。
         $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -RunLevel Highest
-        # 実行時の詳細な条件（バッテリー駆動時でも実行する、など）を定義します。
-        $settings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable
-
-        # 上記で定義した設定を使い、タスクスケジューラにタスクを登録（または上書き）します。
+        $settings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+        
+        # 既存のタスクがあれば上書き(-Force)して登録します。
         Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force -ErrorAction Stop
         Write-Host "-> タスク '$TaskName' を登録しました。" -ForegroundColor Green
 
-        # --- ステップ6: 更新のインストールと再起動 ---
-        Write-Host "`n[5/6] 更新プログラムのダウンロードとインストールを開始します..." -ForegroundColor Cyan
-        Write-Host "この処理は時間がかかる場合があります。自動で再起動するまでお待ちください。" -ForegroundColor Yellow
+        # --- 6. 更新のインストールと再起動 ---
+        Write-Host "`n[5/6] 更新のダウンロードとインストールを開始します..." -ForegroundColor Cyan
+        Write-Host "-> この処理は時間がかかります。完了すると自動で再起動されます。" -ForegroundColor Yellow
+        # 再起動の瞬間にログが途切れないよう、ここで一度ログを停止・再開します。
+        if ($global:Transcript) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
         
-        # 再起動直前のログが消えないように、ここで一度ログを止め、再度開始します。
-        if ($global:Transcript) { Stop-Transcript }
-        Start-Transcript -Path $LogFile -Append
-        
-        # 見つかった全ての更新を承認し(-AcceptAll)、必要なら自動で再起動(-AutoReboot)します。
+        # 見つかった更新をすべて承認(-AcceptAll)し、インストール後に再起動が必要な場合は自動で再起動(-AutoReboot)します。
         Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose
 
-        # --- ステップ7: 再起動が不要だった場合のループ処理 ---
-        # インストールが完了しても再起動が不要だった場合、まだ更新が残っている可能性があります。
+        # --- 7. 再起動が不要だった場合の処理 ---
+        # -AutoRebootしても再起動が実行されなかった場合、まだ適用すべき更新が残っている可能性があります。
         Write-Host "`n[6/6] 再起動は不要でした。続けて残りの更新をチェックします。" -ForegroundColor Yellow
-        # 今回のサイクルでは再起動しなかったので、先ほど登録したタスクは不要です。削除します。
+        # このサイクルでは再起動しなかったため、次回の起動に備えたタスクは不要です。削除します。
         Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
         
-        # 5秒待ってから、もう一度この関数の最初から処理を繰り返します。
+        # 連続実行による負荷を避けるため5秒待機し、再度この関数の先頭から処理を繰り返します。
         Write-Host "-> 5秒後に更新チェックを再開します..."
         Start-Sleep -Seconds 5
         Start-WindowsUpdateProcess
 
     } catch {
-        # --- エラー処理 ---
-        # 上記の `try` ブロック内で何かエラーが発生した場合、この部分が実行されます。
+        # --- エラーハンドリング ---
+        # tryブロック内で発生したすべてのエラーをここで捕捉します。
         Write-Host "`nエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host "処理を中断します。ネットワーク接続などを確認してください。" -ForegroundColor Red
-        Write-Host "詳細はログファイルを参照してください: $LogFile" -ForegroundColor Red
-        # 念のため、登録済みのタスクを削除して、クリーンな状態に戻します。
+        Write-Host "処理を中断します。詳細はログファイルを確認してください: $LogFile" -ForegroundColor Red
+        # 意図しない自動実行を防ぐため、登録済みのタスクを削除します。
         Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 20
-        # ログの記録を停止します。
         if ($global:Transcript) { Stop-Transcript }
     }
 }
 
 # =================================================================
-# ■ スクリプト実行の開始点
+# スクリプト実行開始点
 # =================================================================
-
-# --- チェック1: 管理者権限の有無 ---
-# システム設定を変更するため、管理者として実行されているかを確認します。
+# --- 事前チェック1: 管理者権限 ---
+# システム設定やモジュールインストールには管理者権限が必須です。
 if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Warning "管理者権限がありません。このスクリプトは管理者として実行する必要があります。"
-    Write-Warning "PowerShellを「管理者として実行」で開き直してください。"
-    # ログの記録を停止します。
+    Write-Warning "管理者権限がありません。PowerShellを「管理者として実行」で開き直してください。"
     if ($global:Transcript) { Stop-Transcript }
     Start-Sleep -Seconds 10
     exit
 }
 
-# --- チェック2: 実行ポリシーの確認 ---
-# PowerShellのセキュリティ設定が厳しく、スクリプトを実行できない場合があります。
-# その場合は、このプロセスに限り一時的に実行を許可するかどうかをユーザーに確認します。
+# --- 事前チェック2: 実行ポリシー ---
+# スクリプト実行がセキュリティポリシーで禁止されている場合、一時的に許可するか確認します。
 if ((Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "Bypass") {
     Write-Warning "現在のPowerShell実行ポリシーでは、スクリプトを実行できません。"
-    $choice = Read-Host "このウィンドウ内でのみ、一時的に実行を許可しますか？ (Y/N)"
+    $choice = Read-Host "このセッションに限り、一時的に実行を許可しますか？ (Y/N)"
     if ($choice -eq 'y' -or $choice -eq 'Y') {
-        # 現在のPowerShellプロセス内でのみ、実行ポリシーを変更します。
+        # `-Scope Process` を指定することで、このPowerShellウィンドウ内でのみポリシーが変更されます。
         Set-ExecutionPolicy RemoteSigned -Scope Process -Force
     } else {
         Write-Error "実行が許可されなかったため、スクリプトを終了します。"
-        # ログの記録を停止します。
         if ($global:Transcript) { Stop-Transcript }
         Start-Sleep -Seconds 10
         exit
     }
 }
 
-# --- メイン処理の実行 ---
-# 全ての準備が整ったので、Windows Updateのメイン処理関数を呼び出します。
+# --- メイン処理の呼び出し ---
+# すべてのチェックを通過後、Windows Updateのメインプロセスを開始します。
 Start-WindowsUpdateProcess
 
 # --- 終了処理 ---
-# スクリプトが最後まで到達した場合、ログの記録を確実に停止します。
+# スクリプトが正常・異常問わず終了する際に、ログ記録を確実に停止します。
 if ($global:Transcript) {
     Stop-Transcript
 }
