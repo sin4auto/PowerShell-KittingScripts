@@ -1,6 +1,6 @@
 # Windows自動化スクリプト集 (Windows Automation Scripts)
 
-## Windows PCのキッティング作業を自動化するためのPowerShellスクリプトです。
+### Windows PCのキッティング作業を自動化するためのPowerShellスクリプトです。
 
 ## 概要
 PCの初期設定や、定期的なWindows Updateを簡単かつ確実に実行することを目指しています。
