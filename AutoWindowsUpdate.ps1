@@ -163,7 +163,7 @@ try {
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     Write-Host "-> 自動実行タスクをクリーンアップしました。"
             
-    Write-Host "`n全ての処理が完了しました。10秒後にスクリプトを終了します。"
+    Write-Host "`n全ての処理が完了しました。10秒後に処理を終了します。"
     Start-Sleep -Seconds 10
 
 } catch {
