@@ -19,6 +19,7 @@
 .NOTES
     - 実行には管理者権限が必須です。
     - 初回実行時やモジュールのインストール時にはインターネット接続が必要です。
+    - 本スクリプトはWindows標準のPowerShell 5.1での動作を想定しています。
 #>
 
 # =================================================================
@@ -139,7 +140,8 @@ try {
         Write-Host "-> この処理は時間がかかります。完了すると自動で再起動される場合があります。" -ForegroundColor Yellow
         
         # 再起動の瞬間にログが途切れないよう、ここで一度ログを停止・再開します。
-        if (Get-Transcript) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
+        # PowerShell 5.1との互換性のため、$global:Transcriptでログの状態を確認します。
+        if ($global:Transcript) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
         
         Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose
 
@@ -161,7 +163,7 @@ try {
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     Write-Host "-> 自動実行タスクをクリーンアップしました。"
             
-    Write-Host "`n全ての処理が完了しました。10秒後にウィンドウを閉じます。"
+    Write-Host "`n全ての処理が完了しました。10秒後にスクリプトを終了します。"
     Start-Sleep -Seconds 10
 
 } catch {
@@ -180,8 +182,8 @@ try {
 } finally {
     # --- 6. 最終処理 ---
     # スクリプトが正常終了しても、エラーで中断しても、必ず最後に実行されます。
-    # ログ記録がアクティブな場合は、確実に停止してファイルに書き込みます。
-    if (Get-Transcript) {
+    # PowerShell 5.1との互換性のため、$global:Transcriptでログの状態を確認します。
+    if ($global:Transcript) {
         Stop-Transcript
     }
 }
