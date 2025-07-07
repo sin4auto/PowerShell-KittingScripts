@@ -62,7 +62,8 @@ Windows Updateを「最新の状態」になるまで、更新のインストー
 #### フェーズ2: 開発環境のセットアップ (再起動後に自動実行)
 -   **Node.js開発ツールのインストール**: `npm`を使い、以下のパッケージをグローバルにインストールします。
     -   `typescript`, `ts-node`, `nodemon`, `eslint`, `prettier`, `pnpm`
--   **ログ記録**: すべての実行履歴を `KittingLog.txt` に保存します。
+
+#### ログ記録: すべての実行履歴を `KittingLog.txt` に保存します。
 
 ---
 
