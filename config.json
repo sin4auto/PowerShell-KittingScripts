@@ -1,0 +1,31 @@
+{
+  "wingetInstall": [
+    { "id": "Google.Chrome", "name": "Webブラウザ" },
+    { "id": "7zip.7zip", "name": "高機能なファイル圧縮・解凍ソフト" },
+    { "id": "Microsoft.PowerToys", "name": "Windowsの操作性を向上させるMicrosoft公式ツール群" },
+    { "id": "Microsoft.VisualStudioCode", "name": "高機能なテキストエディタ" },
+    { "id": "OpenJS.NodeJS.LTS", "name": "サーバーサイドJavaScript実行環境（npmを含む）" },
+    { "id": "Git.Git", "name": "バージョン管理システム" },
+    { "id": "Zoom.Zoom", "name": "Web会議クライアント" }
+  ],
+  "appxRemove": [
+    { "name": "*Microsoft.549981C3F5F10*", "description": "Cortana (デジタルアシスタント)" },
+    { "name": "*Microsoft.BingNews*", "description": "Microsoft ニュース" },
+    { "name": "*Microsoft.GetHelp*", "description": "ヘルプの表示" },
+    { "name": "*Microsoft.Getstarted*", "description": "ヒント" },
+    { "name": "*Microsoft.Office.OneNote*", "description": "OneNote (for Windows 10版)" },
+    { "name": "*Microsoft.People*", "description": "People (連絡先)" },
+    { "name": "*Microsoft.WindowsFeedbackHub*", "description": "フィードバック Hub" },
+    { "name": "*Microsoft.YourPhone*", "description": "スマートフォン連携" },
+    { "name": "*Microsoft.ZuneMusic*", "description": "Groove ミュージック" },
+    { "name": "*Microsoft.ZuneVideo*", "description": "映画 & テレビ" }
+  ],
+  "npmInstall": [
+    { "package": "typescript", "description": "JavaScriptに型システムを追加する言語" },
+    { "package": "ts-node", "description": "TypeScriptコードを直接実行するユーティリティ" },
+    { "package": "nodemon", "description": "ソースコードの変更を検知して自動的に再起動するツール" },
+    { "package": "eslint", "description": "コードの品質を保つための静的解析ツール" },
+    { "package": "prettier", "description": "コードの書式を自動で整形するフォーマッター" },
+    { "package": "pnpm", "description": "高速なパッケージマネージャー" }
+  ]
+}
