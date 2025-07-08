@@ -30,8 +30,10 @@
     PowerShellを「管理者として実行」で開き、このスクリプトを実行します。フェーズ1が開始されます。
 
 .NOTES
+    実行には管理者権限が必須です。
     必須ファイル: config.json (スクリプトと同じディレクトリに配置)
-    実行環境: PowerShell (管理者権限)
+    インストール時にはインターネット接続が必要です。
+    本スクリプトはWindows標準のPowerShell 5.1での動作を想定しています。
     Copyright (c) 2025 Sinsaku Higuchi
 #>
 

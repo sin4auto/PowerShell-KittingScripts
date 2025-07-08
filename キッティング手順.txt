@@ -6,4 +6,6 @@
 
 ④Setup.batを管理者権限で実行
 
-⑤アクロバットリーダーのインストール
+★Adobe Acrobat Readerはwingetでは上手くインストールできないため
+　下記URLよりインストーラーをダウンロードしてください。
+　https://get.adobe.com/jp/reader/
