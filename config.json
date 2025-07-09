@@ -6,7 +6,8 @@
     { "id": "Microsoft.VisualStudioCode", "name": "高機能なテキストエディタ" },
     { "id": "OpenJS.NodeJS.LTS", "name": "サーバーサイドJavaScript実行環境（npmを含む）" },
     { "id": "Git.Git", "name": "バージョン管理システム" },
-    { "id": "Zoom.Zoom", "name": "Web会議クライアント" }
+    { "id": "Zoom.Zoom", "name": "Web会議クライアント" },
+    { "id": "Microsoft.PowerShell", "name": "最新のPowerShell環境" }
   ],
   "appxRemove": [
     { "name": "*Microsoft.549981C3F5F10*", "description": "Cortana (デジタルアシスタント)" },
