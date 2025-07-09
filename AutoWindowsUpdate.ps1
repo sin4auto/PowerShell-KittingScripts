@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Windows Updateを全自動で実行し、システムを最新の状態にします。
 
