@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Windows PCの初期設定を自動化します。
 
