@@ -1,10 +1,8 @@
 ①リカバリーUSBからWindows11を再インストール
 
-②OneDrive削除
+②OneDriveは手動で削除
 
-③Googleドライブから「キッティング」フォルダをダウンロード
-
-④Setup.batを管理者権限で実行
+③Setup.batを管理者権限で実行
 
 ★Adobe Acrobat Readerはwingetでは上手くインストールできないため
 　下記URLよりインストーラーをダウンロードしてください。

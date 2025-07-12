@@ -1,13 +1,13 @@
 {
   "wingetInstall": [
+    { "id": "Microsoft.PowerShell", "name": "最新のPowerShell環境" },
     { "id": "Google.Chrome", "name": "Webブラウザ" },
     { "id": "7zip.7zip", "name": "高機能なファイル圧縮・解凍ソフト" },
     { "id": "Microsoft.PowerToys", "name": "Windowsの操作性を向上させるMicrosoft公式ツール群" },
     { "id": "Microsoft.VisualStudioCode", "name": "高機能なテキストエディタ" },
     { "id": "OpenJS.NodeJS.LTS", "name": "サーバーサイドJavaScript実行環境（npmを含む）" },
     { "id": "Git.Git", "name": "バージョン管理システム" },
-    { "id": "Zoom.Zoom", "name": "Web会議クライアント" },
-    { "id": "Microsoft.PowerShell", "name": "最新のPowerShell環境" }
+    { "id": "Zoom.Zoom", "name": "Web会議クライアント" }
   ],
   "appxRemove": [
     { "name": "*Microsoft.549981C3F5F10*", "description": "Cortana (デジタルアシスタント)" },
