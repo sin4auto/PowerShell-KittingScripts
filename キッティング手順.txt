@@ -3,7 +3,3 @@
 ②OneDriveは手動で削除
 
 ③Setup.batを管理者権限で実行
-
-★Adobe Acrobat Readerはwingetでは上手くインストールできないため
-　下記URLよりインストーラーをダウンロードしてください。
-　https://get.adobe.com/jp/reader/
