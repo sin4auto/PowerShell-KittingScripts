@@ -1,55 +1,57 @@
 {
   "wingetInstall": [
-    { "id": "Microsoft.PowerShell", "name": "最新バージョンのPowerShell（コマンドライン環境）" },
-    { "id": "Google.Chrome", "name": "高速で広く利用されているウェブブラウザ" },
-    { "id": "7zip.7zip", "name": "多様な形式に対応したファイル圧縮・解凍ユーティリティ" },
-    { "id": "Microsoft.PowerToys", "name": "Windowsの生産性を向上させるMicrosoft公式の拡張ツール群" },
-    { "id": "Git.Git", "name": "ソースコードなどの変更履歴を管理する分散型バージョン管理システム" },
-    { "id": "OpenJS.NodeJS.LTS", "name": "JavaScript実行環境とパッケージ管理ツール(npm)のLTS版" },
-    { "id": "Python.Python.3.12", "name": "Python 3.12 (安定性の高いバージョン)" },
-    { "id": "astral-sh.uv", "name": "高速なPythonパッケージインストーラー（pip/venv代替）" },
-    { "id": "Zoom.Zoom", "name": "オンラインミーティングやウェビナーに使用するWeb会議ツール" },
+    { "id": "Microsoft.PowerShell" },
+    { "id": "Google.Chrome" },
+    { "id": "7zip.7zip" },
+    { "id": "Microsoft.PowerToys" },
+    { "id": "Git.Git" },
+    { "id": "OpenJS.NodeJS.LTS" },
+    { "id": "Python.Python.3.12" },
+    { "id": "astral-sh.uv" },
+    { "id": "Zoom.Zoom" },
     { 
-      "id": "Microsoft.VisualStudioCode", "name": "開発者向けの多機能なソースコードエディタ",
-      "options": "--override \"/mergetasks=addcontextmenufiles,addcontextmenufolders,addtopath\"" },
+      "id": "Microsoft.VisualStudioCode",
+      "options": "--override \"/mergetasks=addcontextmenufiles,addcontextmenufolders,addtopath\""
+    },
     { 
-      "id": "Adobe.Acrobat.Reader.64-bit", "name": "PDFファイルを閲覧・印刷するための標準的なアプリケーション",
-      "options": "--override \"/sAll /rs /rps /msi EULA_ACCEPT=YES\"" }
+      "id": "Adobe.Acrobat.Reader.64-bit",
+      "options": "--override \"/sAll /rs /rps /msi EULA_ACCEPT=YES\""
+    }
   ],
   "appxRemove": [
-    { "name": "*Microsoft.549981C3F5F10*", "description": "Windowsに搭載されているAIアシスタント機能" },
-    { "name": "*Microsoft.BingNews*", "description": "ニュースや関心事の記事を表示するアプリ" },
-    { "name": "*Microsoft.GetHelp*", "description": "問題解決のためのヘルプとサポートを表示する機能" },
-    { "name": "*Microsoft.Getstarted*", "description": "Windowsの機能や使い方を紹介するアプリ" },
-    { "name": "*Microsoft.Office.OneNote*", "description": "Windows 10に標準搭載されていたデジタルノートアプリ" },
-    { "name": "*Microsoft.People*", "description": "連絡先を管理するための標準アプリ" },
-    { "name": "*Microsoft.WindowsFeedbackHub*", "description": "Microsoftへ製品のフィードバックを送信するツール" },
-    { "name": "*Microsoft.YourPhone*", "description": "PCとスマートフォンを連携させるためのアプリ" },
-    { "name": "*Microsoft.ZuneMusic*", "description": "音楽を再生・管理するための旧標準アプリ" },
-    { "name": "*Microsoft.ZuneVideo*", "description": "ビデオコンテンツを再生・管理するための旧標準アプリ" } 
+    { "name": "*Microsoft.549981C3F5F10*" },
+    { "name": "*Microsoft.BingNews*" },
+    { "name": "*Microsoft.GetHelp*" },
+    { "name": "*Microsoft.Getstarted*" },
+    { "name": "*Microsoft.Office.OneNote*" },
+    { "name": "*Microsoft.People*" },
+    { "name": "*Microsoft.WindowsFeedbackHub*" },
+    { "name": "*Microsoft.YourPhone*" },
+    { "name": "*Microsoft.ZuneMusic*" },
+    { "name": "*Microsoft.ZuneVideo*" } 
   ],
   "npmInstall": [
-    { "package": "typescript", "description": "JavaScriptに静的型付けを追加したプログラミング言語" },
-    { "package": "ts-node", "description": "コンパイル不要でTypeScriptを直接実行するためのツール" },
-    { "package": "nodemon", "description": "ファイルの変更を監視し、自動でNode.jsアプリケーションを再起動する開発ツール" },
-    { "package": "eslint", "description": "コードの問題点を静的に解析し、品質を維持するためのリンター" },
-    { "package": "prettier", "description": "コードのスタイルを統一された書式に自動で整形するツール" },
-    { "package": "pnpm", "description": "高速でディスク容量効率の良いパッケージマネージャー" }
+    { "package": "typescript" },
+    { "package": "ts-node" },
+    { "package": "nodemon" },
+    { "package": "eslint" },
+    { "package": "prettier" },
+    { "package": "pnpm" }
   ],
   "pipInstall": [
-    { "package": "jupyterlab", "description": "対話的なデータ分析のためのWebベース開発環境" },
-    { "package": "jupyterlab-language-pack-ja-jp", "description": "JupyterLabの日本語言語パック" },
-    { "package": "requests", "description": "シンプルなHTTPライブラリ" },
-    { "package": "numpy", "description": "Pythonでの数値計算を効率的に行うための基本的なライブラリ" },
-    { "package": "pandas", "description": "データ分析を容易にするための高性能なデータ構造を提供" },
-    { "package": "matplotlib", "description": "グラフ描画やデータの可視化を行うためのライブラリ" },
-    { "package": "black", "description": "Pythonコードフォーマッター" },
-    { "package": "ruff", "description": "非常に高速なPythonリンター&フォーマッター" },
-    { "package": "python-dotenv", "description": ".envファイルから環境変数を読み込むライブラリ" },
-    { "package": "scikit-learn", "description": "分類、回帰などを含む総合的な機械学習ライブラリ" },
-    { "package": "seaborn", "description": "Matplotlibベースの美しい統計グラフ描画ライブラリ" },
-    { "package": "openpyxl", "description": "Excelファイル(.xlsx)を操作するためのライブラリ" },
-    { "package": "fastapi", "description": "高性能なWeb APIを構築するための最新フレームワーク" },
-    { "package": "lxml", "description": "高速なHTML/XMLパーサー（BeautifulSoupと連携）" }
+    { "package": "jupyterlab" },
+    { "package": "jupyterlab-language-pack-ja-jp" },
+    { "package": "requests" },
+    { "package": "numpy" },
+    { "package": "pandas" },
+    { "package": "matplotlib" },
+    { "package": "black" },
+    { "package": "ruff" },
+    { "package": "python-dotenv" },
+    { "package": "scikit-learn" },
+    { "package": "seaborn" },
+    { "package": "openpyxl" },
+    { "package": "fastapi" },
+    { "package": "lxml" }
   ]
 }
