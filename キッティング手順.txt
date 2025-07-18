@@ -1,5 +1,5 @@
-①リカバリーUSBからWindows11を再インストール
+①リカバリーメディアからWindows11を再インストール
 
-②OneDriveは手動で削除
+②OneDriveを削除する場合は手動で削除
 
 ③Setup.batを管理者権限で実行

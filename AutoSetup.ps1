@@ -57,16 +57,13 @@ try {
     # これにより、どこからスクリプトを実行しても、設定ファイルを正しく見つけられます。
     $PSScriptRoot = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
     Set-Location -Path $PSScriptRoot
-
     # 必須ファイルである「config.json」のパスを生成します。
     $configPath = Join-Path $PSScriptRoot "config.json"
-
     # 「config.json」が存在するかどうかを確認します。
     if (-not (Test-Path $configPath)) {
         # ファイルが見つからない場合は、エラーメッセージを表示して処理を停止します。
         throw "設定ファイル 'config.json' が見つかりません。スクリプトと同じフォルダに配置してください。"
     }
-
     # 「config.json」の内容を読み込み、PowerShellで扱えるオブジェクト形式に変換します。
     # 日本語のコメントなどが含まれていても文字化けしないよう、UTF-8形式で読み込みます。
     $config = Get-Content -Path $configPath -Encoding UTF8 -Raw | ConvertFrom-Json
@@ -102,23 +99,23 @@ if ($Phase -ne '2') {
 #=============================================================================
 # スクリプト実行時に -Phase '2' が指定されていた場合、このブロックのみが実行されます。
 if ($Phase -eq '2') {
-    # PC起動直後はシステムが不安定な場合があるため、少し待機してから処理を開始します。
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 1
 
     Write-Host "===============================================" -ForegroundColor Cyan
     Write-Host "  セットアップ フェーズ2 を開始します" -ForegroundColor Cyan
     Write-Host "  (開発者向けツールのインストール)" -ForegroundColor Cyan
     Write-Host "===============================================" -ForegroundColor Cyan
     Write-Host ""
-    
+    # PC起動直後はシステムが不安定な場合があるため、少し待機してから処理を開始します。
+    Write-Host "10秒後に自動でnpmパッケージのインストールが開始されます。" -ForegroundColor Yellow
+    Start-Sleep -Seconds 10
+
     # config.jsonの 'npmInstall' リストに記載されたパッケージを一つずつ処理します。
     foreach ($pkg in $config.npmInstall) {
-        Write-Host "パッケージ [$($pkg.package)] ($($pkg.description)) の状態を確認しています..."
-        
+        Write-Host "パッケージ [$($pkg.package)] ($($pkg.description)) の状態を確認しています..."    
         # npmコマンドを使い、パッケージがすでにグローバルインストールされているかを確認します。
         # 画面に出力はせず、コマンドの成功/失敗を示す終了コード($LASTEXITCODE)だけを利用します。
         npm list -g $pkg.package --depth=0 > $null
-        
         # 終了コードが 0 の場合は「インストール済み」を意味します。
         if ($LASTEXITCODE -eq 0) {
             Write-Host "-> [$($pkg.package)] はインストール済みです。スキップします。" -ForegroundColor Cyan
@@ -126,7 +123,6 @@ if ($Phase -eq '2') {
             # インストールされていない場合、npm installコマンドを実行します。
             Write-Host "-> [$($pkg.package)] をグローバルにインストールします..."
             npm install -g $pkg.package
-            
             # インストール結果を判定し、メッセージを表示します。
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "-> [$($pkg.package)] のインストールに成功しました。" -ForegroundColor Green
@@ -140,10 +136,8 @@ if ($Phase -eq '2') {
     Write-Host "==============================================="
     Write-Host "  すべてのセットアップ処理が完了しました！" -ForegroundColor Green
     Write-Host "==============================================="
-    
     # ユーザーが結果を確認できるよう、キー入力があるまでウィンドウを閉じずに待機します。
     Read-Host "Enterキーを押して、このウィンドウを閉じてください。"
-    
     # フェーズ2の全処理が完了したため、スクリプトを終了します。
     exit
 }
@@ -166,7 +160,6 @@ Write-Host "--- 1. アプリケーションのインストールを開始しま�
 # config.jsonの 'wingetInstall' リストに記載されたアプリを一つずつ処理します。
 foreach ($app in $config.wingetInstall) {
     Write-Host "アプリ [$($app.id)] ($($app.name)) の状態を確認しています..."
-
     # winget listコマンドを使い、アプリがすでにインストールされているかを確認します。
     # "-e" はIDが完全一致するものだけを対象にするためのオプションです。
     # 画面への出力は不要なため、"> $null" で抑制します。
@@ -190,10 +183,8 @@ foreach ($app in $config.wingetInstall) {
             $command += " $($app.options)"
             Write-Host "-> 個別オプション ($($app.options)) を適用してインストールします。" -ForegroundColor Yellow
         }
-
         # 最終的に組み立てられたコマンド文字列を実行します。
         Invoke-Expression -Command $command
-
         # インストール結果を判定し、メッセージを表示します。
         if ($LASTEXITCODE -eq 0) {
             Write-Host "-> [$($app.id)] のインストールに成功しました。" -ForegroundColor Green
@@ -211,7 +202,6 @@ Write-Host ""
 # ● 2. 不要な標準アプリの削除
 #----------------------------------------------------------------------
 Write-Host "--- 2. 不要なプリインストールアプリの削除を開始します ---" -ForegroundColor Green
-
 # config.jsonの 'appxRemove' リストに記載されたアプリを一つずつ処理します。
 foreach ($app in $config.appxRemove) {
     Write-Host "[$($app.name)] ($($app.description)) を検索し、存在すれば削除します..."
@@ -268,13 +258,10 @@ Write-Host "--- 5. 再起動後にフェーズ2を自動実行するよう設定
 # Windowsの「RunOnce」機能を利用し、次回PCにサインインした時に一度だけコマンドを自動実行させます。
 # これにより、再起動後に手動で操作しなくても、フェーズ2の処理を継続できます。
 $runOnceKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
-
 # このスクリプト自身のフルパスを取得します。
 $scriptPath = $MyInvocation.MyCommand.Path
-
 # 再起動後に実行するコマンドを組み立てます。「-Phase 2」を引数に指定するのがポイントです。
 $commandToRun = "powershell.exe -ExecutionPolicy Bypass -File `"$scriptPath`" -Phase 2"
-
 # RunOnceレジストリキーに、実行したいコマンドを登録します。
 Set-ItemProperty -Path $runOnceKey -Name "AutoSetupPhase2" -Value $commandToRun -Force
 Write-Host "再起動後の自動実行設定が完了しました。"
@@ -291,6 +278,5 @@ Write-Host "設定を完全に適用するため、システムを再起動し�
 # ユーザーが処理をキャンセルする時間的猶予を与えるため、10秒間待機します。
 Write-Host "10秒後に自動で再起動が開始されます。中断したい場合はこのウィンドウを閉じてください。" -ForegroundColor Yellow
 Start-Sleep -Seconds 10
-
 # PCを強制的に再起動し、フェーズ1を完了します。
 Restart-Computer -Force

@@ -7,11 +7,9 @@
     { "id": "OpenJS.NodeJS.LTS", "name": "JavaScript実行環境とパッケージ管理ツール(npm)のLTS版" },
     { "id": "Git.Git", "name": "ソースコードなどの変更履歴を管理する分散型バージョン管理システム" },
     { "id": "Zoom.Zoom", "name": "オンラインミーティングやウェビナーに使用するWeb会議ツール" },
-    { 
-      "id": "Microsoft.VisualStudioCode", "name": "開発者向けの多機能なソースコードエディタ",
+    { "id": "Microsoft.VisualStudioCode", "name": "開発者向けの多機能なソースコードエディタ",
       "options": "--override \"/mergetasks=addcontextmenufiles,addcontextmenufolders,addtopath\"" },
-    { 
-      "id": "Adobe.Acrobat.Reader.64-bit", "name": "PDFファイルを閲覧・印刷するための標準的なアプリケーション",
+    { "id": "Adobe.Acrobat.Reader.64-bit", "name": "PDFファイルを閲覧・印刷するための標準的なアプリケーション",
       "options": "--override \"/sAll /rs /rps /msi EULA_ACCEPT=YES\"" }
   ],
   "appxRemove": [
