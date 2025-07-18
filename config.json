@@ -38,6 +38,7 @@
   ],
   "pipInstall": [
     { "package": "jupyterlab", "description": "対話的なデータ分析のためのWebベース開発環境" },
+    { "package": "jupyterlab-language-pack-ja-jp", "description": "JupyterLabの日本語言語パック" },
     { "package": "requests", "description": "シンプルなHTTPライブラリ" },
     { "package": "numpy", "description": "Pythonでの数値計算を効率的に行うための基本的なライブラリ" },
     { "package": "pandas", "description": "データ分析を容易にするための高性能なデータ構造を提供" },
