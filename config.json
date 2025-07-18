@@ -19,7 +19,7 @@
     }
   ],
   "appxRemove": [
-    { "name": "*Microsoft.549981C3F5F10*" },
+    { "name": "*Cortana*" },
     { "name": "*Microsoft.BingNews*" },
     { "name": "*Microsoft.GetHelp*" },
     { "name": "*Microsoft.Getstarted*" },
