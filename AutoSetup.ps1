@@ -249,12 +249,21 @@ Write-Host ""
 #----------------------------------------------------------------------
 Write-Host "--- 4. Windowsの各種設定を変更します ---" -ForegroundColor Green
 Write-Host "エクスプローラーの表示設定を変更中..."
+# 隠しファイルやフォルダを表示するように設定します (Hidden = 1)。
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "Hidden" -Value 1 -Force
+# ファイルの拡張子を表示するように設定します (HideFileExt = 0)。
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "HideFileExt" -Value 0 -Force
+# エクスプローラーのアドレスバーに完全なパスを表示するようにします。
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" -Name "FullPathAddress" -Value 1 -Force
+# エクスプローラーの起動時に「クイックアクセス」ではなく「PC」を表示するようにします (LaunchTo = 1)。
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "LaunchTo" -Value 1 -Force
+# すべてのフォルダ表示をデフォルトで「詳細」に設定します (ViewMode = 1)。
+$keyPath = "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell"
+if (-not(Test-Path $keyPath)) { New-Item -Path $keyPath -Force | Out-Null }
+Set-ItemProperty -Path $keyPath -Name "ViewMode" -Value 1 -Type DWord -Force
+# Windows 11で、右クリックメニューを従来のスタイル（「その他のオプションを表示」を経由しない）に戻します。
 New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Force | Set-ItemProperty -Name "(Default)" -Value "" -Force
-Write-Host "高速スタートアップを無効化中..."
+# 高速スタートアップを無効にします。これにより、シャットダウン時の問題やデュアルブート時の不整合を防ぐことができます。
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 0 -Type DWord -Force
 Write-Host "--- Windowsの各種設定変更が完了しました ---" -ForegroundColor Green
 Write-Host ""
