@@ -4,11 +4,11 @@
     { "id": "Google.Chrome" },
     { "id": "7zip.7zip" },
     { "id": "Microsoft.PowerToys" },
+    { "id": "Zoom.Zoom" },
     { "id": "Git.Git" },
     { "id": "OpenJS.NodeJS.LTS" },
     { "id": "Python.Python.3.12" },
     { "id": "astral-sh.uv" },
-    { "id": "Zoom.Zoom" },
     { 
       "id": "Microsoft.VisualStudioCode",
       "options": "--override \"/mergetasks=addcontextmenufiles,addcontextmenufolders,addtopath\""
