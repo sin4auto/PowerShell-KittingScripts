@@ -1,209 +1,371 @@
 ﻿<#
 .SYNOPSIS
-    Windows Updateを全自動で実行し、システムを最新の状態にします。
+    Windows PCの初期セットアップと開発環境構築を自動化します。
 
 .DESCRIPTION
-    このスクリプトは、更新プログラムの確認、ダウンロード、インストール、そして必要に応じた再起動までの一連のプロセスを、「更新プログラムはありません」と表示されるまで自動で繰り返します。
-    一度実行すれば、すべての更新が適用されるまで完全に無人で処理が継続されます。
+    このスクリプトは、設定ファイル「config.yaml」に記述された定義に基づき、
+    PCのセットアップと環境構築を自動的に実行します。
+    処理は、再起動を挟む2つのフェーズで構成されています。
 
-    主な動作:
-    - 必須モジュール「PSWindowsUpdate」を自動でインストール・セットアップします。
-    - 再起動後も処理が自動で継続されるように、タスクスケジューラに一時的なタスクを登録します。
-    - 実行されたすべての操作は、スクリプトと同じフォルダ内の「AutoWindowsUpdate.log」に記録されます。
+    [フェーズ1：システム基本セットアップ]
+    ・Wingetを使用したアプリケーションのインストール
+    ・不要なプリインストールアプリのクリーンアップ
+    ・既存アプリケーションの包括的なアップグレード
+    ・エクスプローラーの表示設定など、Windowsシステムの最適化
+    
+    フェーズ1の完了後、再起動を経てフェーズ2が自動的に開始されるよう設定されます。
+
+    [フェーズ2：開発者向け環境構築]
+    ・PC再起動後に自動実行されます。
+    ・npm, pipなどのパッケージマネージャーを通じて、開発用ライブラリをインストールします。
+
+.PARAMETER SetupPhase
+    実行するセットアップフェーズを指定します（例: '2'）。
+    このパラメータは、フェーズ1からフェーズ2へ移行する際にスクリプトが内部的に使用します。
+    通常、ユーザーが手動で指定する必要はありません。
 
 .EXAMPLE
     # 1. PowerShellを「管理者として実行」で起動します。
     # 2. スクリプトが保存されているフォルダに移動します。
     # 3. 以下のコマンドを実行します。
-    .\Update-Windows.ps1
+    .\AutoSetup.ps1
 
 .NOTES
     - 作成者: sin4auto
+    - バージョン: 4.4
     - 実行には管理者権限が必須です。
-    - 初回実行時やモジュールのインストール時にはインターネット接続が必要です。
-    - 本スクリプトはWindows標準のPowerShell 5.1での動作を想定しています。
-    - スクリプト完了後も、一部の機能更新プログラム等が残る場合があります。
-      **最後に必ず、Windowsの「設定」→「Windows Update」画面から手動で「更新プログラムのチェック」を実行し、**
-      完全に最新の状態になっていることを確認してください。
+    - スクリプトと同じフォルダに「config.yaml」を配置する必要があります。
+    - 安定したインターネット接続環境で実行してください。
 #>
 
 #=============================================================================
-# ■ 1. スクリプト設定
+# ■ 1. パラメータ定義
 #=============================================================================
-# 再起動後にこのスクリプトを自動実行させるためにタスクスケジューラに登録するタスクの名前です。
-# 通常は変更する必要はありません。
-$TaskName = "Ultimate-AutoUpdateAfterReboot"
+param(
+    # スクリプトが現在どのフェーズを実行すべきかを判断するための内部パラメータ。
+    [string]$SetupPhase
+)
 
 #=============================================================================
-# ■ 2. メイン処理ブロック (try/catch/finally)
-#    スクリプト全体の実行を管理し、エラー発生時や終了時の後片付けを保証します。
+# ■ 2. グローバル変数の初期化
 #=============================================================================
+# スクリプト実行中に発生したエラー項目を記録するためのリスト。
+# スクリプトスコープ($script:)で定義し、どこからでもアクセス可能にする。
+$script:FailedItems = [System.Collections.Generic.List[string]]::new()
+
+#=============================================================================
+# ■ 2.5 ログ記録の開始
+#=============================================================================
+# スクリプトの実行パスを取得。
+$scriptRootPathForLog = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+# ログファイル名を固定にする。
+$logFileName = "AutoSetup.log"
+$logFilePath = Join-Path $scriptRootPathForLog $logFileName
+# トランスクリプト（コンソール画面の記録）を開始。
+# -Append スイッチにより、ファイルが存在すれば追記し、なければ新規作成する。
+# これにより、フェーズ1とフェーズ2のログが同一ファイルに記録される。
+Start-Transcript -Path $logFilePath -Append
+# この時点ではログファイルパスを表示するのみ。Clear-Hostで消されることを想定。
+
+
+#=============================================================================
+# ■ 3. 実行前準備 (設定ファイルの読み込みと環境チェック)
+#=============================================================================
+# --- 3.1. YAML解析モジュールの準備 ---
 try {
-    # --- 2.1. 初期化処理 ---
-    # スクリプトの実行に必要なパスの特定と、操作ログの記録を開始します。
-    try {
-        # スクリプト自身のフルパスと、それが置かれているディレクトリのパスを取得します。
-        $ScriptPath = $MyInvocation.MyCommand.Path
-        $ScriptDir  = Split-Path $ScriptPath -Parent
-        # ログファイルなどを正しく配置するため、カレントディレクトリをスクリプトのある場所に変更します。
-        Set-Location -Path $ScriptDir
-    } catch {
-        # .ps1ファイルとして保存せずに実行した場合など、パス取得に失敗した際のエラー処理です。
-        Write-Error "スクリプトを.ps1ファイルとして保存してから実行してください。"
-        Start-Sleep -Seconds 10
+    # このスクリプトはYAML設定ファイルを扱うため、'powershell-yaml'モジュールが必須。
+    # まず、モジュールが利用可能かを確認する。
+    if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
+        Write-Host "YAML設定ファイルを読み込むために 'powershell-yaml' モジュールが必要です。" -ForegroundColor Yellow
+        Write-Host "モジュールのインストールを試みます...（初回のみ）" -ForegroundColor Yellow
+        # ユーザーの環境を汚さないよう、現在のユーザーのスコープにインストールする。
+        Install-Module -Name powershell-yaml -Scope CurrentUser -Repository PSGallery -Force -AllowClobber -ErrorAction Stop
+        Write-Host "'powershell-yaml' モジュールのインストールに成功しました。" -ForegroundColor Green
+    }
+    # モジュールを現在のPowerShellセッションにインポートする。
+    Import-Module powershell-yaml -ErrorAction Stop
+}
+catch {
+    Write-Error "YAMLモジュールのインストールまたはインポートに失敗しました。`nお手数ですが、PowerShellを管理者として実行し、次のコマンドを手動で実行してください: Install-Module -Name powershell-yaml"
+    Read-Host "Enterキーを押すと終了します。"
+    Stop-Transcript
+    exit
+}
+
+# --- 3.2. 設定ファイルの読み込み ---
+try {
+    # スクリプト自身のパスを基準に、カレントディレクトリを移動する。
+    $scriptRootPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+    Set-Location -Path $scriptRootPath
+
+    # 'config.yaml' または一般的な別名 'config.yml' を探索する。
+    $configFileName = "config.yaml"
+    $configFilePath = Join-Path $scriptRootPath $configFileName
+    if (-not (Test-Path $configFilePath)) {
+        $configFileName = "config.yml"
+        $configFilePath = Join-Path $scriptRootPath $configFileName
+        if (-not (Test-Path $configFilePath)) { throw "設定ファイル 'config.yaml' または 'config.yml' が見つかりません。" }
+    }
+    Write-Host "設定ファイル '$configFileName' を読み込んでいます..."
+    # -Encoding UTF8で日本語コメントの文字化けを防ぎ、-Rawでファイル全体を一つの文字列として読み込む。
+    $config = Get-Content -Path $configFilePath -Encoding UTF8 -Raw | ConvertFrom-Yaml
+}
+catch {
+    Write-Error "設定ファイルの読み込み中にエラーが発生しました: $($_.Exception.Message)"
+    # YAMLの書式エラーは利用者が特定しにくいため、具体的なヒントを表示する。
+    if ($_.Exception.InnerException -is [YamlDotNet.Core.YamlException]) {
+        Write-Error "YAMLファイルの書式に誤りがある可能性があります。インデント、ハイフン、コロンなどを確認してください。"
+    }
+    Read-Host "Enterキーを押すと終了します。"
+    Stop-Transcript
+    exit
+}
+
+# --- 3.3. 管理者権限の確認 ---
+# フェーズ1はシステム変更を伴うため、管理者権限が不可欠。
+if ($SetupPhase -ne '2') {
+    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        Write-Warning "エラー：このスクriptの実行には管理者権限が必要です。`nPowerShellのアイコンを右クリックし、「管理者として実行」を選択してから再度お試しください。"
+        Read-Host "Enterキーを押すとスクリプトを終了します。"
+        Stop-Transcript
         exit
     }
+}
 
-    # --- 2.2. ログ記録の開始 ---
-    # スクリプトの全出力をログファイルに記録する設定です。
-    $LogFile = Join-Path $ScriptDir "AutoWindowsUpdate.log"
-    try {
-        # 既存のログファイルに追記する形で記録を開始します。
-        # これにより、再起動を挟んでも一つのログファイルに記録が継続されます。
-        Start-Transcript -Path $LogFile -Append
-    } catch {
-        Write-Warning "ログ記録の開始に失敗しました。処理は続行しますが、ログは残りません。エラー: $($_.Exception.Message)"
-    }
 
-    # --- 2.3. 事前チェック ---
-    # --- 2.3.1. 管理者権限の確認 ---
-    # システムの更新には管理者権限が不可欠です。
-    if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-        Write-Warning "管理者権限がありません。PowerShellを「管理者として実行」で開き直してください。"
-        Start-Sleep -Seconds 10
-        exit
-    }
+#=============================================================================
+# ■ 4. メインロジック (フェーズ分岐)
+#   $SetupPhaseパラメータの値に応じて、フェーズ1またはフェーズ2の処理を実行する。
+#=============================================================================
 
-    # --- 2.3.2. 実行ポリシーの確認と一時的な変更 ---
-    # スクリプト実行がセキュリティポリシーで禁止されている場合、ユーザーに許可を求めます。
-    $currentExecutionPolicy = Get-ExecutionPolicy
-    if ($currentExecutionPolicy -notin @('Unrestricted', 'RemoteSigned', 'Bypass')) {
-        Write-Warning "現在のPowerShell実行ポリシー($currentExecutionPolicy)では、スクリプトを実行できません。"
-        $choice = Read-Host "このセッションに限り、一時的に実行を許可しますか？ (Y/N)"
-        if ($choice -eq 'y') {
-            # `-Scope Process` を指定することで、このPowerShellウィンドウ内でのみポリシーが変更されます。
-            Set-ExecutionPolicy RemoteSigned -Scope Process -Force
-        } else {
-            Write-Error "実行が許可されなかったため、スクリプトを終了します。"
-            Start-Sleep -Seconds 10
-            exit
-        }
-    }
+#----------------------------------------------------------------------
+# ● フェーズ1 (初回実行): システムの基本セットアップ
+#   -SetupPhaseパラメータが指定されていない場合、こちらが実行される。
+#----------------------------------------------------------------------
+if ($SetupPhase -ne '2') {
+    Clear-Host
+    Write-Host "===============================================" -ForegroundColor Cyan
+    Write-Host "  セットアップ フェーズ1 を開始します" -ForegroundColor Cyan
+    Write-Host "===============================================" -ForegroundColor Cyan
 
-    #=============================================================================
-    # ■ 3. Windows Update メインループ
-    #    更新がなくなるまで、[確認] -> [インストール] -> [再起動] のサイクルを繰り返します。
-    #=============================================================================
-    while ($true) {
-        # --- [STEP 1/6] 必須モジュールの準備 ---
-        Write-Host "----------------------------------------------------"
-        Write-Host "[1/6] 必須モジュール(PSWindowsUpdate)の準備" -ForegroundColor Cyan
-        if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
-            Write-Host "-> モジュールが未導入のため、インストールを開始します..." -ForegroundColor Yellow
-            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue
-            Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers
-            Write-Host "-> モジュールのインストールが完了しました。" -ForegroundColor Green
-        } else {
-            Write-Host "-> モジュールはインストール済みです。" -ForegroundColor Green
-        }
-        Import-Module PSWindowsUpdate -Force
+    # --- ログファイルパスの再表示 ---
+    Write-Host ""
+    Write-Host "このセッションのログは以下のファイルに出力されます:" -ForegroundColor Gray
+    Write-Host $logFilePath -ForegroundColor Gray
 
-        # --- [STEP 2/6] 更新プログラムの確認 ---
-        Write-Host "----------------------------------------------------"
-        Write-Host "`n[2/6] 更新プログラムを確認中..." -ForegroundColor Cyan
-        # Microsoft Update経由で、Windows以外のMS製品の更新も取得します。
-        $updates = Get-WindowsUpdate -MicrosoftUpdate -ErrorAction Stop
-
-        # --- 更新がなかった場合の処理 ---
-        if (-not $updates) {
-            Write-Host "`n>> システムは最新の状態です。更新プログラムはありません。" -ForegroundColor Green
-            Write-Host ">> 全ての処理が完了しました。後片付けを行います..."
-            break # 更新がなければwhileループを抜けて終了処理へ。
-        }
-
-        # --- [STEP 3/6] 更新プログラムの一覧表示 ---
-        Write-Host ("`n[3/6] {0}個の更新プログラムが見つかりました。" -f $updates.Count) -ForegroundColor Yellow
-        $updates | Select-Object Title, KB, Size | Format-Table
-
-        # --- [STEP 4/6] 再起動後の自動実行タスク登録 ---
-        Write-Host "`n[4/6] 再起動後に処理を継続するためのタスクを登録します..." -ForegroundColor Cyan
+    # --- 4.1.1. アプリケーションのインストール (winget) ---
+    if ($config.phase1.wingetInstall) {
+        Write-Host ""
+        Write-Host "--- 1. アプリケーションのインストールを開始します ---" -ForegroundColor Green
         
-        # タスクスケジューラの各設定項目を、可読性の高い変数として定義します。
-        $taskAction    = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-ExecutionPolicy Bypass -File `"$ScriptPath`""
-        $taskTrigger   = New-ScheduledTaskTrigger -AtStartup # PC起動時に実行
-        $taskPrincipal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -RunLevel Highest # SYSTEM権限、最高レベルで実行
-        $taskSettings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries # バッテリー駆動でも実行
-        
-        # パラメータをSplattingでまとめて渡し、コマンドを読みやすくします。
-        $registerTaskParams = @{
-            TaskName  = $TaskName
-            Action    = $taskAction
-            Trigger   = $taskTrigger
-            Principal = $taskPrincipal
-            Settings  = $taskSettings
-            Force     = $true # 既にタスクが存在しても上書きする
-            ErrorAction = 'Stop'
-        }
-        Register-ScheduledTask @registerTaskParams
-        Write-Host "-> タスク '$TaskName' を登録しました。" -ForegroundColor Green
-
-        # --- [STEP 5/6] 更新のインストールと再起動 ---
-        Write-Host "`n[5/6] 更新のダウンロードとインストールを開始します..." -ForegroundColor Cyan
-        Write-Host "-> この処理は時間がかかります。完了すると自動で再起動される場合があります。" -ForegroundColor Yellow
-        
-        # 再起動の瞬間にログが途切れないよう、ここで一度ログを停止・再開します。
-        # PowerShell 5.1との互換性のため、$global:Transcriptでログの状態を確認します。
-        if ($global:Transcript) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
-        
-        # 全ての更新を受け入れ(-AcceptAll)、必要なら自動で再起動(-AutoReboot)するコマンドを実行します。
-        Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose
-
-        # --- [STEP 6/6] 再起動が不要だった場合の処理 ---
-        # Install-WindowsUpdate が完了してもスクリプトがこの行に到達した場合、再起動は発生していません。
-        Write-Host "`n[6/6] 再起動は不要でした。続けて残りの更新をチェックします。" -ForegroundColor Yellow
-        
-        # このサイクルでは再起動しなかったため、次回の起動に備えたタスクは不要です。削除します。
-        Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
-        
-        Write-Host "-> 5秒後に更新チェックを再開します..."
-        Start-Sleep -Seconds 5
-        # continue でwhileループの先頭に戻ります。
-        continue
-    }
-
-    #=============================================================================
-    # ■ 4. 正常終了処理
-    #    ループを抜けた後（すべての更新が完了した後）の最終クリーンアップです。
-    #=============================================================================
-    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
-    Write-Host "-> 自動実行タスクをクリーンアップしました。"
+        foreach ($app in $config.phase1.wingetInstall) {
+            Write-Host "アプリ [$($app.id)] の状態を確認しています..."
+            winget list --id $app.id -e --accept-source-agreements > $null
             
-    Write-Host "`n全ての処理が完了しました。10秒後に処理を終了します。"
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "-> [$($app.id)] はインストール済みです。" -ForegroundColor Cyan
+            }
+            else {
+                Write-Host "-> [$($app.id)] をインストールします..."
+                $wingetCommand = "winget install --id $($app.id) -e --accept-package-agreements --accept-source-agreements"
+                
+                if ($app.PSObject.Properties.Name -contains 'options' -and $app.options) {
+                    $wingetCommand += " $($app.options)"
+                    Write-Host "-> 個別オプション ($($app.options)) を適用します。" -ForegroundColor Yellow
+                }
+                
+                Invoke-Expression -Command $wingetCommand
+                
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "-> [$($app.id)] のインストールに成功しました。" -ForegroundColor Green
+                }
+                else {
+                    Write-Warning "-> [$($app.id)] のインストール中にエラーが発生しました。"
+                    $script:FailedItems.Add("Winget: $($app.id)")
+                }
+            }
+        }
+        Write-Host "--- アプリケーションのインストールが完了しました ---" -ForegroundColor Green
+    }
+
+    # --- 4.1.2. 不要な標準アプリの削除 ---
+    if ($config.phase1.appxRemove) {
+        Write-Host ""
+        Write-Host "--- 2. 不要なプリインストールアプリの削除を開始します ---" -ForegroundColor Green
+        
+        foreach ($app in $config.phase1.appxRemove) {
+            Write-Host "[$($app.name)] を検索し、存在すれば削除します..."
+            Get-AppxPackage -AllUsers $app.name | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+        }
+        Write-Host "--- 不要なプリインストールアプリの削除が完了しました ---" -ForegroundColor Green
+    }
+
+    # --- 4.1.3. 既存アプリのアップグレード ---
+    if ($config.phase1.otherTasks.upgradeAllApps) {
+        Write-Host ""
+        Write-Host "--- 3. インストール済みアプリをすべて最新版に更新します ---" -ForegroundColor Green
+        winget upgrade --all --silent --accept-package-agreements --accept-source-agreements
+        Write-Host "--- アプリの更新が完了しました ---" -ForegroundColor Green
+    }
+
+    # --- 4.1.4. Windowsのシステム設定変更 ---
+    if ($config.phase1.windowsTweaks) {
+        Write-Host ""
+        Write-Host "--- 4. Windowsの各種設定を変更します ---" -ForegroundColor Green
+        
+        foreach ($tweak in $config.phase1.windowsTweaks) {
+            Write-Host "-> $($tweak.description)..."
+            try {
+                $parentPath = Split-Path -Path $tweak.path
+                if (-not (Test-Path $parentPath)) {
+                    New-Item -Path $parentPath -Force | Out-Null
+                }
+
+                switch ($tweak.type) {
+                    'Set-RegistryValue' {
+                        Set-ItemProperty -Path $tweak.path -Name $tweak.name -Value $tweak.value -Type $tweak.valueType -Force -ErrorAction Stop
+                    }
+                    'Create-RegistryKeyWithDefault' {
+                        New-Item -Path $tweak.path -Force -ErrorAction Stop | Set-ItemProperty -Name "(Default)" -Value $tweak.value -Force -ErrorAction Stop
+                    }
+                }
+            }
+            catch {
+                $errorMessage = "設定変更失敗: $($tweak.description)"
+                Write-Warning "-> $_.Exception.Message"
+                $script:FailedItems.Add($errorMessage)
+            }
+        }
+        Write-Host "--- Windowsの各種設定変更が完了しました ---" -ForegroundColor Green
+    }
+
+    # --- 4.1.5. フェーズ2の自動実行設定と再起動 ---
+    Write-Host ""
+    Write-Host "--- 5. 再起動後にフェーズ2を自動実行するよう設定します ---" -ForegroundColor Green
+    $runOnceRegistryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
+    $currentScriptPath = $MyInvocation.MyCommand.Path
+    $runOnceCommand = "powershell.exe -ExecutionPolicy Bypass -File `"$currentScriptPath`" -SetupPhase 2"
+    Set-ItemProperty -Path $runOnceRegistryKeyPath -Name "AutoSetupPhase2" -Value $runOnceCommand -Force
+    Write-Host "再起動後の自動実行設定が完了しました。"
+
+    # --- 4.1.6. フェーズ1の完了報告と自動再起動 ---
+    Write-Host ""
+    Write-Host "==============================================="
+    if ($script:FailedItems.Count -gt 0) {
+        Write-Warning "フェーズ1の一部の処理でエラーが発生しました。詳細は以下の通りです："
+        foreach ($failedItem in $script:FailedItems) {
+            Write-Warning "- $failedItem"
+        }
+        Write-Host "==============================================="
+    }
+    Write-Host "  フェーズ1のすべての処理が完了しました！" -ForegroundColor Green
+    Write-Host "==============================================="
+    Write-Host ""
+    Write-Host "設定を完全に適用するため、システムを再起動します。" -ForegroundColor Yellow
+    Write-Host "10秒後に自動で再起動が開始されます。中断したい場合はこのウィンドウを閉じてください。" -ForegroundColor Yellow
+    Start-Sleep -Seconds 10
+    Stop-Transcript
+    Restart-Computer -Force
+}
+
+#----------------------------------------------------------------------
+# ● フェーズ2 (再起動後): 開発者向けパッケージのインストール
+#   -SetupPhaseパラメータが '2' の場合、こちらが実行される。
+#----------------------------------------------------------------------
+if ($SetupPhase -eq '2') {
+    # 起動直後のシステム安定化のため、少し待機する。
+    Start-Sleep -Seconds 1
+    Write-Host ""
+    Write-Host "===============================================" -ForegroundColor Cyan
+    Write-Host "  セットアップ フェーズ2 を開始します" -ForegroundColor Cyan
+    Write-Host "===============================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "10秒後に自動でパッケージのインストールが開始されます。" -ForegroundColor Yellow
     Start-Sleep -Seconds 10
 
-} catch {
-    #=============================================================================
-    # ■ 5. エラーハンドリング
-    #    tryブロック内で発生したすべての$ErrorActionPreference='Stop'エラーをここで捕捉します。
-    #=============================================================================
-    Write-Host "`nエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "処理を中断します。詳細はログファイルを確認してください: $LogFile" -ForegroundColor Red
-    
-    # 意図しない自動実行を防ぐため、登録済みのタスクを削除します。
-    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
-    Write-Host "-> 念のため、自動実行タスクをクリーンアップしました。"
-    
-    Start-Sleep -Seconds 20
-    # スクリプトが異常終了したことを示すために、0以外の終了コードで終了します。
-    exit 1
+    # --- 4.2.1. パッケージマネージャーの定義 ---
+    $packageManagerDefinitions = @(
+        @{ 
+            ManagerName   = "npm"
+            YamlSection   = "npmInstall"
+            Executable    = "npm"
+            CheckScript   = { 
+                param($pkgName) 
+                npm list -g $pkgName --depth=0 > $null 
+                return ($LASTEXITCODE -eq 0)
+            }
+            InstallScript = { 
+                param($pkgName) 
+                npm install -g $pkgName 
+            }
+        },
+        @{
+            ManagerName   = "pip"
+            YamlSection   = "pipInstall"
+            Executable    = "uv"
+            CheckScript   = {
+                param($pkgName)
+                uv pip show $pkgName > $null 2>$null
+                return ($LASTEXITCODE -eq 0)
+            }
+            InstallScript = {
+                param($pkgName)
+                uv pip install $pkgName --system
+            }
+        }
+    )
 
-} finally {
-    #=============================================================================
-    # ■ 6. 最終処理 (Finally)
-    #    スクリプトが正常終了しても、エラーで中断しても、必ず最後に実行されます。
-    #=============================================================================
-    # PowerShell 5.1との互換性のため、$global:Transcriptでログの状態を確認します。
-    if ($global:Transcript) {
-        Stop-Transcript
+    # --- 4.2.2. パッケージインストールの実行ループ ---
+    foreach ($manager in $packageManagerDefinitions) {
+        if ($config.phase2.$($manager.YamlSection)) {
+            if (-not (Get-Command $manager.Executable -ErrorAction SilentlyContinue)) {
+                $errorMessage = "必須コマンド '$($manager.Executable)' が見つかりません。($($manager.ManagerName)の処理はスキップされます)"
+                Write-Warning $errorMessage
+                $script:FailedItems.Add($errorMessage)
+                continue
+            }
+
+            Write-Host ""
+            Write-Host "--- $($manager.ManagerName) パッケージのインストールを開始します ---" -ForegroundColor Green
+            
+            $packagesToInstall = $config.phase2.($manager.YamlSection)
+
+            foreach ($package in $packagesToInstall) {
+                Write-Host "パッケージ [$($package.package)] の状態を確認しています..."
+                
+                if (& $manager.CheckScript $package.package) {
+                    Write-Host "-> [$($package.package)] はインストール済みです。スキップします。" -ForegroundColor Cyan
+                } 
+                else {
+                    Write-Host "-> [$($package.package)] をインストールします..."
+                    & $manager.InstallScript $package.package
+                    
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host "-> [$($package.package)] のインストールに成功しました。" -ForegroundColor Green
+                    }
+                    else {
+                        Write-Warning "-> [$($package.package)] のインストール中にエラーが発生しました。"
+                        $script:FailedItems.Add("$($manager.ManagerName): $($package.package)")
+                    }
+                }
+            }
+            Write-Host "--- $($manager.ManagerName) パッケージのインストールが完了しました ---" -ForegroundColor Green
+        }
     }
+
+    # --- 4.2.3. フェーズ2の完了報告 ---
+    Write-Host ""
+    Write-Host "==============================================="
+    if ($script:FailedItems.Count -gt 0) {
+        Write-Warning "一部の処理でエラーが発生しました。詳細は以下の通りです："
+        foreach ($failedItem in $script:FailedItems) {
+            Write-Warning "- $failedItem"
+        }
+        Write-Host "==============================================="
+    }
+    Write-Host "  すべてのセットアップ処理が完了しました！" -ForegroundColor Green
+    Write-Host "==============================================="
+    Read-Host "Enterキーを押して、このウィンドウを閉じてください。"
+    Stop-Transcript
+    exit
 }
