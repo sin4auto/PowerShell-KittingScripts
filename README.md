@@ -60,7 +60,7 @@ Microsoftが提供する `winget configuration` は、宣言的な環境構築�
 | ファイル名                  | 役割                                                                                                                             |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `Start-Admin.bat`           | **起点となるファイル。** 管理者権限を確認し、対話形式で実行するスクリプトを選択させます。                                         |
-| `Update-Windows.ps1`        | Windows Updateを全自動で実行します。更新がなくなるまで、更新の確認・インストール・再起動を繰り返します。                           |
+| `AutoWindowsUpdate.ps1`     | Windows Updateを全自動で実行します。更新がなくなるまで、更新の確認・インストール・再起動を繰り返します。                           |
 | `AutoSetup.ps1`             | `config.yaml` に基づき、アプリのインストール、システム設定、開発環境の構築を2フェーズ（再起動を挟む）に分けて実行します。          |
 | `config.yaml`               | **カスタマイズの中心。** インストールするアプリ、システム設定、開発パッケージなどを、コメント付きで分かりやすく定義します。          |
 | `.gitignore`                | ログファイルなど、Gitの管理対象から除外するファイルを指定します。                                                                 |
@@ -157,7 +157,7 @@ This project is not a replacement for `winget configuration` but rather a specia
 | File Name                   | Role                                                                                                                              |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `Start-Admin.bat`           | **The starting point.** Checks for administrator privileges and provides an interactive menu to select which script to run.         |
-| `Update-Windows.ps1`        | Fully automates Windows Update, repeating the check-install-reboot cycle until no updates remain.                                   |
+| `AutoWindowsUpdate.ps1`     | Fully automates Windows Update, repeating the check-install-reboot cycle until no updates remain.                                   |
 | `AutoSetup.ps1`             | Executes a two-phase setup (with a reboot in between) for apps, system settings, and dev environments based on `config.yaml`.      |
 | `config.yaml`               | **The heart of customization.** Defines apps to install, system settings, and development packages in a clear, commented format.    |
 | `.gitignore`                | Specifies files to be ignored by Git, such as log files.                                                                          |
