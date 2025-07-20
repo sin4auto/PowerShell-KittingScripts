@@ -16,7 +16,7 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 
 ## 主な機能
 
-- **Windows Updateの完全自動化**: 更新プログラムがなくなるまで、確認・インストール・再起動を無人で繰り返します。
+- **Windows Updateの大幅自動化**: 更新プログラムがなくなるまで、確認・インストール・再起動を無人で繰り返します。（最後は手動で確認をお願いします。）
 - **柔軟なアプリケーション管理**: `winget` を利用し、`config.yaml` に基づいてアプリの一括インストールや不要なプリインストールアプリの削除を行います。
 - **開発環境の自動構築**: `npm` (Node.js) や `pip` (Python) のパッケージを自動でインストールします。Python環境には高速な `uv` を利用します。
 - **システム設定のデータ駆動化**: エクスプローラーの拡張子表示などのシステム設定を`config.yaml`に直接記述することで、スクリプトを編集することなく柔軟に設定を変更できます。
@@ -27,7 +27,7 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 
 Microsoftが提供する `winget configuration` は、宣言的な環境構築の標準機能として非常に強力です。しかし、このプロジェクトは特定のワークフローをより深く自動化するために、いくつかのユニークな機能を提供します。
 
-1.  **Windows Updateの完全自動ループ**
+1.  **Windows Updateの自動ループ**
     `winget configuration` は基本的に一度きりの実行ですが、このプロジェクトの `Update-Windows.ps1` は、**更新がなくなるまで「更新チェック → インストール → 再起動」のサイクルを自律的に繰り返します。** これはタスクスケジューラを活用することで実現しており、一度実行すれば完全に最新の状態になるまで無人で処理を継続できる、"Fire and Forget"（撃ちっぱなし）型の強力な機能です。
 
 2.  **安定性を重視した厳密な2フェーズ実行**
@@ -113,7 +113,7 @@ It prevents common setup mistakes and omissions that occur in manual processes, 
 
 ## Main Features
 
-- **Fully Automated Windows Updates**: Autonomously repeats the cycle of checking for updates, installing them, and rebooting until the system is completely up-to-date.
+- **Highly Automated Windows Updates**: Autonomously repeats the cycle of checking for updates, installing them, and rebooting until the system is up-to-date. (A final manual check is recommended.)
 - **Flexible Application Management**: Utilizes `winget` to batch-install applications and remove unwanted pre-installed apps based on the `config.yaml` file.
 - **Automated Development Environment Setup**: Automatically installs packages for `npm` (Node.js) and `pip` (Python). It uses the high-speed `uv` for the Python environment.
 - **Data-Driven System Configuration**: Allows you to define system tweaks, like showing file extensions in Explorer, directly in `config.yaml`, enabling flexible changes without editing the script.
@@ -124,7 +124,7 @@ It prevents common setup mistakes and omissions that occur in manual processes, 
 
 While Microsoft's `winget configuration` is a powerful standard for declarative setup, this project offers several unique features to more deeply automate specific workflows.
 
-1.  **Fully Autonomous Windows Update Loop**
+1.  **Autonomous Windows Update Loop**
     `winget configuration` is typically a one-shot execution. In contrast, this project's `Update-Windows.ps1` **autonomously repeats the "check -> install -> reboot" cycle until no more updates are found.** This is achieved using the Task Scheduler, providing a powerful "fire and forget" capability that continues unattended until the system is fully patched.
 
 2.  **Strict Two-Phase Execution for Stability**
@@ -161,7 +161,7 @@ This project is not a replacement for `winget configuration` but rather a specia
 | `AutoSetup.ps1`             | Executes a two-phase setup (with a reboot in between) for apps, system settings, and dev environments based on `config.yaml`.      |
 | `config.yaml`               | **The heart of customization.** Defines apps to install, system settings, and development packages in a clear, commented format.    |
 | `.gitignore`                | Specifies files to be ignored by Git, such as log files.                                                                          |
-| `キッティング手順.txt`      | A memo outlining the overall workflow, including manual steps, when using these automation scripts.                               |
+| `キッティング手順.txt`      | A Japanese memo outlining the overall workflow, including manual steps, when using these automation scripts.                      |
 
 ## Customization
 
