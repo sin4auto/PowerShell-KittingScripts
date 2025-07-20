@@ -11,7 +11,7 @@
     { "id": "astral-sh.uv" },
     { 
       "id": "Microsoft.VisualStudioCode",
-      "options": "--override \"/mergetasks=addcontextmenufiles,addcontextmenufolders,addtopath\""
+      "options": "--override \"/verysilent /mergetasks=desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\""
     },
     { 
       "id": "Adobe.Acrobat.Reader.64-bit",
