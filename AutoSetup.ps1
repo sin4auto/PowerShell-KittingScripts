@@ -228,8 +228,8 @@ if ($SetupPhase -ne '2') {
                 }
             }
             catch {
-                $errorMessage = "設定変更失敗: $($tweak.description)"
-                Write-Warning "-> $_.Exception.Message"
+                $errorMessage = "設定変更失敗: $($tweak.description): $($_.Exception.Message)"
+                Write-Warning "-> $($_.Exception.Message)"
                 $script:FailedItems.Add($errorMessage)
             }
         }
@@ -282,74 +282,71 @@ if ($SetupPhase -eq '2') {
     Write-Host "10秒後に自動でパッケージのインストールが開始されます。" -ForegroundColor Yellow
     Start-Sleep -Seconds 10
 
- # --- 4.2.1. パッケージマネージャーの定義 ---
-    $packageManagerDefinitions = @(
-        @{ 
-            ManagerName   = "npm"
-            YamlSection   = "npmInstall"
-            Executable    = "npm"
-            CheckScript   = { param($pkgName) npm list -g $pkgName --depth=0 > $null; return ($LASTEXITCODE -eq 0) }
-            InstallScript = { param($pkgName) npm install -g $pkgName }
-        },
-        @{
-            ManagerName   = "pip"
-            YamlSection   = "pipInstall"
-            Executable    = "uv"
-            CheckScript   = { param($pkgName) uv pip show $pkgName > $null 2>$null; return ($LASTEXITCODE -eq 0) }
-            InstallScript = { param($pkgName) uv pip install $pkgName --system }
-        }
-        # Rust(cargo)
-        # ,
-        # @{
-        #     ManagerName   = "cargo"
-        #     YamlSection   = "cargoInstall"
-        #     Executable    = "cargo"
-        #     CheckScript   = { param($pkgName) return (cargo install --list | Select-String -Quiet -Pattern "^$($pkgName) v") }
-        #     InstallScript = { param($pkgName) cargo install $pkgName }
-        # }
-    )
+    # --- 4.2.1. パッケージインストールの実行ループ ---
+    # config.yaml の `phase2` セクションに `packageInstall` が定義されているか確認
+    if ($config.phase2.packageInstall) {
+        # `packageInstall` のキー (npm, pip など) を一つずつ処理
+        foreach ($managerName in $config.phase2.packageInstall.Keys) {
+            # 対応するパッケージマネージャーの定義を `packageManagers` から探す
+            $managerDef = $config.packageManagers | Where-Object { $_.managerName -eq $managerName }
 
-    # --- 4.2.2. パッケージインストールの実行ループ ---
-    # 定義されたパッケージマネージャーごとにループ処理
-    foreach ($manager in $packageManagerDefinitions) {
-        # 設定ファイルに該当マネージャーのセクションが存在する場合のみ処理を実行
-        if ($config.phase2.$($manager.YamlSection)) {
+            if (-not $managerDef) {
+                Write-Warning "設定ファイル(config.yaml)の 'packageManagers' に '$($managerName)' の定義が見つかりません。スキップします。"
+                continue
+            }
+            
             # 実行に必要なコマンドが存在するか確認
-            if (-not (Get-Command $manager.Executable -ErrorAction SilentlyContinue)) {
-                $errorMessage = "必須コマンド '$($manager.Executable)' が見つかりません。($($manager.ManagerName)の処理はスキップされます)"
+            if (-not (Get-Command $managerDef.executable -ErrorAction SilentlyContinue)) {
+                $errorMessage = "必須コマンド '$($managerDef.executable)' が見つかりません。($($managerName)の処理はスキップされます)"
                 Write-Warning $errorMessage
                 $script:FailedItems.Add($errorMessage)
                 continue
             }
+
             Write-Host ""
-            Write-Host "--- $($manager.ManagerName) パッケージのインストールを開始します ---" -ForegroundColor Green
-            $packagesToInstall = $config.phase2.($manager.YamlSection)
+            Write-Host "--- $($managerName) パッケージのインストールを開始します ---" -ForegroundColor Green
+            
+            # インストール対象のパッケージリストを取得
+            $packagesToInstall = $config.phase2.packageInstall.$managerName
+
             # 設定ファイルに記載されたパッケージを一つずつ処理
             foreach ($package in $packagesToInstall) {
-                Write-Host "パッケージ [$($package.package)] の状態を確認しています..."
+                $pkgName = $package.package
+                Write-Host "パッケージ [$($pkgName)] の状態を確認しています..."
+                
+                # Checkコマンドのテンプレートにパッケージ名を埋め込む
+                $checkCmd = $managerDef.checkCommand -replace '\{package\}', $pkgName
+                
+                # Checkコマンドを実行して、インストール済みか判定
+                $isInstalled = try { Invoke-Expression $checkCmd > $null 2>$null; $LASTEXITCODE -eq 0 } catch { $false }
+                
                 # 既にインストール済みかチェック
-                if (& $manager.CheckScript $package.package) {
-                    Write-Host "-> [$($package.package)] はインストール済みです。スキップします。" -ForegroundColor Cyan
+                if ($isInstalled) {
+                    Write-Host "-> [$($pkgName)] はインストール済みです。スキップします。" -ForegroundColor Cyan
                 } 
                 # 未インストールの場合、インストール処理を実行
                 else {
-                    Write-Host "-> [$($package.package)] をインストールします..."
-                    & $manager.InstallScript $package.package
+                    Write-Host "-> [$($pkgName)] をインストールします..."
+                    
+                    # Installコマンドのテンプレートにパッケージ名を埋め込む
+                    $installCmd = $managerDef.installCommand -replace '\{package\}', $pkgName
+                    Invoke-Expression $installCmd
+                    
                     # インストールの成否を判定
                     if ($LASTEXITCODE -eq 0) {
-                        Write-Host "-> [$($package.package)] のインストールに成功しました。" -ForegroundColor Green
+                        Write-Host "-> [$($pkgName)] のインストールに成功しました。" -ForegroundColor Green
                     }
                     else {
-                        Write-Warning "-> [$($package.package)] のインストール中にエラーが発生しました。"
-                        $script:FailedItems.Add("$($manager.ManagerName): $($package.package)")
+                        Write-Warning "-> [$($pkgName)] のインストール中にエラーが発生しました。"
+                        $script:FailedItems.Add("$($managerName): $($pkgName)")
                     }
                 }
             }
-            Write-Host "--- $($manager.ManagerName) パッケージのインストールが完了しました ---" -ForegroundColor Green
+            Write-Host "--- $($managerName) パッケージのインストールが完了しました ---" -ForegroundColor Green
         }
     }
 
-    # --- 4.2.3. フェーズ2の完了報告 ---
+    # --- 4.2.2. フェーズ2の完了報告 ---
     Write-Host ""
     Write-Host "==============================================="
     # 失敗した項目があればリスト表示する
