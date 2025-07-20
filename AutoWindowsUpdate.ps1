@@ -9,10 +9,10 @@
     主な動作:
     - 必須モジュール「PSWindowsUpdate」を自動でインストール・セットアップします。
     - 再起動後も処理が自動で継続されるように、タスクスケジューラに一時的なタスクを登録します。
-    - 実行されたすべての操作は、スクリプトと同じフォルダ内の「AutoUpdateLog.txt」に記録されます。
+    - 実行されたすべての操作は、スクリプトと同じフォルダ内の「AutoWindowsUpdate.log」に記録されます。
 
 .EXAMPLE
-    .\Update-Windows.ps1
+    .\AutoWindowsUpdate.ps1
     PowerShellを「管理者として実行」で開き、上記コマンドでスクリプトを実行します。
     以後の処理はすべて自動で行われます。
 
@@ -115,13 +115,11 @@ try {
 
         # --- [4/6] 再起動後の自動実行タスク登録 ---
         Write-Host "`n[4/6] 再起動後に処理を継続するためのタスクを登録します..." -ForegroundColor Cyan
-        
         # タスクスケジューラの各設定を定義します。
         $taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-ExecutionPolicy Bypass -File `"$ScriptPath`""
         $taskTrigger = New-ScheduledTaskTrigger -AtStartup
         $taskPrincipal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -RunLevel Highest
         $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-        
         # パラメータをSplattingでまとめて渡し、コマンドの可読性を高めます。
         $registerTaskParams = @{
             TaskName  = $TaskName
@@ -138,17 +136,15 @@ try {
         # --- [5/6] 更新のインストールと再起動 ---
         Write-Host "`n[5/6] 更新のダウンロードとインストールを開始します..." -ForegroundColor Cyan
         Write-Host "-> この処理は時間がかかります。完了すると自動で再起動される場合があります。" -ForegroundColor Yellow
-        
         # 再起動の瞬間にログが途切れないよう、ここで一度ログを停止・再開します。
         # PowerShell 5.1との互換性のため、$global:Transcriptでログの状態を確認します。
         if ($global:Transcript) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
-        
+        # Install-WindowsUpdate コマンドで更新プログラムをインストールします。
         Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose
 
         # --- [6/6] 再起動が不要だった場合の処理 ---
         # Install-WindowsUpdate が完了してもスクリプトが続行した場合、再起動は発生していません。
         Write-Host "`n[6/6] 再起動は不要でした。続けて残りの更新をチェックします。" -ForegroundColor Yellow
-        
         # このサイクルでは再起動しなかったため、次回の起動に備えたタスクは不要です。削除します。
         Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
         
@@ -162,23 +158,17 @@ try {
     # ループを抜けた後（すべての更新が完了した後）の最終クリーンアップです。
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     Write-Host "-> 自動実行タスクをクリーンアップしました。"
-            
     Write-Host "`n全ての処理が完了しました。10秒後に処理を終了します。"
     Start-Sleep -Seconds 10
-
 } catch {
     # --- 5. エラー処理 ---
     # tryブロック内で発生したすべての$ErrorActionPreference='Stop'エラーをここで捕捉します。
     Write-Host "`nエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "処理を中断します。詳細はログファイルを確認してください: $LogFile" -ForegroundColor Red
-    
     # 意図しない自動実行を防ぐため、登録済みのタスクを削除します。
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     Write-Host "-> 念のため、自動実行タスクをクリーンアップしました。"
-    
     Start-Sleep -Seconds 20
-    # スクリプトが異常終了したことを示すために、0以外の終了コードで終了します。
-    exit 1
 } finally {
     # --- 6. 最終処理 ---
     # スクリプトが正常終了しても、エラーで中断しても、必ず最後に実行されます。
