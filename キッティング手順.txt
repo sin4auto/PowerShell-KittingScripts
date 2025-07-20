@@ -2,4 +2,4 @@
 
 ②OneDriveを削除する場合は手動で削除
 
-③Setup.batを管理者権限で実行
+③Start-Admin.batを管理者権限で実行

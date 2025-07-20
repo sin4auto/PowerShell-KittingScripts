@@ -32,7 +32,6 @@
 
 .NOTES
     - 作成者: sin4auto
-    - バージョン: 4.4
     - 実行には管理者権限が必須です。
     - スクリプトと同じフォルダに「config.yaml」を配置する必要があります。
     - 安定したインターネット接続環境で実行してください。
@@ -45,6 +44,8 @@ param(
     # スクリプトが現在どのフェーズを実行すべきかを判断するための内部パラメータ。
     [string]$SetupPhase
 )
+
+
 
 #=============================================================================
 # ■ 2. グローバル変数の初期化
@@ -66,7 +67,6 @@ $logFilePath = Join-Path $scriptRootPathForLog $logFileName
 # これにより、フェーズ1とフェーズ2のログが同一ファイルに記録される。
 Start-Transcript -Path $logFilePath -Append
 # この時点ではログファイルパスを表示するのみ。Clear-Hostで消されることを想定。
-
 
 #=============================================================================
 # ■ 3. 実行前準備 (設定ファイルの読み込みと環境チェック)
@@ -97,7 +97,6 @@ try {
     # スクリプト自身のパスを基準に、カレントディレクトリを移動する。
     $scriptRootPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
     Set-Location -Path $scriptRootPath
-
     # 'config.yaml' または一般的な別名 'config.yml' を探索する。
     $configFileName = "config.yaml"
     $configFilePath = Join-Path $scriptRootPath $configFileName
@@ -132,7 +131,6 @@ if ($SetupPhase -ne '2') {
     }
 }
 
-
 #=============================================================================
 # ■ 4. メインロジック (フェーズ分岐)
 #   $SetupPhaseパラメータの値に応じて、フェーズ1またはフェーズ2の処理を実行する。
@@ -147,35 +145,35 @@ if ($SetupPhase -ne '2') {
     Write-Host "===============================================" -ForegroundColor Cyan
     Write-Host "  セットアップ フェーズ1 を開始します" -ForegroundColor Cyan
     Write-Host "===============================================" -ForegroundColor Cyan
-
     # --- ログファイルパスの再表示 ---
     Write-Host ""
     Write-Host "このセッションのログは以下のファイルに出力されます:" -ForegroundColor Gray
     Write-Host $logFilePath -ForegroundColor Gray
-
     # --- 4.1.1. アプリケーションのインストール (winget) ---
     if ($config.phase1.wingetInstall) {
         Write-Host ""
-        Write-Host "--- 1. アプリケーションのインストールを開始します ---" -ForegroundColor Green
-        
+        Write-Host "--- 1. アプリケーションのインストールを開始します ---" -ForegroundColor Green  
+        # 設定ファイルに記載されたアプリを一つずつ処理する
         foreach ($app in $config.phase1.wingetInstall) {
             Write-Host "アプリ [$($app.id)] の状態を確認しています..."
             winget list --id $app.id -e --accept-source-agreements > $null
-            
+            # 既にインストール済みかチェック
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "-> [$($app.id)] はインストール済みです。" -ForegroundColor Cyan
             }
+            # 未インストールの場合、インストール処理を実行
             else {
                 Write-Host "-> [$($app.id)] をインストールします..."
                 $wingetCommand = "winget install --id $($app.id) -e --accept-package-agreements --accept-source-agreements"
                 
+                # インストールオプションが指定されていればコマンドに追加
                 if ($app.PSObject.Properties.Name -contains 'options' -and $app.options) {
                     $wingetCommand += " $($app.options)"
                     Write-Host "-> 個別オプション ($($app.options)) を適用します。" -ForegroundColor Yellow
                 }
-                
+                # wingetコマンドを実行
                 Invoke-Expression -Command $wingetCommand
-                
+                # インストールの成否を判定
                 if ($LASTEXITCODE -eq 0) {
                     Write-Host "-> [$($app.id)] のインストールに成功しました。" -ForegroundColor Green
                 }
@@ -192,7 +190,7 @@ if ($SetupPhase -ne '2') {
     if ($config.phase1.appxRemove) {
         Write-Host ""
         Write-Host "--- 2. 不要なプリインストールアプリの削除を開始します ---" -ForegroundColor Green
-        
+        # 設定ファイルに記載されたアプリを一つずつ削除
         foreach ($app in $config.phase1.appxRemove) {
             Write-Host "[$($app.name)] を検索し、存在すれば削除します..."
             Get-AppxPackage -AllUsers $app.name | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
@@ -212,15 +210,16 @@ if ($SetupPhase -ne '2') {
     if ($config.phase1.windowsTweaks) {
         Write-Host ""
         Write-Host "--- 4. Windowsの各種設定を変更します ---" -ForegroundColor Green
-        
+        # 設定ファイルに記載されたWindows設定変更を一つずつ実行
         foreach ($tweak in $config.phase1.windowsTweaks) {
             Write-Host "-> $($tweak.description)..."
             try {
                 $parentPath = Split-Path -Path $tweak.path
+                # レジストリキーの親パスが存在しない場合は作成する
                 if (-not (Test-Path $parentPath)) {
                     New-Item -Path $parentPath -Force | Out-Null
                 }
-
+                # config.yamlで定義された 'type' に基づき、実行するコマンドを切り替える。
                 switch ($tweak.type) {
                     'Set-RegistryValue' {
                         Set-ItemProperty -Path $tweak.path -Name $tweak.name -Value $tweak.value -Type $tweak.valueType -Force -ErrorAction Stop
@@ -251,8 +250,10 @@ if ($SetupPhase -ne '2') {
     # --- 4.1.6. フェーズ1の完了報告と自動再起動 ---
     Write-Host ""
     Write-Host "==============================================="
+    # 失敗した項目があればリスト表示する
     if ($script:FailedItems.Count -gt 0) {
         Write-Warning "フェーズ1の一部の処理でエラーが発生しました。詳細は以下の通りです："
+        # 失敗した項目を一つずつ表示
         foreach ($failedItem in $script:FailedItems) {
             Write-Warning "- $failedItem"
         }
@@ -283,63 +284,60 @@ if ($SetupPhase -eq '2') {
     Write-Host "10秒後に自動でパッケージのインストールが開始されます。" -ForegroundColor Yellow
     Start-Sleep -Seconds 10
 
-    # --- 4.2.1. パッケージマネージャーの定義 ---
+ # --- 4.2.1. パッケージマネージャーの定義 ---
     $packageManagerDefinitions = @(
         @{ 
             ManagerName   = "npm"
             YamlSection   = "npmInstall"
             Executable    = "npm"
-            CheckScript   = { 
-                param($pkgName) 
-                npm list -g $pkgName --depth=0 > $null 
-                return ($LASTEXITCODE -eq 0)
-            }
-            InstallScript = { 
-                param($pkgName) 
-                npm install -g $pkgName 
-            }
+            CheckScript   = { param($pkgName) npm list -g $pkgName --depth=0 > $null; return ($LASTEXITCODE -eq 0) }
+            InstallScript = { param($pkgName) npm install -g $pkgName }
         },
         @{
             ManagerName   = "pip"
             YamlSection   = "pipInstall"
             Executable    = "uv"
-            CheckScript   = {
-                param($pkgName)
-                uv pip show $pkgName > $null 2>$null
-                return ($LASTEXITCODE -eq 0)
-            }
-            InstallScript = {
-                param($pkgName)
-                uv pip install $pkgName --system
-            }
+            CheckScript   = { param($pkgName) uv pip show $pkgName > $null 2>$null; return ($LASTEXITCODE -eq 0) }
+            InstallScript = { param($pkgName) uv pip install $pkgName --system }
         }
+        # Rust(cargo)
+        # ,
+        # @{
+        #     ManagerName   = "cargo"
+        #     YamlSection   = "cargoInstall"
+        #     Executable    = "cargo"
+        #     CheckScript   = { param($pkgName) return (cargo install --list | Select-String -Quiet -Pattern "^$($pkgName) v") }
+        #     InstallScript = { param($pkgName) cargo install $pkgName }
+        # }
     )
 
     # --- 4.2.2. パッケージインストールの実行ループ ---
+    # 定義されたパッケージマネージャーごとにループ処理
     foreach ($manager in $packageManagerDefinitions) {
+        # 設定ファイルに該当マネージャーのセクションが存在する場合のみ処理を実行
         if ($config.phase2.$($manager.YamlSection)) {
+            # 実行に必要なコマンドが存在するか確認
             if (-not (Get-Command $manager.Executable -ErrorAction SilentlyContinue)) {
                 $errorMessage = "必須コマンド '$($manager.Executable)' が見つかりません。($($manager.ManagerName)の処理はスキップされます)"
                 Write-Warning $errorMessage
                 $script:FailedItems.Add($errorMessage)
                 continue
             }
-
             Write-Host ""
             Write-Host "--- $($manager.ManagerName) パッケージのインストールを開始します ---" -ForegroundColor Green
-            
             $packagesToInstall = $config.phase2.($manager.YamlSection)
-
+            # 設定ファイルに記載されたパッケージを一つずつ処理
             foreach ($package in $packagesToInstall) {
                 Write-Host "パッケージ [$($package.package)] の状態を確認しています..."
-                
+                # 既にインストール済みかチェック
                 if (& $manager.CheckScript $package.package) {
                     Write-Host "-> [$($package.package)] はインストール済みです。スキップします。" -ForegroundColor Cyan
                 } 
+                # 未インストールの場合、インストール処理を実行
                 else {
                     Write-Host "-> [$($package.package)] をインストールします..."
                     & $manager.InstallScript $package.package
-                    
+                    # インストールの成否を判定
                     if ($LASTEXITCODE -eq 0) {
                         Write-Host "-> [$($package.package)] のインストールに成功しました。" -ForegroundColor Green
                     }
@@ -356,8 +354,10 @@ if ($SetupPhase -eq '2') {
     # --- 4.2.3. フェーズ2の完了報告 ---
     Write-Host ""
     Write-Host "==============================================="
+    # 失敗した項目があればリスト表示する
     if ($script:FailedItems.Count -gt 0) {
         Write-Warning "一部の処理でエラーが発生しました。詳細は以下の通りです："
+        # 失敗した項目を一つずつ表示
         foreach ($failedItem in $script:FailedItems) {
             Write-Warning "- $failedItem"
         }
