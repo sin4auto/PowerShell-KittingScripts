@@ -51,7 +51,7 @@ try {
     }
 
     # スクリプトの全出力をログファイルに記録する設定です。
-    $LogFile = Join-Path $ScriptDir "AutoUpdateLog.txt"
+    $LogFile = Join-Path $ScriptDir "AutoWindowsUpdate.log"
     try {
         # 既存のログファイルに追記する形で記録を開始します。
         Start-Transcript -Path $LogFile -Append

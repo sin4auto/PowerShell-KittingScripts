@@ -1,0 +1,114 @@
+# ================================================================
+# AutoSetupスクリプト設定ファイル
+# ================================================================
+# 実行したいタスクをフェーズごとに定義します。
+# 不要な項目は、行頭に「#」を付けてコメントアウトするとスキップされます。
+
+# ----------------------------------------------------------------
+# ■ フェーズ1: システムの基本セットアップ
+# ----------------------------------------------------------------
+phase1:
+  # --- Wingetによるアプリケーションのインストール ---
+  wingetInstall:
+    - id: Microsoft.PowerShell                 # 最新のPowerShell
+    - id: Google.Chrome                        # Webブラウザ
+    - id: 7zip.7zip                            # 高性能なファイル圧縮・解凍ソフト
+    - id: Microsoft.PowerToys                  # Windowsを便利にするユーティリティ集
+    - id: Zoom.Zoom                            # Web会議ツール
+    - id: Git.Git                              # バージョン管理システム
+    - id: OpenJS.NodeJS.LTS                    # JavaScript実行環境 (長期サポート版)
+    - id: Python.Python.3.12                   # プログラミング言語 Python
+    - id: astral-sh.uv                         # 高速なPythonパッケージインストーラー
+    - id: Microsoft.VisualStudioCode           # 高機能テキストエディタ
+      options: '--override "/verysilent /mergetasks=desktopicon,addcontextmenufolders,associatewithfiles,addtopath"'
+    - id: Adobe.Acrobat.Reader.64-bit          # PDF閲覧ソフト
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+
+  # --- 不要なプリインストールアプリの削除 ---
+  appxRemove:
+    - name: "*Cortana*"                        # AIアシスタント
+    - name: "*Microsoft.BingNews*"             # ニュースアプリ
+    - name: "*Microsoft.GetHelp*"              # ヘルプ表示アプリ
+    - name: "*Microsoft.Getstarted*"           # ヒント表示アプリ
+    - name: "*Microsoft.Office.OneNote*"       # OneNote (ストアアプリ版)
+    - name: "*Microsoft.People*"               # People (連絡先) アプリ
+    - name: "*Microsoft.WindowsFeedbackHub*"   # フィードバックHub
+    - name: "*Microsoft.YourPhone*"            # スマートフォン連携
+    - name: "*Microsoft.ZuneMusic*"            # Grooveミュージック
+    - name: "*Microsoft.ZuneVideo*"            # 映画 & テレビ
+
+  # --- その他の固定タスク ---
+  otherTasks:
+    upgradeAllApps: true       # インストール済みアプリ全体を更新する (winget upgrade --all)
+
+  # --- Windowsのシステム設定変更 ---
+  windowsTweaks:
+    - description: 隠しファイルとフォルダを表示する
+      type: Set-RegistryValue # レジストリの値を設定
+      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+      name: Hidden
+      value: 1
+      valueType: DWord
+
+    - description: ファイルの拡張子を常に表示する
+      type: Set-RegistryValue # レジストリの値を設定
+      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+      name: HideFileExt
+      value: 0
+      valueType: DWord
+
+    - description: エクスプローラーのアドレスバーに完全なパスを表示する
+      type: Set-RegistryValue # レジストリの値を設定
+      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState
+      name: FullPathAddress
+      value: 1
+      valueType: DWord
+
+    - description: エクスプローラーの起動時に「PC」を表示する
+      type: Set-RegistryValue # レジストリの値を設定
+      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+      name: LaunchTo
+      value: 1
+      valueType: DWord
+
+    - description: 右クリックメニューを従来のスタイルに戻す (Win11)
+      type: Create-RegistryKeyWithDefault # キーを作成し、その既定値を設定
+      path: HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32
+      value: "" # 空の既定値を設定
+
+    - description: 高速スタートアップを無効化する
+      type: Set-RegistryValue # レジストリの値を設定
+      path: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power
+      name: HiberbootEnabled
+      value: 0
+      valueType: DWord
+
+# ----------------------------------------------------------------
+# ■ フェーズ2: 開発者向けパッケージのインストール（再起動後）
+# ----------------------------------------------------------------
+phase2:
+  # --- Node.js (npm) パッケージ ---
+  npmInstall:
+    - package: typescript                      # JavaScriptに型を追加した言語
+    - package: ts-node                         # TypeScriptを直接実行するツール
+    - package: nodemon                         # ファイル変更を監視して自動で再起動するツール
+    - package: eslint                          # コードの静的解析ツール (品質チェック)
+    - package: prettier                        # コードフォーマッター (コードの見た目を整形)
+    - package: pnpm                            # 高速なパッケージマネージャー
+
+  # --- Python (pip/uv) パッケージ ---
+  pipInstall:
+    - package: jupyterlab                      # 対話的なデータ分析環境
+    - package: jupyterlab-language-pack-ja-jp  # JupyterLab日本語化パック
+    - package: requests                        # HTTP通信ライブラリ
+    - package: numpy                           # 数値計算ライブラリ
+    - package: pandas                          # データ解析ライブラリ
+    - package: matplotlib                      # グラフ描画ライブラリ
+    - package: black                           # コードフォーマッター
+    - package: ruff                            # 高速なリンター (品質チェック)
+    - package: python-dotenv                   # .envファイルから環境変数を読み込む
+    - package: scikit-learn                    # 機械学習ライブラリ
+    - package: seaborn                         # 高機能なグラフ描画ライブラリ
+    - package: openpyxl                        # Excelファイルの読み書き
+    - package: fastapi                         # 高速なWebフレームワーク
+    - package: lxml                            # XML/HTMLパーサー
