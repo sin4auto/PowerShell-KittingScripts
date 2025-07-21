@@ -63,16 +63,16 @@ phase1:
       name: LaunchTo
       value: 1
       valueType: DWord
-    - description: 右クリックメニューを従来のスタイルに戻す (Win11)
-      type: Create-RegistryKeyWithDefault # キーを作成し、その既定値を設定
-      path: HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32
-      value: "" # 空の既定値を設定
     - description: 高速スタートアップを無効化する
       type: Set-RegistryValue
       path: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power
       name: HiberbootEnabled
       value: 0
       valueType: DWord
+    - description: 右クリックメニューを従来のスタイルに戻す (Win11)
+      type: Create-RegistryKeyWithDefault # キーを作成し、その既定値を設定
+      path: HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32
+      value: "" # 空の既定値を設定
 
 # ----------------------------------------------------------------
 # ■ フェーズ2: 開発者向けパッケージのインストール（再起動後）
@@ -85,7 +85,7 @@ phase2:
   # それぞれでインストールしたいパッケージのリストを定義します。
   # スクリプトは、この定義に基づいてパッケージのインストール処理を自動化します。
   packageManagers:
-      # --- npm (Node.js) の設定 ---
+    # --- npm (Node.js) の設定 ---
     - managerName: 'npm'                                  # 管理用の名前 (ログ出力などで使用)
       commandName: 'npm'                                  # ターミナルで実行するコマンド名
       checkCommand: 'npm list -g {package} --depth=0'     # インストール済みか確認するコマンド ({package}は置換されます)
@@ -98,7 +98,7 @@ phase2:
         - prettier        # コードのスタイルを統一するフォーマッター
         - pnpm            # 高速でディスク効率の良いパッケージマネージャー
 
-      # --- pip (Python) の設定 (uvを使用) ---
+    # --- pip (Python) の設定 (uvを使用) ---
     - managerName: 'pip'                                  # 管理用の名前
       commandName: 'uv'                                   # 実行するコマンド名 (uvをpipのラッパーとして使用)
       checkCommand: 'uv pip show {package}'               # インストール済みか確認するコマンド
@@ -119,7 +119,7 @@ phase2:
         - fastapi                         # 高パフォーマンスなWeb APIフレームワーク
         - lxml                            # 高速で多機能なXML/HTMLパーサー
 
-      # --- cargo (Rust) の設定例 (必要に応じてコメントを外してください) ---
+    # --- cargo (Rust) の設定例 (必要に応じてコメントを外してください) ---
     # - managerName: 'cargo'                                # 管理用の名前
     #   commandName: 'cargo'                                # 実行するコマンド名
     #   checkCommand: 'cargo install --list | Select-String -Quiet -Pattern "^{package} v"' # インストール済みか確認するコマンド

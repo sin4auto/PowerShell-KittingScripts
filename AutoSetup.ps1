@@ -149,13 +149,11 @@ if ($SetupPhase -ne '2') {
 #   -SetupPhaseパラメータが指定されていない場合、こちらが実行される。
 #----------------------------------------------------------------------
 if ($SetupPhase -ne '2') {
+    Write-Host ""
     Write-Host "===============================================" -ForegroundColor Cyan
     Write-Host "  セットアップ フェーズ1 を開始します" -ForegroundColor Cyan
     Write-Host "===============================================" -ForegroundColor Cyan
-    # --- ログファイルパスの再表示 ---
     Write-Host ""
-    Write-Host "このセッションのログは以下のファイルに出力されます:" -ForegroundColor Gray
-    Write-Host $logFilePath -ForegroundColor Gray
     # --- アプリケーションのインストール (winget) ---
     if ($config.phase1.wingetInstall) {
         Write-Host ""
