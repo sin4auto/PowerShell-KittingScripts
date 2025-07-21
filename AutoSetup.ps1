@@ -1,4 +1,5 @@
-﻿<#
+﻿# --- 不要な標準アプリの削除 ---
+<#
 .SYNOPSIS
     Windows PCの初期セットアップと開発環境構築を自動化します。
 
@@ -38,7 +39,7 @@
 #>
 
 #=============================================================================
-# ■ 1. パラメータ定義
+# ■ パラメータ定義
 #=============================================================================
 param(
     # スクリプトが現在どのフェーズを実行すべきかを判断するための内部パラメータ。
@@ -46,14 +47,23 @@ param(
 )
 
 #=============================================================================
-# ■ 2. グローバル変数の初期化
+# ■ グローバル変数の初期化
 #=============================================================================
 # スクリプト実行中に発生したエラー項目を記録するためのリスト。
 # スクリプトスコープ($script:)で定義し、どこからでもアクセス可能にする。
 $script:FailedItems = [System.Collections.Generic.List[string]]::new()
 
 #=============================================================================
-# ■ 2.5 ログ記録の開始
+# ■ 文字エンコーディングの設定
+#=============================================================================
+# wingetなどの外部コマンドが出力する日本語の文字化けを防ぐため、
+# コンソールの出力エンコーディングを明示的にUTF-8に設定します。
+[System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+# 外部コマンドへのリダイレクトやパイプライン処理時のエンコーディングもUTF-8に設定します。
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
+#=============================================================================
+# ■ ログ記録の開始
 #=============================================================================
 # スクリプトの実行パスを取得。
 $scriptRootPathForLog = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
@@ -67,9 +77,9 @@ Start-Transcript -Path $logFilePath -Append
 # この時点ではログファイルパスを表示するのみ。Clear-Hostで消されることを想定。
 
 #=============================================================================
-# ■ 3. 実行前準備 (設定ファイルの読み込みと環境チェック)
+# ■ 実行前準備 (設定ファイルの読み込みと環境チェック)
 #=============================================================================
-# --- 3.1. YAML解析モジュールの準備 ---
+# --- YAML解析モジュールの準備 ---
 try {
     # このスクリプトはYAML設定ファイルを扱うため、'powershell-yaml'モジュールが必須。
     # まず、モジュールが利用可能かを確認する。
@@ -90,7 +100,7 @@ catch {
     exit
 }
 
-# --- 3.2. 設定ファイルの読み込み ---
+# --- 設定ファイルの読み込み ---
 try {
     # スクリプト自身のパスを基準に、カレントディレクトリを移動する。
     $scriptRootPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
@@ -118,7 +128,7 @@ catch {
     exit
 }
 
-# --- 3.3. 管理者権限の確認 ---
+# --- 管理者権限の確認 ---
 # フェーズ1はシステム変更を伴うため、管理者権限が不可欠。
 if ($SetupPhase -ne '2') {
     if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -130,7 +140,7 @@ if ($SetupPhase -ne '2') {
 }
 
 #=============================================================================
-# ■ 4. メインロジック (フェーズ分岐)
+# ■ メインロジック (フェーズ分岐)
 #   $SetupPhaseパラメータの値に応じて、フェーズ1またはフェーズ2の処理を実行する。
 #=============================================================================
 
@@ -139,7 +149,6 @@ if ($SetupPhase -ne '2') {
 #   -SetupPhaseパラメータが指定されていない場合、こちらが実行される。
 #----------------------------------------------------------------------
 if ($SetupPhase -ne '2') {
-    Clear-Host
     Write-Host "===============================================" -ForegroundColor Cyan
     Write-Host "  セットアップ フェーズ1 を開始します" -ForegroundColor Cyan
     Write-Host "===============================================" -ForegroundColor Cyan
@@ -147,14 +156,17 @@ if ($SetupPhase -ne '2') {
     Write-Host ""
     Write-Host "このセッションのログは以下のファイルに出力されます:" -ForegroundColor Gray
     Write-Host $logFilePath -ForegroundColor Gray
-    # --- 4.1.1. アプリケーションのインストール (winget) ---
+    # --- アプリケーションのインストール (winget) ---
     if ($config.phase1.wingetInstall) {
         Write-Host ""
-        Write-Host "--- 1. アプリケーションのインストールを開始します ---" -ForegroundColor Green  
+        Write-Host "--- 1. アプリケーションのインストールを開始します ---" -ForegroundColor Green
         # 設定ファイルに記載されたアプリを一つずつ処理する
         foreach ($app in $config.phase1.wingetInstall) {
             Write-Host "アプリ [$($app.id)] の状態を確認しています..."
-            winget list --id $app.id -e --accept-source-agreements > $null
+            # --disable-interactivity オプションでプログレスバー等の動的表示を抑制し、文字化けを防ぐ
+            $listCmd = "winget list --id $($app.id) -e --accept-source-agreements --disable-interactivity"
+            Invoke-Expression -Command $listCmd
+            
             # 既にインストール済みかチェック
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "-> [$($app.id)] はインストール済みです。" -ForegroundColor Cyan
@@ -162,9 +174,9 @@ if ($SetupPhase -ne '2') {
             # 未インストールの場合、インストール処理を実行
             else {
                 Write-Host "-> [$($app.id)] をインストールします..."
-                $wingetCommand = "winget install --id $($app.id) -e --accept-package-agreements --accept-source-agreements"
+                # --disable-interactivity オプションを追加
+                $wingetCommand = "winget install --id $($app.id) -e --accept-package-agreements --accept-source-agreements --disable-interactivity"
                 # インストールオプションが指定されていればコマンドに追加
-                # `$app.options` が存在し、かつ値が空でなければオプションを適用
                 if ($null -ne $app.options) {
                     $wingetCommand += " $($app.options)"
                     Write-Host "-> 個別オプション ($($app.options)) を適用します。" -ForegroundColor Yellow
@@ -184,7 +196,7 @@ if ($SetupPhase -ne '2') {
         Write-Host "--- アプリケーションのインストールが完了しました ---" -ForegroundColor Green
     }
 
-    # --- 4.1.2. 不要な標準アプリの削除 ---
+    # --- 不要な標準アプリの削除 ---
     if ($config.phase1.appxRemove) {
         Write-Host ""
         Write-Host "--- 2. 不要なプリインストールアプリの削除を開始します ---" -ForegroundColor Green
@@ -196,7 +208,7 @@ if ($SetupPhase -ne '2') {
         Write-Host "--- 不要なプリインストールアプリの削除が完了しました ---" -ForegroundColor Green
     }
 
-    # --- 4.1.3. Windowsのシステム設定変更 ---
+    # --- Windowsのシステム設定変更 ---
     if ($config.phase1.windowsTweaks) {
         Write-Host ""
         Write-Host "--- 3. Windowsの各種設定を変更します ---" -ForegroundColor Green
@@ -207,7 +219,7 @@ if ($SetupPhase -ne '2') {
                 $parentPath = Split-Path -Path $tweak.path
                 # レジストリキーの親パスが存在しない場合は作成する
                 if (-not (Test-Path $parentPath)) {
-                    New-Item -Path $parentPath -Force | Out-Null
+                    New-Item -Path $parentPath -Force
                 }
                 # config.yamlで定義された 'type' に基づき、実行するコマンドを切り替える。
                 switch ($tweak.type) {
@@ -228,23 +240,19 @@ if ($SetupPhase -ne '2') {
         Write-Host "--- Windowsの各種設定変更が完了しました ---" -ForegroundColor Green
     }
 
-    # --- 4.1.4. その他のカスタムコマンド実行 ---
-    if ($config.phase1.runCommands) {
-        Write-Host ""
-        Write-Host "--- 4. その他のカスタムコマンドを実行します ---" -ForegroundColor Green
-        foreach ($cmd in $config.phase1.runCommands) {
-            Write-Host "-> $($cmd.description)..."
-            Invoke-Expression -Command $cmd.command
-            if ($LASTEXITCODE -ne 0) {
-                $errorMessage = "コマンド実行失敗: $($cmd.description)"
-                Write-Warning "-> $errorMessage"
-                $script:FailedItems.Add($errorMessage)
-            }
-        }
-        Write-Host "--- カスタムコマンドの実行が完了しました ---" -ForegroundColor Green
+    # --- インストール済みアプリ全体を更新 ---
+    Write-Host ""
+    Write-Host "--- 4. インストール済みアプリ全体を更新します ---" -ForegroundColor Green
+    winget upgrade --all --silent --accept-package-agreements --accept-source-agreements
+    # 直前のコマンドの実行結果を評価する
+    if ($LASTEXITCODE -ne 0) {
+        # 失敗した場合、警告メッセージを表示し、エラーリストに記録する
+        Write-Warning "-> アプリ全体の更新プロセス中にエラーが報告されました。"
+        $script:FailedItems.Add("Winget: アプリ全体の更新")
     }
+    Write-Host "--- インストール済みアプリ全体の更新が完了しました ---" -ForegroundColor Green
 
-    # --- 4.1.5. フェーズ2の自動実行設定と再起動 ---
+    # --- フェーズ2の自動実行設定と再起動 ---
     Write-Host ""
     Write-Host "--- 5. 再起動後にフェーズ2を自動実行するよう設定します ---" -ForegroundColor Green
     $runOnceRegistryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
@@ -253,7 +261,7 @@ if ($SetupPhase -ne '2') {
     Set-ItemProperty -Path $runOnceRegistryKeyPath -Name "AutoSetupPhase2" -Value $runOnceCommand -Force
     Write-Host "再起動後の自動実行設定が完了しました。"
 
-    # --- 4.1.6. フェーズ1の完了報告と自動再起動 ---
+    # --- フェーズ1の完了報告と自動再起動 ---
     Write-Host ""
     Write-Host "==============================================="
     # 失敗した項目があればリスト表示する
@@ -280,8 +288,6 @@ if ($SetupPhase -ne '2') {
 #   -SetupPhaseパラメータが '2' の場合、こちらが実行される。
 #----------------------------------------------------------------------
 if ($SetupPhase -eq '2') {
-    # 起動直後のシステム安定化のため、少し待機する。
-    Start-Sleep -Seconds 1
     Write-Host ""
     Write-Host "===============================================" -ForegroundColor Cyan
     Write-Host "  セットアップ フェーズ2 を開始します" -ForegroundColor Cyan
@@ -290,71 +296,59 @@ if ($SetupPhase -eq '2') {
     Write-Host "10秒後に自動でパッケージのインストールが開始されます。" -ForegroundColor Yellow
     Start-Sleep -Seconds 10
 
-    # --- 4.2.1. パッケージインストールの実行ループ ---
-    # config.yaml の `phase2` セクションに `packageInstall` が定義されているか確認
-    if ($config.phase2.packageInstall) {
-        # `packageInstall` のキー (npm, pip など) を一つずつ処理
-        foreach ($managerName in $config.phase2.packageInstall.Keys) {
-            # 対応するパッケージマネージャーの定義を `packageManagers` から探す
-            $managerDef = $config.phase2.packageManagers | Where-Object { $_.managerName -eq $managerName }
-
-            if (-not $managerDef) {
-                Write-Warning "設定ファイル(config.yaml)の 'phase2.packageManagers' に '$($managerName)' の定義が見つかりません。スキップします。"
-                continue
-            }
+    # --- パッケージインストールの実行ループ ---
+    # config.yaml の `phase2` セクションに `packageManagers` が定義されているか確認
+    if ($config.phase2.packageManagers) {
+        # `packageManagers` リストの定義を一つずつ処理
+        foreach ($manager in $config.phase2.packageManagers) {
             
             # 実行に必要なコマンドが存在するか確認
-            if (-not (Get-Command $managerDef.commandName -ErrorAction SilentlyContinue)) {
-                $errorMessage = "必須コマンド '$($managerDef.commandName)' が見つかりません。($($managerName)の処理はスキップされます)"
+            $commandExists = Get-Command $manager.commandName -ErrorAction SilentlyContinue
+            if (-not $commandExists) {
+                $errorMessage = "必須コマンド '$($manager.commandName)' が見つかりません。($($manager.managerName)の処理はスキップされます)"
                 Write-Warning $errorMessage
                 $script:FailedItems.Add($errorMessage)
                 continue
             }
 
             Write-Host ""
-            Write-Host "--- $($managerName) パッケージのインストールを開始します ---" -ForegroundColor Green
+            Write-Host "--- $($manager.managerName) パッケージのインストールを開始します ---" -ForegroundColor Green
             
-            # インストール対象のパッケージリストを取得
-            $packagesToInstall = $config.phase2.packageInstall.$managerName
-
-            # 設定ファイルに記載されたパッケージを一つずつ処理
-            foreach ($package in $packagesToInstall) {
-                $pkgName = $package.package
-                Write-Host "パッケージ [$($pkgName)] の状態を確認しています..."
-                
-                # Checkコマンドのテンプレートにパッケージ名を埋め込む
-                $checkCmd = $managerDef.checkCommand -replace '\{package\}', $pkgName
-                
-                # Checkコマンドを実行して、インストール済みか判定
-                $isInstalled = try { Invoke-Expression $checkCmd > $null 2>$null; $LASTEXITCODE -eq 0 } catch { $false }
-                
-                # 既にインストール済みかチェック
-                if ($isInstalled) {
-                    Write-Host "-> [$($pkgName)] はインストール済みです。スキップします。" -ForegroundColor Cyan
-                } 
-                # 未インストールの場合、インストール処理を実行
-                else {
-                    Write-Host "-> [$($pkgName)] をインストールします..."
-                    
-                    # Installコマンドのテンプレートにパッケージ名を埋め込む
-                    $installCmd = $managerDef.installCommand -replace '\{package\}', $pkgName
-                    Invoke-Expression $installCmd
-                    
-                    # インストールの成否を判定
+            # インストール対象のパッケージリストが存在する場合のみ処理を続行
+            if ($manager.packages) {
+                # 設定ファイルに記載されたパッケージを一つずつ処理
+                foreach ($pkgName in $manager.packages) {
+                    Write-Host "パッケージ [$($pkgName)] の状態を確認しています..."
+                    # チェックコマンドのテンプレートにパッケージ名を埋め込む
+                    $checkCmd = $manager.checkCommand -replace '\{package\}', $pkgName
+                    # チェックコマンドを実行し、その結果(標準出力/エラー)を Out-Host で明示的にホストへ出力する
+                    Invoke-Expression $checkCmd -ErrorAction SilentlyContinue | Out-Host
+                    # 直前のチェックコマンドの終了コード($LASTEXITCODE)に基づいて、後続の処理を判断する
                     if ($LASTEXITCODE -eq 0) {
-                        Write-Host "-> [$($pkgName)] のインストールに成功しました。" -ForegroundColor Green
-                    }
+                        Write-Host "-> [$($pkgName)] はインストール済みです。スキップします。" -ForegroundColor Cyan
+                    } 
                     else {
-                        Write-Warning "-> [$($pkgName)] のインストール中にエラーが発生しました。"
-                        $script:FailedItems.Add("$($managerName): $($pkgName)")
+                        Write-Host "-> [$($pkgName)] をインストールします..."
+                        # インストールコマンドのテンプレートにパッケージ名を埋め込む
+                        $installCmd = $manager.installCommand -replace '\{package\}', $pkgName
+                        # インストールコマンドを実行し、その結果(標準出力/エラー)を Out-Host で明示的にホストへ出力する
+                        Invoke-Expression $installCmd | Out-Host
+                        # インストールの成否を判定
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-Host "-> [$($pkgName)] のインストールに成功しました。" -ForegroundColor Green
+                        }
+                        else {
+                            Write-Warning "-> [$($pkgName)] のインストール中にエラーが発生しました。"
+                            $script:FailedItems.Add("$($manager.managerName): $($pkgName)")
+                        }
                     }
                 }
             }
-            Write-Host "--- $($managerName) パッケージのインストールが完了しました ---" -ForegroundColor Green
+            Write-Host "--- $($manager.managerName) パッケージのインストールが完了しました ---" -ForegroundColor Green
         }
     }
 
-    # --- 4.2.2. フェーズ2の完了報告 ---
+    # --- フェーズ2の完了報告 ---
     Write-Host ""
     Write-Host "==============================================="
     # 失敗した項目があればリスト表示する
