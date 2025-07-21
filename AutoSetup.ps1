@@ -163,9 +163,9 @@ if ($SetupPhase -ne '2') {
             else {
                 Write-Host "-> [$($app.id)] をインストールします..."
                 $wingetCommand = "winget install --id $($app.id) -e --accept-package-agreements --accept-source-agreements"
-                
                 # インストールオプションが指定されていればコマンドに追加
-                if ($app.PSObject.Properties.Name -contains 'options' -and $app.options) {
+                # `$app.options` が存在し、かつ値が空でなければオプションを適用
+                if ($null -ne $app.options) {
                     $wingetCommand += " $($app.options)"
                     Write-Host "-> 個別オプション ($($app.options)) を適用します。" -ForegroundColor Yellow
                 }
@@ -196,18 +196,10 @@ if ($SetupPhase -ne '2') {
         Write-Host "--- 不要なプリインストールアプリの削除が完了しました ---" -ForegroundColor Green
     }
 
-    # --- 4.1.3. 既存アプリのアップグレード ---
-    if ($config.phase1.otherTasks.upgradeAllApps) {
-        Write-Host ""
-        Write-Host "--- 3. インストール済みアプリをすべて最新版に更新します ---" -ForegroundColor Green
-        winget upgrade --all --silent --accept-package-agreements --accept-source-agreements
-        Write-Host "--- アプリの更新が完了しました ---" -ForegroundColor Green
-    }
-
-    # --- 4.1.4. Windowsのシステム設定変更 ---
+    # --- 4.1.3. Windowsのシステム設定変更 ---
     if ($config.phase1.windowsTweaks) {
         Write-Host ""
-        Write-Host "--- 4. Windowsの各種設定を変更します ---" -ForegroundColor Green
+        Write-Host "--- 3. Windowsの各種設定を変更します ---" -ForegroundColor Green
         # 設定ファイルに記載されたWindows設定変更を一つずつ実行
         foreach ($tweak in $config.phase1.windowsTweaks) {
             Write-Host "-> $($tweak.description)..."
@@ -234,6 +226,22 @@ if ($SetupPhase -ne '2') {
             }
         }
         Write-Host "--- Windowsの各種設定変更が完了しました ---" -ForegroundColor Green
+    }
+
+    # --- 4.1.4. その他のカスタムコマンド実行 ---
+    if ($config.phase1.runCommands) {
+        Write-Host ""
+        Write-Host "--- 4. その他のカスタムコマンドを実行します ---" -ForegroundColor Green
+        foreach ($cmd in $config.phase1.runCommands) {
+            Write-Host "-> $($cmd.description)..."
+            Invoke-Expression -Command $cmd.command
+            if ($LASTEXITCODE -ne 0) {
+                $errorMessage = "コマンド実行失敗: $($cmd.description)"
+                Write-Warning "-> $errorMessage"
+                $script:FailedItems.Add($errorMessage)
+            }
+        }
+        Write-Host "--- カスタムコマンドの実行が完了しました ---" -ForegroundColor Green
     }
 
     # --- 4.1.5. フェーズ2の自動実行設定と再起動 ---
@@ -288,16 +296,16 @@ if ($SetupPhase -eq '2') {
         # `packageInstall` のキー (npm, pip など) を一つずつ処理
         foreach ($managerName in $config.phase2.packageInstall.Keys) {
             # 対応するパッケージマネージャーの定義を `packageManagers` から探す
-            $managerDef = $config.packageManagers | Where-Object { $_.managerName -eq $managerName }
+            $managerDef = $config.phase2.packageManagers | Where-Object { $_.managerName -eq $managerName }
 
             if (-not $managerDef) {
-                Write-Warning "設定ファイル(config.yaml)の 'packageManagers' に '$($managerName)' の定義が見つかりません。スキップします。"
+                Write-Warning "設定ファイル(config.yaml)の 'phase2.packageManagers' に '$($managerName)' の定義が見つかりません。スキップします。"
                 continue
             }
             
             # 実行に必要なコマンドが存在するか確認
-            if (-not (Get-Command $managerDef.executable -ErrorAction SilentlyContinue)) {
-                $errorMessage = "必須コマンド '$($managerDef.executable)' が見つかりません。($($managerName)の処理はスキップされます)"
+            if (-not (Get-Command $managerDef.commandName -ErrorAction SilentlyContinue)) {
+                $errorMessage = "必須コマンド '$($managerDef.commandName)' が見つかりません。($($managerName)の処理はスキップされます)"
                 Write-Warning $errorMessage
                 $script:FailedItems.Add($errorMessage)
                 continue

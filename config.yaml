@@ -19,8 +19,8 @@ phase1:
     - id: OpenJS.NodeJS.LTS                    # JavaScript実行環境 (長期サポート版)
     - id: Python.Python.3.12                   # プログラミング言語 Python
     - id: astral-sh.uv                         # 高速なPythonパッケージインストーラー
-    - id: Microsoft.VisualStudioCode           # 高機能テキストエディタ
-      options: '--override "/verysilent /mergetasks=desktopicon,addcontextmenufolders,associatewithfiles,addtopath"'
+    - id: Microsoft.VisualStudioCode           # 統合開発環境 (IDE)
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
     - id: Adobe.Acrobat.Reader.64-bit          # PDF閲覧ソフト
       options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
 
@@ -36,10 +36,6 @@ phase1:
     - name: "*Microsoft.YourPhone*"            # スマートフォン連携
     - name: "*Microsoft.ZuneMusic*"            # Grooveミュージック
     - name: "*Microsoft.ZuneVideo*"            # 映画 & テレビ
-
-  # --- その他の固定タスク ---
-  otherTasks:
-    upgradeAllApps: true       # インストール済みアプリ全体を更新する (winget upgrade --all)
 
   # --- Windowsのシステム設定変更 ---
   windowsTweaks:
@@ -78,21 +74,49 @@ phase1:
       value: 0
       valueType: DWord
 
+  # --- その他のカスタムコマンド実行 ---
+  runCommands:
+    - description: インストール済みアプリ全体を更新する
+      command: 'winget upgrade --all --silent --accept-package-agreements --accept-source-agreements'
+
 # ----------------------------------------------------------------
 # ■ フェーズ2: 開発者向けパッケージのインストール（再起動後）
 # ----------------------------------------------------------------
 phase2:
-  # どのパッケージマネージャーで何をインストールするかを指定します。
-  # ここのマネージャー名 (npm, pip) の定義は、下の `packageManagers` セクションで行います。
+  # =================================================================
+  # ■ パッケージマネージャーの定義
+  # =================================================================
+  # 各パッケージマネージャーの動作をここで定義します。
+  # {package} という文字列が、PowerShellスクリプトによって実際のパッケージ名に置換されます。
+  packageManagers:
+    - managerName: 'npm'
+      commandName: 'npm'
+      checkCommand: 'npm list -g {package} --depth=0'
+      installCommand: 'npm install -g {package}'
+
+    - managerName: 'pip'
+      commandName: 'uv'
+      checkCommand: 'uv pip show {package}'
+      installCommand: 'uv pip install {package} --system'
+      
+    # - managerName: 'cargo'
+    #   commandName: 'cargo'
+    #   checkCommand: 'cargo install --list | Select-String -Quiet -Pattern "^{package} v"'
+    #   installCommand: 'cargo install {package}'
+
+  # =================================================================
+  # ■ パッケージのインストール
+  # =================================================================
+  # 上で定義したパッケージマネージャーを使って、実際にインストールするパッケージを指定します。
   packageInstall:
-    npm:
+    - npm:
       - package: typescript                      # JavaScriptに型を追加した言語
       - package: ts-node                         # TypeScriptを直接実行するツール
       - package: nodemon                         # ファイル変更を監視して自動で再起動するツール
       - package: eslint                          # コードの静的解析ツール (品質チェック)
       - package: prettier                        # コードフォーマッター (コードの見た目を整形)
       - package: pnpm                            # 高速なパッケージマネージャー
-    pip:
+    - pip:
       - package: jupyterlab                      # 対話的なデータ分析環境
       - package: jupyterlab-language-pack-ja-jp  # JupyterLab日本語化パック
       - package: requests                        # HTTP通信ライブラリ
@@ -107,24 +131,3 @@ phase2:
       - package: openpyxl                        # Excelファイルの読み書き
       - package: fastapi                         # 高速なWebフレームワーク
       - package: lxml                            # XML/HTMLパーサー
-
-# =================================================================
-# ■ パッケージマネージャーの定義
-# =================================================================
-# 各パッケージマネージャーの動作をここで定義します。
-# {package} という文字列が、PowerShellスクリプトによって実際のパッケージ名に置換されます。
-packageManagers:
-  - managerName: 'npm'
-    executable: 'npm'
-    checkCommand: 'npm list -g {package} --depth=0'
-    installCommand: 'npm install -g {package}'
-
-  - managerName: 'pip'
-    executable: 'uv'
-    checkCommand: 'uv pip show {package}'
-    installCommand: 'uv pip install {package} --system'
-    
-  # - managerName: 'cargo'
-  #   executable: 'cargo'
-  #   checkCommand: 'cargo install --list | Select-String -Quiet -Pattern "^{package} v"'
-  #   installCommand: 'cargo install {package}'
