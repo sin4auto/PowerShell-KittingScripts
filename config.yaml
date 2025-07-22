@@ -84,47 +84,47 @@ phase2:
   # ここでは、コマンドと引数をリスト形式で定義し、安全な実行を可能にします。
   packageManagers:
     # --- npm (Node.js) の設定 ---
-    - managerName: 'npm'
-      commandName: 'npm'
-      checkArgs: ['list', '-g', '{package}', '--depth=0']
-      installArgs: ['install', '-g', '{package}']
-      packages:
-        - typescript
-        - ts-node
-        - nodemon
-        - eslint
-        - prettier
-        - pnpm
+    - managerName: 'npm'                                            # 管理者の表示名 (ログ用)
+      commandName: 'npm'                                            # 実行するコマンド名
+      checkArgs: ['list', '-g', '{package}', '--depth=0']           # インストール済みか確認するための引数
+      installArgs: ['install', '-g', '{package}']                   # インストールを実行するための引数
+      packages:                                                     # インストールするパッケージのリスト
+        - typescript                                                # 静的型付けJavaScript
+        - ts-node                                                   # TypeScriptを直接実行
+        - nodemon                                                   # ファイル変更時に自動でサーバーを再起動
+        - eslint                                                    # コードの静的解析ツール
+        - prettier                                                  # コードフォーマッター
+        - pnpm                                                      # 高速なパッケージマネージャー
 
     # --- pip (Python) の設定 (uvを使用) ---
-    - managerName: 'pip'
-      commandName: 'uv'
-      checkArgs: ['pip', 'show', '{package}']
-      installArgs: ['pip', 'install', '{package}', '--system']
-      packages:
-        - jupyterlab
-        - jupyterlab-language-pack-ja-jp
-        - requests
-        - numpy
-        - pandas
-        - matplotlib
-        - black
-        - ruff
-        - python-dotenv
-        - scikit-learn
-        - seaborn
-        - openpyxl
-        - fastapi
-        - lxml
+    - managerName: 'pip'                                            # 管理者の表示名 (ログ用)
+      commandName: 'uv'                                             # 実行するコマンド名
+      checkArgs: ['pip', 'show', '{package}']                       # インストール済みか確認するための引数
+      installArgs: ['pip', 'install', '{package}', '--system']      # インストールを実行するための引数
+      packages:                                                     # インストールするパッケージのリスト
+        - jupyterlab                                                # 対話的なデータ分析・開発環境
+        - jupyterlab-language-pack-ja-jp                            # JupyterLabの日本語化パック
+        - requests                                                  # HTTP通信ライブラリ
+        - numpy                                                     # 数値計算ライブラリ
+        - pandas                                                    # データ分析ライブラリ
+        - matplotlib                                                # データ可視化・グラフ描画ライブラリ
+        - black                                                     # コードフォーマッター
+        - ruff                                                      # 高速なリンター
+        - python-dotenv                                             # .envファイルから環境変数を読み込む
+        - scikit-learn                                              # 機械学習ライブラリ
+        - seaborn                                                   # 統計的データ可視化ライブラリ
+        - openpyxl                                                  # Excelファイルの読み書き
+        - fastapi                                                   # 高速なWebフレームワーク
+        - lxml                                                      # XML/HTMLパーサー
 
     # --- cargo (Rust) の設定例 ---
     # 注: cargoの確認コマンドはパイプライン(|)を含むため、このスクリプトでは直接サポートしていません。
     # checkArgsを修正するか、インストール済でも再実行を許容する運用を検討してください。
-    # - managerName: 'cargo'
-    #   commandName: 'cargo'
-    #   checkArgs: ['install', '--list'] # 例: cargo install --list | findstr "{package}" のような確認が必要
-    #   installArgs: ['install', '{package}']
-    #   packages:
-    #     - ripgrep
-    #     - bat
-    #     - fd-find
+    # - managerName: 'cargo'                                         # 管理者の表示名 (ログ用)
+    #   commandName: 'cargo'                                         # 実行するコマンド名
+    #   checkArgs: ['install', '--list']                             # インストール済みか確認するための引数 (※要修正)
+    #   installArgs: ['install', '{package}']                        # インストールを実行するための引数
+    #   packages:                                                    # インストールするパッケージのリスト
+    #     - ripgrep                                                  # 高速なgrep代替ツール
+    #     - bat                                                      # シンタックスハイライト付きcat
+    #     - fd-find                                                  # 高速なfind代替ツール

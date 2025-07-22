@@ -287,7 +287,6 @@ if ($SetupPhase -eq '2') {
                     # ---- 確認コマンドの実行 (cmd.exe 経由) ----
                     $checkArgs = $manager.checkArgs | ForEach-Object { $_ -replace '\{package\}', $pkgName }
                     $fullCheckCommand = "$($manager.commandName) " + ($checkArgs -join " ")
-                    
                     $checkProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c $fullCheckCommand" -Wait -NoNewWindow -PassThru
                     
                     if ($checkProcess.ExitCode -eq 0) {
@@ -299,7 +298,6 @@ if ($SetupPhase -eq '2') {
                         # ---- インストールコマンドの実行 (cmd.exe 経由) ----
                         $installArgs = $manager.installArgs | ForEach-Object { $_ -replace '\{package\}', $pkgName }
                         $fullInstallCommand = "$($manager.commandName) " + ($installArgs -join " ")
-
                         $installProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c $fullInstallCommand" -Wait -NoNewWindow -PassThru
                         
                         if ($installProcess.ExitCode -eq 0) {
