@@ -270,8 +270,8 @@ if ($SetupPhase -eq '2') {
     # --- パッケージインストールの実行ループ ---
     if ($config.phase2.packageManagers) {
         foreach ($manager in $config.phase2.packageManagers) {
-            $commandExists = Get-Command $manager.commandName -ErrorAction SilentlyContinue
-            if (-not $commandExists) {
+            # コマンドの存在確認は Get-Command で行う
+            if (-not (Get-Command $manager.commandName -ErrorAction SilentlyContinue)) {
                 $errorMessage = "必須コマンド '$($manager.commandName)' が見つかりません。($($manager.managerName)の処理はスキップされます)"
                 Write-Warning $errorMessage
                 $script:FailedItems.Add($errorMessage)
@@ -283,19 +283,26 @@ if ($SetupPhase -eq '2') {
             if ($manager.packages) {
                 foreach ($pkgName in $manager.packages) {
                     Write-Host "パッケージ [$($pkgName)] の状態を確認しています..."
-                    # この部分は設定ファイルでコマンド自体を定義しているため、Invoke-Expressionが適している
-                    $checkCmd = $manager.checkCommand -replace '\{package\}', $pkgName
-                    Invoke-Expression $checkCmd -ErrorAction SilentlyContinue | Out-Host
                     
-                    if ($LASTEXITCODE -eq 0) {
+                    # ---- 確認コマンドの実行 (cmd.exe 経由) ----
+                    $checkArgs = $manager.checkArgs | ForEach-Object { $_ -replace '\{package\}', $pkgName }
+                    $fullCheckCommand = "$($manager.commandName) " + ($checkArgs -join " ")
+                    
+                    $checkProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c $fullCheckCommand" -Wait -NoNewWindow -PassThru
+                    
+                    if ($checkProcess.ExitCode -eq 0) {
                         Write-Host "-> [$($pkgName)] はインストール済みです。スキップします。`n" -ForegroundColor Cyan
                     } 
                     else {
                         Write-Host "-> [$($pkgName)] をインストールします..."
-                        $installCmd = $manager.installCommand -replace '\{package\}', $pkgName
-                        Invoke-Expression $installCmd | Out-Host
                         
-                        if ($LASTEXITCODE -eq 0) {
+                        # ---- インストールコマンドの実行 (cmd.exe 経由) ----
+                        $installArgs = $manager.installArgs | ForEach-Object { $_ -replace '\{package\}', $pkgName }
+                        $fullInstallCommand = "$($manager.commandName) " + ($installArgs -join " ")
+
+                        $installProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c $fullInstallCommand" -Wait -NoNewWindow -PassThru
+                        
+                        if ($installProcess.ExitCode -eq 0) {
                             Write-Host "-> [$($pkgName)] のインストールに成功しました。`n" -ForegroundColor Green
                         }
                         else {

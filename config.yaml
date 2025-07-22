@@ -81,50 +81,50 @@ phase2:
   # =================================================================
   # ■ パッケージマネージャーとインストールするパッケージの定義
   # =================================================================
-  # ここでは、使用するパッケージマネージャーごとの設定と、
-  # それぞれでインストールしたいパッケージのリストを定義します。
-  # スクリプトは、この定義に基づいてパッケージのインストール処理を自動化します。
+  # ここでは、コマンドと引数をリスト形式で定義し、安全な実行を可能にします。
   packageManagers:
     # --- npm (Node.js) の設定 ---
-    - managerName: 'npm'                                  # 管理用の名前 (ログ出力などで使用)
-      commandName: 'npm'                                  # ターミナルで実行するコマンド名
-      checkCommand: 'npm list -g {package} --depth=0'     # インストール済みか確認するコマンド ({package}は置換されます)
-      installCommand: 'npm install -g {package}'          # インストールを実行するコマンド ({package}は置換されます)
-      packages:                                           # このマネージャーでインストールするパッケージのリスト
-        - typescript      # JavaScriptに静的型付けを追加する言語
-        - ts-node         # TypeScriptファイルを直接実行するランタイム
-        - nodemon         # ファイル変更を監視し、自動でサーバーを再起動するツール
-        - eslint          # JavaScript/TypeScriptコードの静的解析ツール (品質チェック)
-        - prettier        # コードのスタイルを統一するフォーマッター
-        - pnpm            # 高速でディスク効率の良いパッケージマネージャー
+    - managerName: 'npm'
+      commandName: 'npm'
+      checkArgs: ['list', '-g', '{package}', '--depth=0']
+      installArgs: ['install', '-g', '{package}']
+      packages:
+        - typescript
+        - ts-node
+        - nodemon
+        - eslint
+        - prettier
+        - pnpm
 
     # --- pip (Python) の設定 (uvを使用) ---
-    - managerName: 'pip'                                  # 管理用の名前
-      commandName: 'uv'                                   # 実行するコマンド名 (uvをpipのラッパーとして使用)
-      checkCommand: 'uv pip show {package}'               # インストール済みか確認するコマンド
-      installCommand: 'uv pip install {package} --system' # インストールを実行するコマンド
-      packages:                                           # インストールするパッケージのリスト
-        - jupyterlab                      # 対話的なデータ分析・開発環境
-        - jupyterlab-language-pack-ja-jp  # JupyterLabの日本語化パック
-        - requests                        # シンプルで使いやすいHTTP通信ライブラリ
-        - numpy                           # 高速な数値計算・多次元配列を扱うライブラリ
-        - pandas                          # データ解析を支援するライブラリ (データフレーム操作)
-        - matplotlib                      # 定番のグラフ描画ライブラリ
-        - black                           # 厳格で一貫性のあるPythonコードフォーマッター
-        - ruff                            # 非常に高速なPythonリンター (品質チェック)
-        - python-dotenv                   # .envファイルから環境変数を読み込むライブラリ
-        - scikit-learn                    # 機械学習のための総合ライブラリ
-        - seaborn                         # matplotlibを基にした、より美しいグラフ描画ライブラリ
-        - openpyxl                        # Excelファイル (.xlsx) の読み書きライブラリ
-        - fastapi                         # 高パフォーマンスなWeb APIフレームワーク
-        - lxml                            # 高速で多機能なXML/HTMLパーサー
+    - managerName: 'pip'
+      commandName: 'uv'
+      checkArgs: ['pip', 'show', '{package}']
+      installArgs: ['pip', 'install', '{package}', '--system']
+      packages:
+        - jupyterlab
+        - jupyterlab-language-pack-ja-jp
+        - requests
+        - numpy
+        - pandas
+        - matplotlib
+        - black
+        - ruff
+        - python-dotenv
+        - scikit-learn
+        - seaborn
+        - openpyxl
+        - fastapi
+        - lxml
 
-    # --- cargo (Rust) の設定例 (必要に応じてコメントを外してください) ---
-    # - managerName: 'cargo'                                # 管理用の名前
-    #   commandName: 'cargo'                                # 実行するコマンド名
-    #   checkCommand: 'cargo install --list | Select-String -Quiet -Pattern "^{package} v"' # インストール済みか確認するコマンド
-    #   installCommand: 'cargo install {package}'           # インストールを実行するコマンド
-    #   packages:                                           # インストールするパッケージのリスト
-    #     - ripgrep  # 高速なgrep代替ツール
-    #     - bat      # シンタックスハイライト機能付きのcat代替ツール
-    #     - fd-find  # シンプルで高速なfind代替ツール
+    # --- cargo (Rust) の設定例 ---
+    # 注: cargoの確認コマンドはパイプライン(|)を含むため、このスクリプトでは直接サポートしていません。
+    # checkArgsを修正するか、インストール済でも再実行を許容する運用を検討してください。
+    # - managerName: 'cargo'
+    #   commandName: 'cargo'
+    #   checkArgs: ['install', '--list'] # 例: cargo install --list | findstr "{package}" のような確認が必要
+    #   installArgs: ['install', '{package}']
+    #   packages:
+    #     - ripgrep
+    #     - bat
+    #     - fd-find
