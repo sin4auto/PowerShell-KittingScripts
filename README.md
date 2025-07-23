@@ -74,10 +74,9 @@ Microsoftが提供する `winget configuration` は、宣言的な環境構築�
 
 再起動前に実行される基本的なシステムセットアップを定義します。
 
+- `windowsTweaks`: レジストリ変更を伴うシステム設定を、`description`, `type`, `path` などのキーで詳細に定義します。
 - `wingetInstall`: `winget` でインストールするアプリのIDと、必要に応じてインストールオプションを記述します。
 - `appxRemove`: 削除したいWindows標準アプリの名称（ワイルドカード使用可）を記述します。
-- `otherTasks`: `upgradeAllApps` など、リスト形式ではない固定タスクの実行を `true`/`false` で制御します。
-- `windowsTweaks`: レジストリ変更を伴うシステム設定を、`description`, `type`, `path` などのキーで詳細に定義します。
 
 ### フェーズ2 (`phase2`)
 
@@ -171,10 +170,9 @@ The setup can be freely customized by editing `config.yaml`. To disable an item,
 
 Defines the basic system setup that runs before the reboot.
 
+- `windowsTweaks`: Define system settings that involve registry changes with keys like `description`, `type`, and `path`.
 - `wingetInstall`: List the app IDs to install with `winget`, with optional installation arguments.
 - `appxRemove`: List the names of Windows default apps to remove (wildcards are supported).
-- `otherTasks`: Control non-list-based tasks like `upgradeAllApps` with `true`/`false`.
-- `windowsTweaks`: Define system settings that involve registry changes with keys like `description`, `type`, and `path`.
 
 ### Phase 2 (`phase2`)
 

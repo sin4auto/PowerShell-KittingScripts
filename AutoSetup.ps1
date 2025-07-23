@@ -144,9 +144,37 @@ if ($SetupPhase -ne '2') {
     Write-Host "  セットアップ フェーズ1 を開始します" -ForegroundColor Cyan
     Write-Host "===============================================`n" -ForegroundColor Cyan
     
+    # --- Windowsのシステム設定変更 ---
+    if ($config.phase1.windowsTweaks) {
+        Write-Host "--- 1. Windowsの各種設定を変更します ---`n" -ForegroundColor Green
+        foreach ($tweak in $config.phase1.windowsTweaks) {
+            Write-Host "-> $($tweak.description)..."
+            try {
+                $parentPath = Split-Path -Path $tweak.path
+                if (-not (Test-Path $parentPath)) {
+                    New-Item -Path $parentPath -Force | Out-Null
+                }
+                switch ($tweak.type) {
+                    'Set-RegistryValue' {
+                        Set-ItemProperty -Path $tweak.path -Name $tweak.name -Value $tweak.value -Type $tweak.valueType -Force -ErrorAction Stop
+                    }
+                    'Create-RegistryKeyWithDefault' {
+                        New-Item -Path $tweak.path -Force -ErrorAction Stop | Set-ItemProperty -Name "(Default)" -Value $tweak.value -Force -ErrorAction Stop
+                    }
+                }
+            }
+            catch {
+                $errorMessage = "設定変更失敗: $($tweak.description): $($_.Exception.Message)"
+                Write-Warning "-> $($_.Exception.Message)"
+                $script:FailedItems.Add($errorMessage)
+            }
+        }
+        Write-Host "`n--- Windowsの各種設定変更が完了しました ---`n" -ForegroundColor Green
+    }
+
     # --- アプリケーションのインストール (winget) ---
     if ($config.phase1.wingetInstall) {
-        Write-Host "--- 1. アプリケーションのインストールを開始します ---`n" -ForegroundColor Green
+        Write-Host "--- 2. アプリケーションのインストールを開始します ---`n" -ForegroundColor Green
         foreach ($app in $config.phase1.wingetInstall) {
             Write-Host "アプリ [$($app.id)] の状態を確認しています..."
             winget list --id $app.id -e --accept-source-agreements --disable-interactivity
@@ -186,40 +214,12 @@ if ($SetupPhase -ne '2') {
 
     # --- 不要な標準アプリの削除 ---
     if ($config.phase1.appxRemove) {
-        Write-Host "--- 2. 不要なプリインストールアプリの削除を開始します ---`n" -ForegroundColor Green
+        Write-Host "--- 3. 不要なプリインストールアプリの削除を開始します ---`n" -ForegroundColor Green
         foreach ($app in $config.phase1.appxRemove) {
             Write-Host "[$($app.name)] を検索し、存在すれば削除します..."
             Get-AppxPackage -AllUsers $app.name | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
         }
         Write-Host "`n--- 不要なプリインストールアプリの削除が完了しました ---`n" -ForegroundColor Green
-    }
-
-    # --- Windowsのシステム設定変更 ---
-    if ($config.phase1.windowsTweaks) {
-        Write-Host "--- 3. Windowsの各種設定を変更します ---`n" -ForegroundColor Green
-        foreach ($tweak in $config.phase1.windowsTweaks) {
-            Write-Host "-> $($tweak.description)..."
-            try {
-                $parentPath = Split-Path -Path $tweak.path
-                if (-not (Test-Path $parentPath)) {
-                    New-Item -Path $parentPath -Force | Out-Null
-                }
-                switch ($tweak.type) {
-                    'Set-RegistryValue' {
-                        Set-ItemProperty -Path $tweak.path -Name $tweak.name -Value $tweak.value -Type $tweak.valueType -Force -ErrorAction Stop
-                    }
-                    'Create-RegistryKeyWithDefault' {
-                        New-Item -Path $tweak.path -Force -ErrorAction Stop | Set-ItemProperty -Name "(Default)" -Value $tweak.value -Force -ErrorAction Stop
-                    }
-                }
-            }
-            catch {
-                $errorMessage = "設定変更失敗: $($tweak.description): $($_.Exception.Message)"
-                Write-Warning "-> $($_.Exception.Message)"
-                $script:FailedItems.Add($errorMessage)
-            }
-        }
-        Write-Host "`n--- Windowsの各種設定変更が完了しました ---`n" -ForegroundColor Green
     }
 
     # --- インストール済みアプリ全体を更新 ---

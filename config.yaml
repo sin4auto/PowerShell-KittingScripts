@@ -8,35 +8,6 @@
 # ■ フェーズ1: システムの基本セットアップ
 # ----------------------------------------------------------------
 phase1:
-  # --- Wingetによるアプリケーションのインストール ---
-  wingetInstall:
-    - id: Microsoft.PowerShell                 # 最新のPowerShell
-    - id: Google.Chrome                        # Webブラウザ
-    - id: 7zip.7zip                            # 高性能なファイル圧縮・解凍ソフト
-    - id: Microsoft.PowerToys                  # Windowsを便利にするユーティリティ集
-    - id: Zoom.Zoom                            # Web会議ツール
-    - id: Git.Git                              # バージョン管理システム
-    - id: OpenJS.NodeJS.LTS                    # JavaScript実行環境 (長期サポート版)
-    - id: Python.Python.3.12                   # プログラミング言語 Python
-    - id: astral-sh.uv                         # 高速なPythonパッケージインストーラー
-    - id: Microsoft.VisualStudioCode           # 統合開発環境 (IDE)
-      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
-    - id: Adobe.Acrobat.Reader.64-bit          # PDF閲覧ソフト
-      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
-
-  # --- 不要なプリインストールアプリの削除 ---
-  appxRemove:
-    - name: "*Cortana*"                        # AIアシスタント
-    - name: "*Microsoft.BingNews*"             # ニュースアプリ
-    - name: "*Microsoft.GetHelp*"              # ヘルプ表示アプリ
-    - name: "*Microsoft.Getstarted*"           # ヒント表示アプリ
-    - name: "*Microsoft.Office.OneNote*"       # OneNote (ストアアプリ版)
-    - name: "*Microsoft.People*"               # People (連絡先) アプリ
-    - name: "*Microsoft.WindowsFeedbackHub*"   # フィードバックHub
-    - name: "*Microsoft.YourPhone*"            # スマートフォン連携
-    - name: "*Microsoft.ZuneMusic*"            # Grooveミュージック
-    - name: "*Microsoft.ZuneVideo*"            # 映画 & テレビ
-
   # --- Windowsのシステム設定変更 ---
   windowsTweaks:
     - description: 隠しファイルとフォルダを表示する
@@ -73,6 +44,35 @@ phase1:
       type: Create-RegistryKeyWithDefault # キーを作成し、その既定値を設定
       path: HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32
       value: "" # 空の既定値を設定
+
+  # --- Wingetによるアプリケーションのインストール ---
+  wingetInstall:
+    - id: Microsoft.PowerShell                 # 最新のPowerShell
+    - id: Google.Chrome                        # Webブラウザ
+    - id: 7zip.7zip                            # 高性能なファイル圧縮・解凍ソフト
+    - id: Microsoft.PowerToys                  # Windowsを便利にするユーティリティ集
+    - id: Zoom.Zoom                            # Web会議ツール
+    - id: Git.Git                              # バージョン管理システム
+    - id: OpenJS.NodeJS.LTS                    # JavaScript実行環境 (長期サポート版)
+    - id: Python.Python.3.12                   # プログラミング言語 Python
+    - id: astral-sh.uv                         # 高速なPythonパッケージインストーラー
+    - id: Microsoft.VisualStudioCode           # 統合開発環境 (IDE)
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    - id: Adobe.Acrobat.Reader.64-bit          # PDF閲覧ソフト
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+
+  # --- 不要なプリインストールアプリの削除 ---
+  appxRemove:
+    - name: "*Cortana*"                        # AIアシスタント
+    - name: "*Microsoft.BingNews*"             # ニュースアプリ
+    - name: "*Microsoft.GetHelp*"              # ヘルプ表示アプリ
+    - name: "*Microsoft.Getstarted*"           # ヒント表示アプリ
+    - name: "*Microsoft.Office.OneNote*"       # OneNote (ストアアプリ版)
+    - name: "*Microsoft.People*"               # People (連絡先) アプリ
+    - name: "*Microsoft.WindowsFeedbackHub*"   # フィードバックHub
+    - name: "*Microsoft.YourPhone*"            # スマートフォン連携
+    - name: "*Microsoft.ZuneMusic*"            # Grooveミュージック
+    - name: "*Microsoft.ZuneVideo*"            # 映画 & テレビ
 
 # ----------------------------------------------------------------
 # ■ フェーズ2: 開発者向けパッケージのインストール（再起動後）
