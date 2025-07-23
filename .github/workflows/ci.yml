@@ -23,13 +23,18 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v4
 
-    # ステップ2: AutoSetup.ps1 のフェーズ1を実行します。
+    # ステップ2: wingetコマンドのパスを環境変数に追加します。
+    # これがwingetを認識させるための重要なステップです。
+    - name: Add winget path
+      shell: pwsh
+      run: echo "$env:LOCALAPPDATA\Microsoft\WindowsApps" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    # ステップ3: AutoSetup.ps1 のフェーズ1を実行します。
     - name: Run AutoSetup Phase 1
       shell: pwsh
       run: .\AutoSetup.ps1
 
-    # ステップ3: AutoSetup.ps1 のフェーズ2を実行します。
+    # ステップ4: AutoSetup.ps1 のフェーズ2を実行します。
     - name: Run AutoSetup Phase 2
-      # CI環境では再起動はできないため、連続して実行することでスクリプト全体の動作をテストします。
       shell: pwsh
       run: .\AutoSetup.ps1 -SetupPhase 2
