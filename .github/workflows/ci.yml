@@ -18,24 +18,22 @@ jobs:
       uses: actions/checkout@v4
 
     # ステップ2: フェーズ1を実行します。
-    # Invoke-Expressionを使い、PowerShell内でコマンド実行を完結させるラッパー関数を定義します。
+    # cmd.exeのセッション内でPATHを設定してからwingetを実行する、複合コマンドを使います。
     - name: Run AutoSetup Phase 1
       shell: powershell
       run: |
-        # winget.exeへのフルパスを事前に変数に格納
-        $wingetPath = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\winget.exe"
-
         # wingetコマンドの挙動を上書きするラッパー関数
         function global:winget {
-            # スクリプトから渡された引数を単純に文字列として結合
+            # スクリプトから渡された引数を文字列として結合
             $argumentString = $args -join ' '
-            # 実行するコマンドの完全な文字列を組み立てる。& (呼び出し演算子) を先頭に付ける。
-            $commandToRun = "& `"$wingetPath`" $argumentString"
+            # cmd.exeに渡すための複合コマンドを組み立てる
+            # 1. cmd.exe自身のPATHにwingetのパスを追加
+            # 2. && を使い、PATH設定が成功したらwingetを実行
+            $commandToRun = "path %path%;%localappdata%\Microsoft\WindowsApps && winget $argumentString"
 
-            # デバッグ用に実行するコマンド全体を表示
-            Write-Host "Wrapper: Executing command via Invoke-Expression: $commandToRun"
-            # 組み立てたコマンド文字列を、PowerShellコマンドとして解釈・実行する
-            Invoke-Expression -Command $commandToRun
+            Write-Host "Wrapper: Executing compound command in cmd.exe: $commandToRun"
+            # 組み立てた複合コマンドをcmd.exeに実行させる
+            cmd.exe /c $commandToRun
         }
         # スクリプトを実行
         .\AutoSetup.ps1
@@ -45,11 +43,10 @@ jobs:
     - name: Run AutoSetup Phase 2
       shell: powershell
       run: |
-        $wingetPath = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\winget.exe"
         function global:winget {
             $argumentString = $args -join ' '
-            $commandToRun = "& `"$wingetPath`" $argumentString"
-            Write-Host "Wrapper: Executing command via Invoke-Expression: $commandToRun"
-            Invoke-Expression -Command $commandToRun
+            $commandToRun = "path %path%;%localappdata%\Microsoft\WindowsApps && winget $argumentString"
+            Write-Host "Wrapper: Executing compound command in cmd.exe: $commandToRun"
+            cmd.exe /c $commandToRun
         }
         .\AutoSetup.ps1 -SetupPhase 2
