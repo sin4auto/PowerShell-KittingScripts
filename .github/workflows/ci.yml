@@ -18,7 +18,7 @@ jobs:
       uses: actions/checkout@v4
 
     # ステップ2: フェーズ1を実行します。
-    # wingetのフルパスを直接cmd.exeに渡すラッパー関数を定義します。
+    # cmd.exeが正しく解釈できるコマンド文字列を組み立てるラッパー関数を定義します。
     - name: Run AutoSetup Phase 1
       shell: powershell
       run: |
@@ -27,11 +27,17 @@ jobs:
 
         # wingetコマンドの挙動を上書きするラッパー関数
         function global:winget {
+            # スクリプトから渡された引数を単純に文字列として結合
             $argumentString = $args -join ' '
-            # cmd.exeを呼び出し、winget.exeのフルパスと引数を渡して実行させる
-            & cmd.exe /c "`"$wingetPath`" $argumentString"
+            # 実行ファイルパスをダブルクォートで囲み、引数と結合して、cmd.exeが解釈できる単一のコマンド文字列を作成
+            $commandToRun = "`"$wingetPath`" $argumentString"
+
+            # デバッグ用に実行するコマンド全体を表示
+            Write-Host "Wrapper: Executing command via cmd.exe: $commandToRun"
+            # 組み立てたコマンド文字列をcmd.exeに渡して実行
+            cmd.exe /c $commandToRun
         }
-        # スクリプトを実行（これにより上記のラッパー関数が使われる）
+        # スクリプトを実行
         .\AutoSetup.ps1
 
     # ステップ3: フェーズ2を実行します。
@@ -42,6 +48,8 @@ jobs:
         $wingetPath = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\winget.exe"
         function global:winget {
             $argumentString = $args -join ' '
-            & cmd.exe /c "`"$wingetPath`" $argumentString"
+            $commandToRun = "`"$wingetPath`" $argumentString"
+            Write-Host "Wrapper: Executing command via cmd.exe: $commandToRun"
+            cmd.exe /c $commandToRun
         }
         .\AutoSetup.ps1 -SetupPhase 2
