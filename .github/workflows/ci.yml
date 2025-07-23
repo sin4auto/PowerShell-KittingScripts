@@ -18,19 +18,25 @@ jobs:
       uses: actions/checkout@v4
 
     # ステップ2: フェーズ1を実行します。
-    # スクリプト実行前に'winget'コマンドのエイリアス（別名）を直接作成します。
+    # wingetコマンドをcmd.exe経由で実行するラッパー関数を定義します。
     - name: Run AutoSetup Phase 1
       shell: powershell
       run: |
-        New-Alias -Name winget -Value "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe" -ErrorAction Stop
-        Write-Host "Alias 'winget' created successfully."
+        function global:winget {
+            $argumentString = $args -join ' '
+            Write-Host "Wrapper: Executing 'winget $argumentString' via cmd.exe"
+            cmd.exe /c "winget $argumentString"
+        }
         .\AutoSetup.ps1
 
     # ステップ3: フェーズ2を実行します。
-    # ステップが異なるため、ここでも再度エイリアスを作成する必要があります。
+    # こちらのステップでも同様にラッパー関数を定義します。
     - name: Run AutoSetup Phase 2
       shell: powershell
       run: |
-        New-Alias -Name winget -Value "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe" -ErrorAction Stop
-        Write-Host "Alias 'winget' created successfully."
+        function global:winget {
+            $argumentString = $args -join ' '
+            Write-Host "Wrapper: Executing 'winget $argumentString' via cmd.exe"
+            cmd.exe /c "winget $argumentString"
+        }
         .\AutoSetup.ps1 -SetupPhase 2
