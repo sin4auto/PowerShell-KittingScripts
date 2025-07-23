@@ -18,20 +18,26 @@ jobs:
       uses: actions/checkout@v4
 
     # ステップ2: フェーズ1を実行します。
-    # 解析停止演算子(--%)を使い、PowerShellの余計な引数解釈を完全に止めさせます。
+    # Invoke-Expressionを使い、PowerShell内でコマンド実行を完結させるラッパー関数を定義します。
     - name: Run AutoSetup Phase 1
       shell: powershell
       run: |
+        # winget.exeへのフルパスを事前に変数に格納
         $wingetPath = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\winget.exe"
 
+        # wingetコマンドの挙動を上書きするラッパー関数
         function global:winget {
+            # スクリプトから渡された引数を単純に文字列として結合
             $argumentString = $args -join ' '
-            $commandToRun = "`"$wingetPath`" $argumentString"
+            # 実行するコマンドの完全な文字列を組み立てる。& (呼び出し演算子) を先頭に付ける。
+            $commandToRun = "& `"$wingetPath`" $argumentString"
 
-            Write-Host "Wrapper: Executing command via cmd.exe: $commandToRun"
-            # --% を使い、コマンド文字列を解釈させずにそのままcmd.exeへ渡す
-            cmd.exe /c --% $commandToRun
+            # デバッグ用に実行するコマンド全体を表示
+            Write-Host "Wrapper: Executing command via Invoke-Expression: $commandToRun"
+            # 組み立てたコマンド文字列を、PowerShellコマンドとして解釈・実行する
+            Invoke-Expression -Command $commandToRun
         }
+        # スクリプトを実行
         .\AutoSetup.ps1
 
     # ステップ3: フェーズ2を実行します。
@@ -42,10 +48,8 @@ jobs:
         $wingetPath = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\winget.exe"
         function global:winget {
             $argumentString = $args -join ' '
-            $commandToRun = "`"$wingetPath`" $argumentString"
-
-            Write-Host "Wrapper: Executing command via cmd.exe: $commandToRun"
-            # --% を使い、コマンド文字列を解釈させずにそのままcmd.exeへ渡す
-            cmd.exe /c --% $commandToRun
+            $commandToRun = "& `"$wingetPath`" $argumentString"
+            Write-Host "Wrapper: Executing command via Invoke-Expression: $commandToRun"
+            Invoke-Expression -Command $commandToRun
         }
         .\AutoSetup.ps1 -SetupPhase 2
