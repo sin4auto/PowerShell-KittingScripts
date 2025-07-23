@@ -1,4 +1,4 @@
-# Windows 11 に Hyper-V をインストールして仮想マシンを構築する手順
+# Windows11 に Hyper-V をインストールしてWindows11仮想マシンを構築する手順
 
 ---
 
