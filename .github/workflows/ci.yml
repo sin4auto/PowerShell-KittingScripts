@@ -18,17 +18,19 @@ jobs:
       uses: actions/checkout@v4
 
     # ステップ2: フェーズ1を実行します。
-    # shellを'powershell'に指定し、ローカル環境に近いWindows PowerShell 5.1を使用します。
+    # スクリプト実行前に'winget'コマンドのエイリアス（別名）を直接作成します。
     - name: Run AutoSetup Phase 1
       shell: powershell
       run: |
-        $env:PATH = "$env:PATH;$env:LOCALAPPDATA\Microsoft\WindowsApps"
+        New-Alias -Name winget -Value "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe" -ErrorAction Stop
+        Write-Host "Alias 'winget' created successfully."
         .\AutoSetup.ps1
 
     # ステップ3: フェーズ2を実行します。
-    # こちらも同様に'powershell'を指定して実行します。
+    # ステップが異なるため、ここでも再度エイリアスを作成する必要があります。
     - name: Run AutoSetup Phase 2
       shell: powershell
       run: |
-        $env:PATH = "$env:PATH;$env:LOCALAPPDATA\Microsoft\WindowsApps"
+        New-Alias -Name winget -Value "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe" -ErrorAction Stop
+        Write-Host "Alias 'winget' created successfully."
         .\AutoSetup.ps1 -SetupPhase 2
