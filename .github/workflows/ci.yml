@@ -3,38 +3,40 @@ name: PowerShell AutoSetup Script CI
 
 # このワークフローが実行されるタイミング（トリガー）を指定します。
 on:
-  # 'main' ブランチにコードがプッシュされた時
   push:
     branches: [ main ]
-  # 'main' ブランチに対してプルリクエストが作成された時
   pull_request:
     branches: [ main ]
 
 # 実行する一連のジョブを定義します。
 jobs:
-  # 'run-script-on-windows' という名前のジョブを定義します。
   run-script-on-windows:
-    # このジョブを、最新のWindows環境（仮想マシン）上で実行します。
     runs-on: windows-latest
-
-    # ジョブ内で実行される一連のステップ（タスク）を定義します。
     steps:
     # ステップ1: リポジトリのコードを仮想マシンにダウンロードします。
     - name: Checkout repository code
       uses: actions/checkout@v4
 
-    # ステップ2: wingetコマンドのパスを環境変数に追加します。
-    # これがwingetを認識させるための重要なステップです。
-    - name: Add winget path
+    # ステップ2: wingetコマンドが使えるように環境変数PATHを更新します。
+    # GITHUB_ENVファイルを使うことで、後続のステップに環境変数を確実に引き継ぎます。
+    - name: Add winget to PATH environment variable
       shell: pwsh
-      run: echo "$env:LOCALAPPDATA\Microsoft\WindowsApps" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      run: echo "PATH=$env:PATH;$env:LOCALAPPDATA\Microsoft\WindowsApps" >> $env:GITHUB_ENV
 
-    # ステップ3: AutoSetup.ps1 のフェーズ1を実行します。
+    # ステップ3: (デバッグ用) 更新されたPATHの内容を確認します。
+    # これでwingetへのパスが正しく追加されたかを確認できます。
+    - name: Display PATH to verify
+      shell: pwsh
+      run: |
+        echo "PATH is:"
+        echo $env:PATH
+
+    # ステップ4: AutoSetup.ps1 のフェーズ1を実行します。
     - name: Run AutoSetup Phase 1
       shell: pwsh
       run: .\AutoSetup.ps1
 
-    # ステップ4: AutoSetup.ps1 のフェーズ2を実行します。
+    # ステップ5: AutoSetup.ps1 のフェーズ2を実行します。
     - name: Run AutoSetup Phase 2
       shell: pwsh
       run: .\AutoSetup.ps1 -SetupPhase 2
