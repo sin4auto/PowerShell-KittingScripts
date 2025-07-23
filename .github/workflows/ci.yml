@@ -17,26 +17,18 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v4
 
-    # ステップ2: wingetコマンドが使えるように環境変数PATHを更新します。
-    # GITHUB_ENVファイルを使うことで、後続のステップに環境変数を確実に引き継ぎます。
-    - name: Add winget to PATH environment variable
-      shell: pwsh
-      run: echo "PATH=$env:PATH;$env:LOCALAPPDATA\Microsoft\WindowsApps" >> $env:GITHUB_ENV
-
-    # ステップ3: (デバッグ用) 更新されたPATHの内容を確認します。
-    # これでwingetへのパスが正しく追加されたかを確認できます。
-    - name: Display PATH to verify
+    # ステップ2: wingetのパスを追加し、続けてフェーズ1を実行します。
+    # 同一のステップ内で実行することで、環境変数の変更を確実に反映させます。
+    - name: Run AutoSetup Phase 1 with winget path
       shell: pwsh
       run: |
-        echo "PATH is:"
-        echo $env:PATH
+        $env:PATH = "$env:PATH;$env:LOCALAPPDATA\Microsoft\WindowsApps"
+        .\AutoSetup.ps1
 
-    # ステップ4: AutoSetup.ps1 のフェーズ1を実行します。
-    - name: Run AutoSetup Phase 1
+    # ステップ3: wingetのパスを追加し、続けてフェーズ2を実行します。
+    # ステップが異なると環境変数はリセットされるため、ここでも再度パスを設定します。
+    - name: Run AutoSetup Phase 2 with winget path
       shell: pwsh
-      run: .\AutoSetup.ps1
-
-    # ステップ5: AutoSetup.ps1 のフェーズ2を実行します。
-    - name: Run AutoSetup Phase 2
-      shell: pwsh
-      run: .\AutoSetup.ps1 -SetupPhase 2
+      run: |
+        $env:PATH = "$env:PATH;$env:LOCALAPPDATA\Microsoft\WindowsApps"
+        .\AutoSetup.ps1 -SetupPhase 2
