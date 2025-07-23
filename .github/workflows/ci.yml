@@ -1,0 +1,35 @@
+# ワークフローの名前。GitHubの "Actions" タブで表示されます。
+name: PowerShell AutoSetup Script CI
+
+# このワークフローが実行されるタイミング（トリガー）を指定します。
+on:
+  # 'main' ブランチにコードがプッシュされた時
+  push:
+    branches: [ main ]
+  # 'main' ブランチに対してプルリクエストが作成された時
+  pull_request:
+    branches: [ main ]
+
+# 実行する一連のジョブを定義します。
+jobs:
+  # 'run-script-on-windows' という名前のジョブを定義します。
+  run-script-on-windows:
+    # このジョブを、最新のWindows環境（仮想マシン）上で実行します。
+    runs-on: windows-latest
+
+    # ジョブ内で実行される一連のステップ（タスク）を定義します。
+    steps:
+    # ステップ1: リポジトリのコードを仮想マシンにダウンロードします。
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    # ステップ2: AutoSetup.ps1 のフェーズ1を実行します。
+    - name: Run AutoSetup Phase 1
+      shell: pwsh
+      run: .\AutoSetup.ps1
+
+    # ステップ3: AutoSetup.ps1 のフェーズ2を実行します。
+    - name: Run AutoSetup Phase 2
+      # CI環境では再起動はできないため、連続して実行することでスクリプト全体の動作をテストします。
+      shell: pwsh
+      run: .\AutoSetup.ps1 -SetupPhase 2
