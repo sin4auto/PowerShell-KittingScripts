@@ -1,167 +1,176 @@
 # ================================================================
-# AutoSetupスクリプト設定ファイル
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
 # ================================================================
-# 実行したいタスクをフェーズごとに定義します。
-# 不要な項目は、行頭に「#」を付けてコメントアウトするとスキップされます。
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 各タスクはフェーズごとにグループ化されています。
+# 不要なタスクは、行頭に「#」を付けてコメントアウトすることでスキップできます。
 
 # ----------------------------------------------------------------
-# ■ フェーズ1: システムの基本セットアップ
+# ■ フェーズ1: OSの基本設定と必須アプリケーションの導入
 # ----------------------------------------------------------------
 phase1:
-  # --- Windowsのシステム設定変更 ---
+  # --- Windowsのシステム設定 (レジストリ変更によるUX改善) ---
   windowsSettings:
-    # --- エクスプローラー関連設定 ---
-    - description: 隠しファイルとフォルダを表示する
+    # [エクスプローラー設定]
+    - description: エクスプローラーで隠しファイルを表示する
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
-    - description: ファイルの拡張子を常に表示する
+    - description: エクスプローラーで登録されている拡張子を常に表示する
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
-    - description: エクスプローラーのアドレスバーに完全なパスを表示する
+    - description: アドレスバーに常に完全なパスを表示する
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
-    - description: エクスプローラーの起動時に「PC」を表示する
+    - description: エクスプローラー起動時のデフォルト表示を「PC」にする
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 右クリックメニューを従来のスタイルに戻す (Win11)
+    - description: Windows 11の右クリックメニューを従来の形式（フルメニュー）に戻す
       command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
-
-    # --- 自動再生の設定 ---
-    - description: 'すべてのメディアとデバイスで自動再生を有効化'
+    # [自動再生設定]
+    - description: 全てのメディアとデバイスで自動再生機能を有効化する
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
-    - description: '自動再生の既定: リムーバブル ドライブはフォルダーを開く'
+    - description: リムーバブルドライブ接続時の既定の動作を「フォルダーを開いてファイルを表示」にする
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
-
-    # --- 通知とプライバシー設定 ---
-    - description: '通知: 更新後とサインイン時のウェルカム体験をオフ'
+    # [通知・プライバシー設定]
+    - description: サインイン時の「ようこそ」画面やヒント表示を無効化する
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
-    - description: '通知: デバイス設定を完了する方法の提案をオフ'
+    - description: デバイス設定の完了を促す通知を無効化する
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
-    - description: '通知: Windows使用時のヒントや提案をオフ'
+    - description: Windowsの使用に関するヒントや提案の通知を無効化する
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
-    - description: 'プライバシー: オプションの診断データをオフにする'
+    - description: OSの診断データを必須なものに限定する (プライバシー向上)
       command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
-    - description: 'プライバシー: 手書き入力と入力の改善をオフにする'
+    - description: 手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
-    - description: 'プライバシー: カスタマイズされたエクスペリエンスをオフにする'
+    - description: 診断データに基づいた個人向けのおすすめ機能などを無効化する
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
-
-    # --- セキュリティと電源設定 ---
-    - description: 'コア分離: メモリ整合性を有効化'
+    # [セキュリティ・電源設定]
+    - description: コア分離: 仮想化ベースのセキュリティでメモリを保護する (メモリ整合性)
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
-    - description: 'コア分離: カーネル モード ハードウェア強制スタック保護を有効化'
+    - description: コア分離: ハードウェアでカーネルスタックを保護し、制御フロー攻撃を防御する
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
-    - description: 'コア分離: ローカル セキュリティ機関の保護を有効化'
+    - description: コア分離: LSAプロセスを保護し、資格情報が盗まれるのを防ぐ
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
-    - description: 高速スタートアップを無効化する (powercfgコマンド)
+    - description: 高速スタートアップを無効化 (シャットダウン関連の問題を回避)
       command: "powercfg.exe /h off"
-    - description: 電源接続時のスリープを無効にする
+    - description: AC電源接続中にPCがスリープしないように設定する
       command: "powercfg.exe /change standby-timeout-ac 0"
-    - description: バッテリー駆動時のスリープを無効にする
+    - description: バッテリー駆動中にPCがスリープしないように設定する
       command: "powercfg.exe /change standby-timeout-dc 0"
 
-  # --- Wingetによるアプリケーションのインストール ---
+  # --- Winget: 基本アプリケーションのインストール ---
   wingetInstall:
-    - id: Microsoft.PowerShell                 # 最新のPowerShell
-    - id: Google.Chrome                        # Webブラウザ
-    - id: 7zip.7zip                            # 高性能なファイル圧縮・解凍ソフト
-    - id: Microsoft.PowerToys                  # Windowsを便利にするユーティリティ集
-    - id: Zoom.Zoom                            # Web会議ツール
-    - id: Git.Git                              # バージョン管理システム
-    - id: OpenJS.NodeJS.LTS                    # JavaScript実行環境 (長期サポート版)
-    - id: Python.Python.3.12                   # プログラミング言語 Python
-    - id: astral-sh.uv                         # 高速なPythonパッケージインストーラー
-    - id: Microsoft.VisualStudioCode           # 統合開発環境 (IDE)
-      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
-    - id: Adobe.Acrobat.Reader.64-bit          # PDF閲覧ソフト
-      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    - id: Microsoft.PowerShell                 # 最新版のPowerShell。Windows標準搭載版とは別。
+    - id: Google.Chrome                        # 代表的なWebブラウザ。
+    - id: 7zip.7zip                            # 高機能なファイル圧縮・解凍ソフト。
+    - id: Microsoft.PowerToys                  # Windowsの生産性を向上させる公式ユーティリティ群。
+    - id: Zoom.Zoom                            # オンライン会議ツール。
+    - id: Git.Git                              # 分散型バージョン管理システムのコア。
+    - id: OpenJS.NodeJS.LTS                    # JavaScriptのサーバーサイド実行環境 (長期安定版)。npmも含まれる。
+    - id: Python.Python.3.13                   # プログラミング言語Pythonの最新安定版。
+    - id: astral-sh.uv                         # Rust製の高速なPythonパッケージインストーラー兼仮想環境マネージャー。
+    - id: Microsoft.VisualStudioCode           # 多機能なコードエディタ。
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"' # インストールオプション: サイレント実行、自動再起動なし、関連付け等のタスクを抑制。
+    - id: Adobe.Acrobat.Reader.64-bit          # PDF閲覧ソフトの定番。
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"' # インストールオプション: サイレント実行、利用規約への同意。
 
-  # --- 不要なプリインストールアプリの削除 ---
+  # --- Appx: 不要なプリインストールアプリのアンインストール ---
   appxRemove:
-    - name: "*Cortana*"                        # AIアシスタント
-    - name: "*Microsoft.BingNews*"             # ニュースアプリ
-    - name: "*Microsoft.GetHelp*"              # ヘルプ表示アプリ
-    - name: "*Microsoft.Getstarted*"           # ヒント表示アプリ
-    - name: "*Microsoft.Office.OneNote*"       # OneNote (ストアアプリ版)
-    - name: "*Microsoft.People*"               # People (連絡先) アプリ
-    - name: "*Microsoft.WindowsFeedbackHub*"   # フィードバックHub
-    - name: "*Microsoft.YourPhone*"            # スマートフォン連携
-    - name: "*Microsoft.ZuneMusic*"            # Grooveミュージック
-    - name: "*Microsoft.ZuneVideo*"            # 映画 & テレビ
+    - name: "*Cortana*"                        # デジタルアシスタント。
+    - name: "*Microsoft.BingNews*"             # ニュースアプリ。
+    - name: "*Microsoft.GetHelp*"              # 「ヘルプ」アプリ。
+    - name: "*Microsoft.Getstarted*"           # 「ヒント」アプリ。
+    - name: "*Microsoft.Office.OneNote*"       # OneNoteのストアアプリ版。デスクトップ版とは異なる。
+    - name: "*Microsoft.People*"               # 「People」アプリ (連絡先)。
+    - name: "*Microsoft.WindowsFeedbackHub*"   # OSへのフィードバック送信アプリ。
+    - name: "*Microsoft.YourPhone*"            # 「スマートフォン連携」アプリ。
+    - name: "*Microsoft.ZuneMusic*"            # 「Groove ミュージック」アプリ。
+    - name: "*Microsoft.ZuneVideo*"            # 「映画 & テレビ」アプリ。
 
 # ----------------------------------------------------------------
-# ■ フェーズ2: 開発者向けパッケージのインストール（再起動後）
+# ■ フェーズ2: 開発環境のセットアップ (各種パッケージの導入)
 # ----------------------------------------------------------------
+# システムの再起動が必要な場合があるため、フェーズを分けています。
 phase2:
   # =================================================================
-  # ■ パッケージマネージャーとインストールするパッケージの定義
+  # ■ パッケージマネージャーごとの設定
   # =================================================================
+  # ここでは、vscode, npm, pip などの異なるパッケージマネージャーを使って、
+  # ツールやライブラリをインストールするための共通の枠組みを定義します。
   packageManagers:
-    # --- Visual Studio Code Extensions の設定 ---
-    - managerName: 'vscode'                                                 # 管理者の表示名 (ログ用)
-      checkCommand: 'code --list-extensions | findstr /i /l /c:"{package}"' # インストール済みか確認するコマンド。{package}は置換される。
-      installCommand: 'code --install-extension {package}'                  # インストールを実行するコマンド。{package}は置換される。
-      packages:                                                             # このマネージャーでインストールするパッケージのリスト
-        # --- 基本 & AI支援 ---
-        - ms-ceintl.vscode-language-pack-ja                                 # Japanese Language Pack: VSCodeを日本語化
-        - VisualStudioExptTeam.vscodeintellicode                            # IntelliCode: AIを使用したコード補完
-        - GitHub.copilot                                                    # GitHub Copilot: AIコード補完ツール
-        # --- コード整形・静的解析 ---
-        - esbenp.prettier-vscode                                            # Prettier – Code formatter: コードを整形
-        - dbaeumer.vscode-eslint                                            # ESLint: JavaScript/TypeScriptの静的解析
-        - streetsidesoftware.code-spell-checker                             # Code Spell Checker: コードのスペルミスを指摘
-        # --- コーディング補助 ---
-        - formulahendry.auto-rename-tag                                     # Auto Rename Tag: 開始/終了タグを自動で変更
-        - formulahendry.auto-close-tag                                      # Auto Close Tag: 自動的に閉じタグを挿入
-        - christian-kohler.path-intellisense                                # Path Intellisense: パス入力を補完
-        # --- 表示・UI改善 ---
-        - oderwat.indent-rainbow                                            # indent-rainbow: インデントを色分け
-        - mosapride.zenkaku                                                 # Zenkaku: 全角スペースをハイライト
-        - shardulm94.trailing-spaces                                        # Trailing Spaces: 行末の余分なスペースをハイライト
-        - aaron-bond.better-comments                                        # Better Comments: コメントを分かりやすくハイライト
-        - gruntfuggly.todo-tree                                             # Todo Tree: TODOコメントをツリー表示
-        - eamodio.gitlens                                                   # GitLens: Git連携を強化
-        - tonybaloney.vscode-pets                                           # vscode-pets: エディタ上にかわいいペットを表示
-        # --- 言語サポート & その他 ---
-        - ms-python.python                                                  # Python (Microsoft)
-        - ms-vscode.cpptools-extension-pack                                 # C/C++ (Microsoft Extension Pack)
-        - ms-vscode.powershell                                              # PowerShell (Microsoft)
-        - redhat.vscode-yaml                                                # YAML (Red Hat)
+    # --- VSCode: 拡張機能のインストール ---
+    - managerName: 'vscode'                                                 # スクリプトのログに表示されるマネージャー名。
+      checkCommand: 'code --list-extensions | findstr /i /l /c:"{package}"' # 拡張機能が既にインストールされているかを確認するコマンド。
+      installCommand: 'code --install-extension {package}'                  # 拡張機能をインストールするコマンド。
+      packages:                                                             # 'code --install-extension'でインストールする拡張機能のIDリスト。
+        # [UI/UX & 日本語化]
+        - ms-ceintl.vscode-language-pack-ja                                 # VSCodeのUIを日本語化する公式パック。
+        - oderwat.indent-rainbow                                            # インデントの深さを色付けして可読性を向上させる。
+        - mosapride.zenkaku                                                 # 全角スペースをハイライトして意図しない混入を防ぐ。
+        - shardulm94.trailing-spaces                                        # 行末の不要な空白文字をハイライト・削除する。
+        - tonybaloney.vscode-pets                                           # エディタの隅にペットを表示させて癒やされる。
+        # [コーディング支援 & AI]
+        - VisualStudioExptTeam.vscodeintellicode                            # AIが文脈を読み取り、賢いコード補完候補を提示する。
+        - GitHub.copilot                                                    # AIがコードの続きや関数全体を生成してくれるペアプログラマー。
+        - formulahendry.auto-rename-tag                                     # HTML/XMLの開始タグを変更すると、対応する閉じタグも自動で変更する。
+        - formulahendry.auto-close-tag                                      # HTML/XMLの開始タグを入力すると、自動で閉じタグを挿入する。
+        - christian-kohler.path-intellisense                                # ファイルパスの入力を賢く補完する。
+        # [コード品質 & フォーマット]
+        - esbenp.prettier-vscode                                            # Prettierと連携し、保存時にコードを自動整形する。
+        - dbaeumer.vscode-eslint                                            # ESLintと連携し、コードの問題点をリアルタイムで指摘する。
+        - streetsidesoftware.code-spell-checker                             # コードやコメント内のスペルミスをチェックする。
+        # [Git & プロジェクト管理]
+        - eamodio.gitlens                                                   # Gitの履歴(blame)を行単位で表示するなど、Git機能を大幅に強化する。
+        - gruntfuggly.todo-tree                                             # 'TODO:'や'FIXME:'などのコメントを抽出し、ツリー表示で一覧化する。
+        - aaron-bond.better-comments                                        # コメントの種類(Alert, Queryなど)に応じて色分けし、視認性を高める。
+        # [言語サポート]
+        - ms-python.python                                                  # Python開発に必須のMicrosoft公式拡張機能。
+        - ms-vscode.cpptools-extension-pack                                 # C/C++開発向けのMicrosoft公式拡張機能パック。
+        - ms-vscode.powershell                                              # PowerShellスクリプト開発をサポートする公式拡張機能。
+        - redhat.vscode-yaml                                                # YAMLファイルのシンタックスハイライトや補完機能を提供する。
 
-    # --- npm (Node.js) の設定 ---
-    - managerName: 'npm'                                            # 管理者の表示名 (ログ用)
-      checkCommand: 'npm list -g {package} --depth=0'               # インストール済みか確認するコマンド。{package}は置換される。成功(インストール済)の場合、終了コード0を返すこと。
-      installCommand: 'npm install -g {package}'                    # インストールを実行するコマンド。{package}は置換される。
-      packages:                                                     # このマネージャーでインストールするパッケージのリスト
-        - typescript                                                # 静的型付けJavaScript
-        - ts-node                                                   # TypeScriptを直接実行
-        - nodemon                                                   # ファイル変更時に自動でサーバーを再起動
-        - eslint                                                    # コードの静的解析ツール
-        - prettier                                                  # コードフォーマッター
-        - pnpm                                                      # 高速なパッケージマネージャー
+    # --- npm: グローバルNode.jsパッケージのインストール ---
+    - managerName: 'npm'                                            # スクリプトのログに表示されるマネージャー名。
+      checkCommand: 'npm list -g {package} --depth=0'               # パッケージがグローバルにインストールされているかを確認するコマンド。
+      installCommand: 'npm install -g {package}'                    # パッケージをグローバルにインストールするコマンド。
+      packages:                                                     # 'npm install -g'でインストールするパッケージのリスト。
+        - typescript                                                # JavaScriptに静的な型付けを追加する言語。
+        - ts-node                                                   # TypeScriptコードをコンパイルせずに直接実行するユーティリティ。
+        - nodemon                                                   # 開発中にソースコードの変更を検知し、自動でサーバーを再起動するツール。
+        - eslint                                                    # JavaScript/TypeScriptコードの静的解析を行い、問題点を検出するリンター。
+        - prettier                                                  # ソースコードのスタイルを統一するためのコードフォーマッター。
+        - pnpm                                                      # 高速でディスク効率の良いパッケージマネージャー。npmの代替として利用可能。
 
-    # --- pip (Python) の設定 (uvを使用) ---
-    - managerName: 'pip'                                            # 管理者の表示名 (ログ用)
-      checkCommand: 'uv pip show {package}'                         # インストール済みか確認するコマンド。{package}は置換される。
-      installCommand: 'uv pip install {package} --system'           # インストールを実行するコマンド。{package}は置換される。
-      packages:                                                     # このマネージャーでインストールするパッケージのリスト
-        - jupyterlab                                                # 対話的なデータ分析・開発環境
-        - jupyterlab-language-pack-ja-jp                            # JupyterLabの日本語化パック
-        - requests                                                  # HTTP通信ライブラリ
-        - numpy                                                     # 数値計算ライブラリ
-        - pandas                                                    # データ分析ライブラリ
-        - matplotlib                                                # データ可視化・グラフ描画ライブラリ
-        - black                                                     # コードフォーマッター
-        - ruff                                                      # 高速なリンター
-        - python-dotenv                                             # .envファイルから環境変数を読み込む
-        - scikit-learn                                              # 機械学習ライブラリ
-        - seaborn                                                   # 統計的データ可視化ライブラリ
-        - openpyxl                                                  # Excelファイルの読み書き
-        - fastapi                                                   # 高速なWebフレームワーク
-        - lxml                                                      # XML/HTMLパーサー
+    # --- pip (uv): Pythonパッケージのインストール ---
+    # Rust製の高速な 'uv' を使ってPythonパッケージをグローバルにインストールします。
+    - managerName: 'pip'                                            # スクリプトのログに表示されるマネージャー名。
+      checkCommand: 'uv pip show {package}'                         # パッケージがインストールされているかを確認するコマンド。
+      installCommand: 'uv pip install {package} --system'           # パッケージをインストールするコマンド。--systemでグローバル環境にインストール。
+      packages:                                                     # 'uv pip install'でインストールするパッケージのリスト。
+        # [Webフレームワーク]
+        - fastapi                                                   # API開発に特化した、モダンで非常に高速なWebフレームワーク。
+        - flask                                                     # 軽量で始めやすく、自由に拡張できるマイクロWebフレームワーク。
+        - django                                                    # 大規模開発向け。管理画面など多くの機能が揃ったフルスタックWebフレームワーク。
+        # [データ分析 & 機械学習]
+        - jupyterlab                                                # ブラウザ上でコード実行やデータ可視化ができる対話型開発環境。
+        - jupyterlab-language-pack-ja-jp                            # JupyterLabのUIを日本語化するパック。
+        - numpy                                                     # 高速な数値計算や多次元配列を扱うための基本ライブラリ。
+        - pandas                                                    # 表形式のデータを効率的に操作・分析するためのライブラリ (DataFrame)。
+        - scikit-learn                                              # 分類、回帰、クラスタリングなど機械学習のアルゴリズムを提供する。
+        - matplotlib                                                # グラフ描画やデータ可視化を行うための定番ライブラリ。
+        - seaborn                                                   # Matplotlibをベースに、より美しく統計的なグラフを簡単に描画できる。
+        - openpyxl                                                  # PythonでExcelファイル (.xlsx) の読み書きを行うためのライブラリ。
+        # [開発ツール & コード品質]
+        - black                                                     # 「妥協しない」スタイルでPythonコードを自動整形するフォーマッター。
+        - ruff                                                      # Rust製。非常に高速なPythonリンター兼フォーマッター。
+        # [汎用ライブラリ]
+        - requests                                                  # 直感的に使える、人間向けのHTTP通信ライブラリ。
+        - python-dotenv                                             # .envファイルに記述した環境変数をスクリプトに読み込ませる。
+        - lxml                                                      # 高速で多機能なXML/HTMLパーサー。Webスクレイピングなどで使用。
 
     # --- cargo (Rust) の設定例 ---
-    # 注: cargoの確認コマンドはパイプライン(|)を含むため、このスクリプトでは直接サポートしていません。
-    # checkCommandを修正するか、インストール済でも再実行を許容する運用を検討してください。
+    # 注: このセクションはRust言語のツールをインストールする設定例です。
+    # cargoのインストール確認コマンドは複雑なため、現状ではコメントアウトされています。
+    # Rustをインストールし、利用する場合はこのコメントアウトを解除してください。
     # - managerName: 'cargo'                                         # 管理者の表示名 (ログ用)
-    #   checkCommand: 'cargo install --list | findstr {package}'     # インストール済みか確認するコマンド。{package}は置換される。
-    #   installCommand: 'cargo install {package}'                    # インストールを実行するコマンド。{package}は置換しなければならない。
+    #   checkCommand: 'cargo install --list | findstr {package}'     # インストール済みか確認するコマンド。
+    #   installCommand: 'cargo install {package}'                    # インストールを実行するコマンド。
     #   packages:                                                    # このマネージャーでインストールするパッケージのリスト
     #     - ripgrep                                                  # 高速なgrep代替ツール
     #     - bat                                                      # シンタックスハイライト付きcat
