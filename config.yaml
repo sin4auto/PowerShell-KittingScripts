@@ -11,39 +11,28 @@ phase1:
   # --- Windowsのシステム設定変更 ---
   windowsTweaks:
     - description: 隠しファイルとフォルダを表示する
-      type: Set-RegistryValue # レジストリの値を設定
-      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
-      name: Hidden
-      value: 1
-      valueType: DWord
+      command: 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+
     - description: ファイルの拡張子を常に表示する
-      type: Set-RegistryValue
-      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
-      name: HideFileExt
-      value: 0
-      valueType: DWord
+      command: 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+
     - description: エクスプローラーのアドレスバーに完全なパスを表示する
-      type: Set-RegistryValue
-      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState
-      name: FullPathAddress
-      value: 1
-      valueType: DWord
+      command: 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+
     - description: エクスプローラーの起動時に「PC」を表示する
-      type: Set-RegistryValue
-      path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
-      name: LaunchTo
-      value: 1
-      valueType: DWord
-    - description: 高速スタートアップを無効化する
-      type: Set-RegistryValue
-      path: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power
-      name: HiberbootEnabled
-      value: 0
-      valueType: DWord
+      command: 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+
+    - description: 高速スタートアップを無効化する (powercfgコマンド)
+      command: "powercfg.exe /h off"
+
+    - description: 電源接続時のスリープを無効にする
+      command: "powercfg /change standby-timeout-ac 0"
+
+    - description: バッテリー駆動時のスリープを無効にする
+      command: "powercfg /change standby-timeout-dc 0"
+
     - description: 右クリックメニューを従来のスタイルに戻す (Win11)
-      type: Create-RegistryKeyWithDefault # キーを作成し、その既定値を設定
-      path: HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32
-      value: "" # 空の既定値を設定
+      command: 'reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
 
   # --- Wingetによるアプリケーションのインストール ---
   wingetInstall:
@@ -81,14 +70,12 @@ phase2:
   # =================================================================
   # ■ パッケージマネージャーとインストールするパッケージの定義
   # =================================================================
-  # ここでは、コマンドと引数をリスト形式で定義し、安全な実行を可能にします。
   packageManagers:
     # --- npm (Node.js) の設定 ---
     - managerName: 'npm'                                            # 管理者の表示名 (ログ用)
-      commandName: 'npm'                                            # 実行するコマンド名
-      checkArgs: ['list', '-g', '{package}', '--depth=0']           # インストール済みか確認するための引数
-      installArgs: ['install', '-g', '{package}']                   # インストールを実行するための引数
-      packages:                                                     # インストールするパッケージのリスト
+      checkCommand: 'npm list -g {package} --depth=0'               # インストール済みか確認するコマンド。{package}は置換される。成功(インストール済)の場合、終了コード0を返すこと。
+      installCommand: 'npm install -g {package}'                    # インストールを実行するコマンド。{package}は置換される。
+      packages:                                                     # このマネージャーでインストールするパッケージのリスト
         - typescript                                                # 静的型付けJavaScript
         - ts-node                                                   # TypeScriptを直接実行
         - nodemon                                                   # ファイル変更時に自動でサーバーを再起動
@@ -98,10 +85,9 @@ phase2:
 
     # --- pip (Python) の設定 (uvを使用) ---
     - managerName: 'pip'                                            # 管理者の表示名 (ログ用)
-      commandName: 'uv'                                             # 実行するコマンド名
-      checkArgs: ['pip', 'show', '{package}']                       # インストール済みか確認するための引数
-      installArgs: ['pip', 'install', '{package}', '--system']      # インストールを実行するための引数
-      packages:                                                     # インストールするパッケージのリスト
+      checkCommand: 'uv pip show {package}'                         # インストール済みか確認するコマンド。{package}は置換される。
+      installCommand: 'uv pip install {package} --system'           # インストールを実行するコマンド。{package}は置換される。
+      packages:                                                     # このマネージャーでインストールするパッケージのリスト
         - jupyterlab                                                # 対話的なデータ分析・開発環境
         - jupyterlab-language-pack-ja-jp                            # JupyterLabの日本語化パック
         - requests                                                  # HTTP通信ライブラリ
@@ -119,12 +105,11 @@ phase2:
 
     # --- cargo (Rust) の設定例 ---
     # 注: cargoの確認コマンドはパイプライン(|)を含むため、このスクリプトでは直接サポートしていません。
-    # checkArgsを修正するか、インストール済でも再実行を許容する運用を検討してください。
+    # checkCommandを修正するか、インストール済でも再実行を許容する運用を検討してください。
     # - managerName: 'cargo'                                         # 管理者の表示名 (ログ用)
-    #   commandName: 'cargo'                                         # 実行するコマンド名
-    #   checkArgs: ['install', '--list']                             # インストール済みか確認するための引数 (※要修正)
-    #   installArgs: ['install', '{package}']                        # インストールを実行するための引数
-    #   packages:                                                    # インストールするパッケージのリスト
+    #   checkCommand: 'cargo install --list | findstr {package}'     # インストール済みか確認するコマンド。{package}は置換される。
+    #   installCommand: 'cargo install {package}'                    # インストールを実行するコマンド。{package}は置かなければならない。
+    #   packages:                                                    # このマネージャーでインストールするパッケージのリスト
     #     - ripgrep                                                  # 高速なgrep代替ツール
     #     - bat                                                      # シンタックスハイライト付きcat
     #     - fd-find                                                  # 高速なfind代替ツール
