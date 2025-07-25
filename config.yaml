@@ -93,6 +93,37 @@ phase2:
   # ■ パッケージマネージャーとインストールするパッケージの定義
   # =================================================================
   packageManagers:
+    # --- Visual Studio Code Extensions の設定 ---
+    - managerName: 'vscode'                                                 # 管理者の表示名 (ログ用)
+      checkCommand: 'code --list-extensions | findstr /i /l /c:"{package}"' # インストール済みか確認するコマンド。{package}は置換される。
+      installCommand: 'code --install-extension {package}'                  # インストールを実行するコマンド。{package}は置換される。
+      packages:                                                             # このマネージャーでインストールするパッケージのリスト
+        # --- 基本 & AI支援 ---
+        - ms-ceintl.vscode-language-pack-ja                                 # Japanese Language Pack: VSCodeを日本語化
+        - VisualStudioExptTeam.vscodeintellicode                            # IntelliCode: AIを使用したコード補完
+        - GitHub.copilot                                                    # GitHub Copilot: AIコード補完ツール
+        # --- コード整形・静的解析 ---
+        - esbenp.prettier-vscode                                            # Prettier – Code formatter: コードを整形
+        - dbaeumer.vscode-eslint                                            # ESLint: JavaScript/TypeScriptの静的解析
+        - streetsidesoftware.code-spell-checker                             # Code Spell Checker: コードのスペルミスを指摘
+        # --- コーディング補助 ---
+        - formulahendry.auto-rename-tag                                     # Auto Rename Tag: 開始/終了タグを自動で変更
+        - formulahendry.auto-close-tag                                      # Auto Close Tag: 自動的に閉じタグを挿入
+        - christian-kohler.path-intellisense                                # Path Intellisense: パス入力を補完
+        # --- 表示・UI改善 ---
+        - oderwat.indent-rainbow                                            # indent-rainbow: インデントを色分け
+        - mosapride.zenkaku                                                 # Zenkaku: 全角スペースをハイライト
+        - shardulm94.trailing-spaces                                        # Trailing Spaces: 行末の余分なスペースをハイライト
+        - aaron-bond.better-comments                                        # Better Comments: コメントを分かりやすくハイライト
+        - gruntfuggly.todo-tree                                             # Todo Tree: TODOコメントをツリー表示
+        - eamodio.gitlens                                                   # GitLens: Git連携を強化
+        - tonybaloney.vscode-pets                                           # vscode-pets: エディタ上にかわいいペットを表示
+        # --- 言語サポート & その他 ---
+        - ms-python.python                                                  # Python (Microsoft)
+        - ms-vscode.cpptools-extension-pack                                 # C/C++ (Microsoft Extension Pack)
+        - ms-vscode.powershell                                              # PowerShell (Microsoft)
+        - redhat.vscode-yaml                                                # YAML (Red Hat)
+
     # --- npm (Node.js) の設定 ---
     - managerName: 'npm'                                            # 管理者の表示名 (ログ用)
       checkCommand: 'npm list -g {package} --depth=0'               # インストール済みか確認するコマンド。{package}は置換される。成功(インストール済)の場合、終了コード0を返すこと。
@@ -130,7 +161,7 @@ phase2:
     # checkCommandを修正するか、インストール済でも再実行を許容する運用を検討してください。
     # - managerName: 'cargo'                                         # 管理者の表示名 (ログ用)
     #   checkCommand: 'cargo install --list | findstr {package}'     # インストール済みか確認するコマンド。{package}は置換される。
-    #   installCommand: 'cargo install {package}'                    # インストールを実行するコマンド。{package}は置かなければならない。
+    #   installCommand: 'cargo install {package}'                    # インストールを実行するコマンド。{package}は置換しなければならない。
     #   packages:                                                    # このマネージャーでインストールするパッケージのリスト
     #     - ripgrep                                                  # 高速なgrep代替ツール
     #     - bat                                                      # シンタックスハイライト付きcat
