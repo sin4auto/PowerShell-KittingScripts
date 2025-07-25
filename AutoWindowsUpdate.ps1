@@ -21,8 +21,8 @@
 # =================================================================
 # 定数定義
 # =================================================================
-# 再起動後の自動実行用タスク名
-$TaskName = "Ultimate-AutoUpdateAfterReboot"
+# RunOnceレジストリキーに登録する名前
+$RunOnceKeyName = "AutoWindowsUpdate"
 
 # =================================================================
 # メイン処理ブロック
@@ -82,7 +82,7 @@ try {
         # --- 更新が存在しない場合の処理 ---
         if (-not $updates) {
             Write-Host "`n>> 更新プログラムは検出されませんでした。システムは最新です。" -ForegroundColor Green
-            Write-Host ">> 全プロセス正常完了。クリーンアップを実行します..."
+            Write-Host ">> 全プロセス正常完了。処理を終了します..."
             break # ループを終了
         }
 
@@ -90,21 +90,13 @@ try {
         Write-Host ("`n[2/5] {0}個の更新を検出。" -f $updates.Count) -ForegroundColor Yellow
         $updates | Select-Object Title, KB, Size | Format-Table
 
-        # --- [3/5] 再起動後の自動実行タスク登録 ---
-        Write-Host "`n[3/5] 再起動後の継続実行タスクを登録..." -ForegroundColor Cyan
-        # タスクのアクションではスクリプトのフルパス($PSCommandPath)を直接使用
-        $taskAction    = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-        $taskTrigger   = New-ScheduledTaskTrigger -AtStartup
-        $taskPrincipal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -RunLevel Highest
-        $taskSettings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-        
-        $registerTaskParams = @{
-            TaskName  = $TaskName; Action = $taskAction; Trigger = $taskTrigger
-            Principal = $taskPrincipal; Settings = $taskSettings; Force = $true
-            ErrorAction = 'Stop'
-        }
-        Register-ScheduledTask @registerTaskParams
-        Write-Host "-> タスク '$TaskName' を登録しました。" -ForegroundColor Green
+        # --- [3/5] 再起動後にスクリプトを自動実行するよう設定 ---
+        Write-Host "`n[3/5] 再起動後にスクリプトを自動実行するよう設定..." -ForegroundColor Cyan
+        $runOnceRegistryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
+        # $PSCommandPath変数でスクリプトのフルパスを直接取得する
+        $runOnceCommand = "powershell.exe -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+        Set-ItemProperty -Path $runOnceRegistryKeyPath -Name $RunOnceKeyName -Value $runOnceCommand -Force
+        Write-Host "-> レジストリに '$RunOnceKeyName' を登録しました。" -ForegroundColor Green
 
         # --- [4/5] 更新のインストールと条件付き再起動 ---
         Write-Host "`n[4/5] 更新のダウンロードとインストールを開始..." -ForegroundColor Cyan
@@ -119,8 +111,8 @@ try {
         # このステップに到達した場合、AutoRebootはトリガーされなかったことを意味する
         Write-Host "`n[5/5] 再起動は要求されませんでした。連続して更新チェックを続行します。" -ForegroundColor Yellow
         
-        # 次のサイクルに備えたタスクは不要なため削除
-        Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
+        # 次のサイクルに備えたRunOnceキーは不要なため削除
+        Remove-ItemProperty -Path $runOnceRegistryKeyPath -Name $RunOnceKeyName -ErrorAction SilentlyContinue
         
         Write-Host "-> 5秒後に次のスキャンを開始します..."
         Start-Sleep -Seconds 5
@@ -128,10 +120,8 @@ try {
     }
 
     # --- 3. 正常終了時のクリーンアップ ---
-    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
-    Write-Host "-> 自動実行タスクをクリーンアップしました。"
-    Write-Host "`n全ての処理が完了しました。10秒後にウィンドウを閉じます。"
-    Start-Sleep -Seconds 10
+    # RunOnceキーは自動で消えるため、ここではクリーンアップ不要
+    Write-Host "`n全ての処理が完了しました。"
 
 } catch {
     # --- 4. 例外処理 ---
@@ -139,9 +129,10 @@ try {
     Write-Host "`nFATAL: エラーが発生しました。 $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "処理を中断します。詳細はログファイルを参照してください: $LogFile" -ForegroundColor Red
     
-    # フェイルセーフとしてタスクを削除
-    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
-    Write-Host "-> 自動実行タスクをクリーンアップしました。"
+    # フェイルセーフとしてRunOnceキーを削除
+    $runOnceRegistryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
+    Remove-ItemProperty -Path $runOnceRegistryKeyPath -Name $RunOnceKeyName -ErrorAction SilentlyContinue
+    Write-Host "-> 自動実行レジストリキーをクリーンアップしました。"
     Start-Sleep -Seconds 20
 
 } finally {
