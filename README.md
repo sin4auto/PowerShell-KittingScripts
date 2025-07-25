@@ -115,7 +115,7 @@ Copyright (c) 2025 sin4auto
 
 This is a collection of PowerShell scripts for automating the kitting (initial setup) and development environment configuration of a Windows PC.
 
-By defining settings in a human-readable **`config.yaml`** file with clear comments, you can significantly reduce time-consuming manual setup tasks and enable anyone to quickly build a consistent environment.
+By simply defining settings in **`config.yaml`**, you can significantly reduce time-consuming manual setup tasks and enable anyone to quickly build a consistent environment.
 
 ## Key Features
 
@@ -131,13 +131,13 @@ By defining settings in a human-readable **`config.yaml`** file with clear comme
 While Microsoft's `winget configuration` is a powerful standard for declarative setup, this project offers several unique features to more deeply automate specific workflows.
 
 1.  **Autonomous Windows Update Loop**
-    `winget configuration` is typically a one-shot execution. In contrast, this project's `Update-Windows.ps1` **autonomously repeats the "check -> install -> reboot" cycle until no more updates are found.** This is achieved using the Task Scheduler, providing a powerful "fire and forget" capability that continues unattended until the system is fully patched.
+    `winget configuration` is typically a one-shot execution. In contrast, this project's `Update-Windows.ps1` **autonomously repeats the "check -> install -> reboot" cycle until no more updates are found.** This is achieved using the Task Scheduler, providing a powerful feature that **allows the process to run unattended until completion** once initiated.
 
 2.  **Strict Two-Phase Execution for Stability**
     While `winget configuration` can handle reboots, this script employs a **strict two-phase architecture that enforces a reboot between system changes and development tool installations to reliably avoid PATH environment variable issues.** This fundamentally prevents problems where commands like `npm` or `uv` are "not found" in Phase 2.
 
 3.  **User-Friendly Interactive Menu**
-    `winget configuration` is a command-line tool. This project provides a simple menu launched from `Start-Admin.bat`, allowing even users unfamiliar with PowerShell to **intuitively proceed with the steps**, such as "1. Update first," then "2. Setup next."
+    `winget configuration` is a command-line tool. This project provides a simple menu launched from `Start-Admin.bat`, allowing even users unfamiliar with PowerShell to **intuitively proceed with the steps without hesitation**, such as "1. Update first," then "2. Setup next."
 
 4.  **Easily Extensible Package Manager Definitions**
     The installation logic for package managers like `npm` and `pip` can be defined directly in `config.yaml`. Users can **add new package managers like `cargo` (Rust) or `gem` (Ruby) without editing the script, simply by writing the `checkCommand` and `installCommand` in the configuration file.** This provides high maintainability, allowing the toolchain to be flexibly extended to meet project requirements.
@@ -165,7 +165,7 @@ While Microsoft's `winget configuration` is a powerful standard for declarative 
 | `AutoSetup.ps1`             | Executes a two-phase setup (with a reboot in between) for apps, system settings, and dev environments based on `config.yaml`.      |
 | `config.yaml`               | **The heart of customization.** Defines apps to install, system settings, and development packages in a clear, commented format.    |
 | `.gitignore`                | Specifies files to be ignored by Git, such as log files.                                                                          |
-| `キッティング手順.txt`      | A Japanese memo outlining the overall workflow, including manual steps, when using these automation scripts.                      |
+| `キッティング手順.txt`      | A memo outlining the overall workflow, including manual steps, when using these automation scripts.                      |
 
 ## Customization
 
