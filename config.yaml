@@ -9,30 +9,52 @@
 # ----------------------------------------------------------------
 phase1:
   # --- Windowsのシステム設定変更 ---
-  windowsTweaks:
+  windowsSettings:
+    # --- エクスプローラー関連設定 ---
     - description: 隠しファイルとフォルダを表示する
-      command: 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
-
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
     - description: ファイルの拡張子を常に表示する
-      command: 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
-
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
     - description: エクスプローラーのアドレスバーに完全なパスを表示する
-      command: 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
-
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: エクスプローラーの起動時に「PC」を表示する
-      command: 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 右クリックメニューを従来のスタイルに戻す (Win11)
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
 
+    # --- 自動再生の設定 ---
+    - description: 'すべてのメディアとデバイスで自動再生を有効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: '自動再生の既定: リムーバブル ドライブはフォルダーを開く'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+
+    # --- 通知とプライバシー設定 ---
+    - description: '通知: 更新後とサインイン時のウェルカム体験をオフ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: '通知: デバイス設定を完了する方法の提案をオフ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: '通知: Windows使用時のヒントや提案をオフ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'プライバシー: オプションの診断データをオフにする'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: 'プライバシー: 手書き入力と入力の改善をオフにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'プライバシー: カスタマイズされたエクスペリエンスをオフにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+
+    # --- セキュリティと電源設定 ---
+    - description: 'コア分離: メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離: カーネル モード ハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離: ローカル セキュリティ機関の保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 高速スタートアップを無効化する (powercfgコマンド)
       command: "powercfg.exe /h off"
-
     - description: 電源接続時のスリープを無効にする
-      command: "powercfg /change standby-timeout-ac 0"
-
+      command: "powercfg.exe /change standby-timeout-ac 0"
     - description: バッテリー駆動時のスリープを無効にする
-      command: "powercfg /change standby-timeout-dc 0"
-
-    - description: 右クリックメニューを従来のスタイルに戻す (Win11)
-      command: 'reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+      command: "powercfg.exe /change standby-timeout-dc 0"
 
   # --- Wingetによるアプリケーションのインストール ---
   wingetInstall:
