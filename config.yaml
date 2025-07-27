@@ -142,10 +142,19 @@ phase2:
         - jupyterlab-language-pack-ja-jp            # JupyterLabの日本語化
         - numpy                                     # 数値計算ライブラリ
         - pandas                                    # データ分析ライブラリ
-        - scikit-learn                              # 機械学習ライブラリ
         - matplotlib                                # グラフ描画ライブラリ
         - seaborn                                   # 統計グラフの可視化ライブラリ
         - openpyxl                                  # Excelファイルの読み書き
+        - scikit-learn                              # 機械学習ライブラリ
+        - tensorflow                                # ディープラーニングフレームワーク (Google)
+        - torch                                     # ディープラーニングフレームワーク (Meta)
+        # [自然言語処理]
+        - nltk                                      # 自然言語処理ツールキット
+        - spacy                                     # 高速な自然言語処理ライブラリ
+        # [ウェブスクレイピング]
+        - beautifulsoup4                            # HTML/XMLからデータを抽出するライブラリ
+        - scrapy                                    # ウェブスクレイピングフレームワーク
+        - selenium                                  # Webブラウザ自動化ツール
         # [開発ツール & コード品質]
         - black                                     # Pythonコードフォーマッター (整形)
         - ruff                                      # 高速なPythonリンター (問題点検知)
@@ -153,6 +162,7 @@ phase2:
         - requests                                  # HTTP通信ライブラリ
         - python-dotenv                             # .envファイル読み込み
         - lxml                                      # XML/HTMLパーサー
+        - sqlalchemy                                # SQLツールキット & ORM
 
     # --- cargo (Rustパッケージ設定例) ---
     # - managerName: 'cargo'
