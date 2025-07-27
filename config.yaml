@@ -95,37 +95,50 @@ phase2:
       checkCommand: 'code --list-extensions | findstr /i /l /c:"{package}"'
       installCommand: 'code --install-extension {package}'
       packages:
+        # [基本 & UI]
         - ms-ceintl.vscode-language-pack-ja         # UIの日本語化
         - oderwat.indent-rainbow                    # インデントを色付けして見やすくする
         - mosapride.zenkaku                         # 全角スペースをハイライト表示
         - shardulm94.trailing-spaces                # 行末の不要な空白をハイライト表示
+        - aaron-bond.better-comments                # コメントを種類別に色分け
         - tonybaloney.vscode-pets                   # エディタにペットを表示する癒やし機能
+        # [コーディング支援]
         - VisualStudioExptTeam.vscodeintellicode    # AIによる賢いコード補完
         - GitHub.copilot                            # AIによるコード自動生成
         - formulahendry.auto-rename-tag             # HTMLタグのペアを同時に変更
         - formulahendry.auto-close-tag              # HTMLタグを自動で閉じる
         - christian-kohler.path-intellisense        # ファイルパスの入力を補完
+        # [コード品質 & フォーマット]
         - esbenp.prettier-vscode                    # 保存時にコードを自動整形 (Prettier)
         - dbaeumer.vscode-eslint                    # コードの問題点を指摘 (ESLint)
         - streetsidesoftware.code-spell-checker     # スペルミスをチェック
+        # [バージョン管理 & チーム開発]
         - eamodio.gitlens                           # Gitの機能を強化
+        - mhutchie.git-graph                        # Gitのブランチツリーを視覚的に表示
         - gruntfuggly.todo-tree                     # TODOコメントなどを一覧表示
-        - aaron-bond.better-comments                # コメントを種類別に色分け
+        # [言語サポート]
         - ms-python.python                          # Python言語サポート
         - ms-vscode.cpptools-extension-pack         # C/C++言語サポート
         - ms-vscode.powershell                      # PowerShell言語サポート
         - redhat.vscode-yaml                        # YAML言語サポート
+        # [その他ユーティリティ]
+        - yzhang.markdown-all-in-one                # Markdown編集を強力にサポート
+        - ms-vscode-remote.remote-wsl               # WSL内のプロジェクトを直接編集
 
     # --- npm (グローバルNode.jsパッケージ) ---
     - managerName: 'npm'
       checkCommand: 'npm list -g {package} --depth=0'
       installCommand: 'npm install -g {package}'
       packages:
+        # [言語 & 実行環境]
         - typescript                                # JavaScriptに型を追加
         - ts-node                                   # TypeScriptを直接実行
-        - nodemon                                   # ファイル変更時に自動で再起動
-        - eslint                                    # JavaScriptのリンター (問題点検知)
         - prettier                                  # コードフォーマッター (整形)
+        - eslint                                    # JavaScriptのリンター (問題点検知)
+        - nodemon                                   # ファイル変更時に自動で再起動
+        - http-server                               # 簡単な静的HTTPサーバー
+        - rimraf                                    # OSを問わず使えるrm -rfコマンド
+        - nx                                        # 高速なビルドツール & Monorepo管理
         - pnpm                                      # 高速なパッケージマネージャー
 
     # --- pip (Pythonパッケージ by uv) ---
@@ -133,36 +146,40 @@ phase2:
       checkCommand: 'uv pip show {package}'
       installCommand: 'uv pip install {package} --system'
       packages:
-        # [Webフレームワーク]
+        # [Web開発 & 通信]
         - fastapi                                   # 高速なWeb API構築フレームワーク
         - flask                                     # 軽量なマイクロWebフレームワーク
         - django                                    # 多機能なフルスタックWebフレームワーク
-        # [データ分析 & 機械学習]
-        - jupyterlab                                # 対話的なデータ分析・開発環境
-        - jupyterlab-language-pack-ja-jp            # JupyterLabの日本語化
+        - requests                                  # HTTP通信ライブラリ
+        - httpx                                     # requests互換の非同期HTTPクライアント
+        - beautifulsoup4                            # HTML/XMLからデータを抽出するライブラリ
+        - lxml                                      # 高速なXML/HTMLパーサー
+        - scrapy                                    # ウェブスクレイピングフレームワーク
+        - selenium                                  # Webブラウザ自動化ツール
+        # [データ分析 & 可視化]
         - numpy                                     # 数値計算ライブラリ
         - pandas                                    # データ分析ライブラリ
         - matplotlib                                # グラフ描画ライブラリ
         - seaborn                                   # 統計グラフの可視化ライブラリ
-        - openpyxl                                  # Excelファイルの読み書き
+        - plotly                                    # インタラクティブなグラフ描画ライブラリ
+        - pillow                                    # 基本的な画像処理ライブラリ (PIL)
+        # [機械学習 & 自然言語処理]
         - scikit-learn                              # 機械学習ライブラリ
-        - tensorflow                                # ディープラーニングフレームワーク (Google)
-        - torch                                     # ディープラーニングフレームワーク (Meta)
-        # [自然言語処理]
+        - xgboost                                   # 高性能な勾配ブースティングライブラリ
+        - lightgbm                                  # 高速・軽量な勾配ブースティングライブラリ
         - nltk                                      # 自然言語処理ツールキット
         - spacy                                     # 高速な自然言語処理ライブラリ
-        # [ウェブスクレイピング]
-        - beautifulsoup4                            # HTML/XMLからデータを抽出するライブラリ
-        - scrapy                                    # ウェブスクレイピングフレームワーク
-        - selenium                                  # Webブラウザ自動化ツール
         # [開発ツール & コード品質]
+        - jupyterlab                                # 対話的なデータ分析・開発環境
+        - jupyterlab-language-pack-ja-jp            # JupyterLabの日本語化
         - black                                     # Pythonコードフォーマッター (整形)
         - ruff                                      # 高速なPythonリンター (問題点検知)
-        # [汎用ライブラリ]
-        - requests                                  # HTTP通信ライブラリ
-        - python-dotenv                             # .envファイル読み込み
-        - lxml                                      # XML/HTMLパーサー
+        - pytest                                    # デファクトスタンダードのテストフレームワーク
+        - rich                                      # ターミナル出力を見やすくリッチにする
+        # [データベース & ファイル操作]
         - sqlalchemy                                # SQLツールキット & ORM
+        - openpyxl                                  # Excelファイルの読み書き
+        - python-dotenv                             # .envファイル読み込み
 
     # --- cargo (Rustパッケージ設定例) ---
     # - managerName: 'cargo'
