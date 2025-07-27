@@ -101,7 +101,6 @@ phase2:
         - mosapride.zenkaku                         # 全角スペースをハイライト表示
         - shardulm94.trailing-spaces                # 行末の不要な空白をハイライト表示
         - aaron-bond.better-comments                # コメントを種類別に色分け
-        - tonybaloney.vscode-pets                   # エディタにペットを表示する癒やし機能
         # [コーディング支援]
         - VisualStudioExptTeam.vscodeintellicode    # AIによる賢いコード補完
         - GitHub.copilot                            # AIによるコード自動生成
@@ -150,7 +149,6 @@ phase2:
         - fastapi                                   # 高速なWeb API構築フレームワーク
         - flask                                     # 軽量なマイクロWebフレームワーク
         - django                                    # 多機能なフルスタックWebフレームワーク
-        - requests                                  # HTTP通信ライブラリ
         - httpx                                     # requests互換の非同期HTTPクライアント
         - beautifulsoup4                            # HTML/XMLからデータを抽出するライブラリ
         - lxml                                      # 高速なXML/HTMLパーサー
@@ -172,8 +170,8 @@ phase2:
         # [開発ツール & コード品質]
         - jupyterlab                                # 対話的なデータ分析・開発環境
         - jupyterlab-language-pack-ja-jp            # JupyterLabの日本語化
-        - black                                     # Pythonコードフォーマッター (整形)
-        - ruff                                      # 高速なPythonリンター (問題点検知)
+        - mypy                                      # Pythonの型チェックツール
+        - ruff                                      # 高速なPythonのリンターとフォーマッター
         - pytest                                    # デファクトスタンダードのテストフレームワーク
         - rich                                      # ターミナル出力を見やすくリッチにする
         # [データベース & ファイル操作]
