@@ -39,6 +39,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
