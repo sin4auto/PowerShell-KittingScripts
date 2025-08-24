@@ -1,0 +1,358 @@
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+      onOff: true
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+      onOff: true
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+      onOff: true
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+      onOff: true
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+      onOff: true
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+      onOff: true
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+      onOff: true
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+      onOff: true
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+      onOff: true
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+      onOff: true
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+      onOff: true
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+      onOff: true
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+      onOff: true
+
+  # --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    - description: '最新版のPowerShell'
+      id: Microsoft.PowerShell
+      onOff: true
+    - description: '定番のWebブラウザ'
+      id: Google.Chrome
+      onOff: true
+    - description: '高機能なファイル圧縮解凍ソフト'
+      id: 7zip.7zip
+      onOff: true
+    - description: 'Windowsを便利にする公式ツール群'
+      id: Microsoft.PowerToys
+      onOff: true
+    - description: 'オンライン会議ツール'
+      id: Zoom.Zoom
+      onOff: true
+    - description: 'バージョン管理システム'
+      id: Git.Git
+      onOff: true
+    - description: 'JavaScript実行環境 (長期安定版)'
+      id: OpenJS.NodeJS.LTS
+      onOff: true
+    - description: 'プログラミング言語 Python'
+      id: Python.Python.3.13
+      onOff: true
+    - description: '高速なPythonパッケージインストーラー'
+      id: astral-sh.uv
+      onOff: true
+    - description: '高機能コードエディタ'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+      onOff: true
+    - description: 'PDF閲覧ソフト'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+      onOff: true
+
+  # --- Appx (不要なプリインストールアプリの削除"onOff: true"） ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+      onOff: true
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+      onOff: true
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+      onOff: true
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+      onOff: true
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+      onOff: true
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+      onOff: true
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+      onOff: true
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+      onOff: true
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+      onOff: true
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+      onOff: true
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+      onOff: true
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+      onOff: true
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+      onOff: true
+    - description: 'フォト'
+      name: "*Microsoft.Windows.Photos*"
+      onOff: false
+    - description: 'ペイント 3D'
+      name: "*Microsoft.MSPaint*"
+      onOff: false
+    - description: 'ビデオエディター'
+      name: "*Clipchamp.Clipchamp*"
+      onOff: false
+    - description: '複合現実ポータル'
+      name: "*Microsoft.MixedReality.Portal*"
+      onOff: false
+    - description: 'ソリティア & カジュアルゲーム'
+      name: "*Microsoft.MicrosoftSolitaireCollection*"
+      onOff: false
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  # =================================================================
+  # ■ パッケージマネージャーごとの設定
+  # =================================================================
+  packageManagers:
+    # --- VSCode (拡張機能) ---
+    - managerName: 'vscode'
+      checkCommand: 'code --list-extensions | findstr /i /l /c:"{package}"'
+      installCommand: 'code --install-extension {package}'
+      packages:
+        # [基本 & UI]
+        - description: 'UIの日本語化'
+          name: ms-ceintl.vscode-language-pack-ja
+        - description: 'インデントを色付けして見やすくする'
+          name: oderwat.indent-rainbow
+        - description: '全角スペースをハイライト表示'
+          name: mosapride.zenkaku
+        - description: '行末の不要な空白をハイライト表示'
+          name: shardulm94.trailing-spaces
+        - description: 'コメントを種類別に色分け'
+          name: aaron-bond.better-comments
+        # [コーディング支援]
+        - description: 'AIによる賢いコード補完'
+          name: VisualStudioExptTeam.vscodeintellicode
+        - description: 'AIによるコード自動生成'
+          name: GitHub.copilot
+        - description: 'HTMLタグのペアを同時に変更'
+          name: formulahendry.auto-rename-tag
+        - description: 'HTMLタグを自動で閉じる'
+          name: formulahendry.auto-close-tag
+        - description: 'ファイルパスの入力を補完'
+          name: christian-kohler.path-intellisense
+        # [コード品質 & フォーマット]
+        - description: '保存時にコードを自動整形 (Prettier)'
+          name: esbenp.prettier-vscode
+        - description: 'コードの問題点を指摘 (ESLint)'
+          name: dbaeumer.vscode-eslint
+        - description: 'スペルミスをチェック'
+          name: streetsidesoftware.code-spell-checker
+        # [バージョン管理 & チーム開発]
+        - description: 'Gitの機能を強化'
+          name: eamodio.gitlens
+        - description: 'Gitのブランチツリーを視覚的に表示'
+          name: mhutchie.git-graph
+        - description: 'TODOコメントなどを一覧表示'
+          name: gruntfuggly.todo-tree
+        # [言語サポート]
+        - description: 'Python言語サポート'
+          name: ms-python.python
+        - description: 'C/C++言語サポート'
+          name: ms-vscode.cpptools-extension-pack
+        - description: 'C#言語サポート'
+          name: ms-dotnettools.csharp
+        - description: 'PowerShell言語サポート'
+          name: ms-vscode.powershell
+        - description: 'YAML言語サポート'
+          name: redhat.vscode-yaml
+        # [その他ユーティリティ]
+        - description: 'Markdown編集を強力にサポート'
+          name: yzhang.markdown-all-in-one
+        - description: 'MarkdownでのMermaid記法サポート'
+          name: bierner.markdown-mermaid
+        - description: 'WSL内のプロジェクトを直接編集'
+          name: ms-vscode-remote.remote-wsl
+
+    # --- npm (グローバルNode.jsパッケージ) ---
+    - managerName: 'npm'
+      checkCommand: 'npm list -g {package} --depth=0'
+      installCommand: 'npm install -g {package}'
+      packages:
+        # [言語 & 実行環境]
+        - description: 'JavaScriptに型を追加'
+          name: typescript
+        - description: 'TypeScriptを直接実行'
+          name: ts-node
+        - description: 'コードフォーマッター (整形)'
+          name: prettier
+        - description: 'JavaScriptのリンター (問題点検知)'
+          name: eslint
+        - description: 'ファイル変更時に自動で再起動'
+          name: nodemon
+        - description: '簡単な静的HTTPサーバー'
+          name: http-server
+        - description: 'OSを問わず使えるrm -rfコマンド'
+          name: rimraf
+        - description: '高速なビルドツール & Monorepo管理'
+          name: nx
+        - description: '高速なパッケージマネージャー'
+          name: pnpm
+
+    # --- pip (Pythonパッケージ by uv) ---
+    - managerName: 'pip'
+      checkCommand: 'uv pip show {package}'
+      installCommand: 'uv pip install {package} --system'
+      packages:
+        # [Web開発 & 通信]
+        - description: '高速なWeb API構築フレームワーク'
+          name: fastapi
+        - description: '軽量なマイクロWebフレームワーク'
+          name: flask
+        - description: '多機能なフルスタックWebフレームワーク'
+          name: django
+        - description: 'requests互換の非同期HTTPクライアント'
+          name: httpx
+        - description: 'HTML/XMLからデータを抽出するライブラリ'
+          name: beautifulsoup4
+        - description: '高速なXML/HTMLパーサー'
+          name: lxml
+        - description: 'ウェブスクレイピングフレームワーク'
+          name: scrapy
+        - description: 'Webブラウザ自動化ツール'
+          name: selenium
+        # [データ分析 & 可視化]
+        - description: '数値計算ライブラリ'
+          name: numpy
+        - description: 'データ分析ライブラリ'
+          name: pandas
+        - description: 'グラフ描画ライブラリ'
+          name: matplotlib
+        - description: '統計グラフの可視化ライブラリ'
+          name: seaborn
+        - description: 'インタラクティブなグラフ描画ライブラリ'
+          name: plotly
+        - description: '基本的な画像処理ライブラリ (PIL)'
+          name: pillow
+        # [機械学習 & 自然言語処理]
+        - description: '機械学習ライブラリ'
+          name: scikit-learn
+        - description: '高性能な勾配ブースティングライブラリ'
+          name: xgboost
+        - description: '高速・軽量な勾配ブースティングライブラリ'
+          name: lightgbm
+        - description: '自然言語処理ツールキット'
+          name: nltk
+        - description: '高速な自然言語処理ライブラリ'
+          name: spacy
+        # [開発ツール & コード品質]
+        - description: '対話的なデータ分析・開発環境'
+          name: jupyterlab
+        - description: 'JupyterLabの日本語化'
+          name: jupyterlab-language-pack-ja-jp
+        - description: 'Pythonの型チェックツール'
+          name: mypy
+        - description: '高速なPythonのリンターとフォーマッター'
+          name: ruff
+        - description: 'デファクトスタンダードのテストフレームワーク'
+          name: pytest
+        - description: 'ターミナル出力を見やすくリッチにする'
+          name: rich
+        # [データベース & ファイル操作]
+        - description: 'SQLツールキット & ORM'
+          name: sqlalchemy
+        - description: 'Excelファイルの読み書き'
+          name: openpyxl
+        - description: '.envファイル読み込み'
+          name: python-dotenv
+
+    # --- cargo (Rustパッケージ設定例) ---
+    # - managerName: 'cargo'
+    #   checkCommand: 'cargo install --list | findstr {package}'
+    #   installCommand: 'cargo install {package}'
+    #   packages:
+    #     - description: '高速なgrep代替ツール'
+    #       name: ripgrep
+    #     - description: 'シンタックスハイライト付きcat'
+    #       name: bat
+    #     - description: '高速なfind代替ツール'
+    #       name: fd-find

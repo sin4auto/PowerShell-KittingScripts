@@ -2,7 +2,7 @@
 .SYNOPSIS
     Windows PCの初期セットアップと開発環境構築を自動化します。
 .DESCRIPTION
-    このスクリプトは、「config.yaml」設定ファイルに基づき、PCのセットアップを自動実行します。
+    このスクリプトは、「recipe.yaml」設定ファイルに基づき、PCのセットアップを自動実行します。
     処理はシステムの再起動を挟む2つのフェーズで構成されます。
     フェーズ1では、システム設定の変更、Wingetによるアプリのインストール、不要なプリインストールアプリの削除、そして全アプリの更新を行います。
     フェーズ1完了後、再起動を経てフェーズ2が自動開始されるよう設定されます。
@@ -16,7 +16,7 @@
     # 3. 以下のコマンドを実行します。
     .\AutoSetup.ps1
 .NOTES
-    - スクリプトと同じフォルダに「config.yaml」を配置。
+    - スクリプトと同じフォルダに「recipe.yaml」を配置。
     - 要管理者権限。
     - 初回実行にはインターネット接続が必須。
     - PowerShell 5.1での動作を想定。
@@ -36,6 +36,8 @@ param(
 # スクリプト実行中に発生したエラーの情報を格納するためのリストを準備する。
 # 'script:'スコープを使い、スクリプト内のどこからでもアクセス可能にする。
 $script:failedItems = [System.Collections.Generic.List[string]]::new()
+# 再起動後の自動実行で利用するタスクスケジューラのタスク名を定義する。
+$TaskName = "AutoSetupPhase2Task"
 #=============================================================================
 # ■ 文字エンコーディングの設定
 #=============================================================================
@@ -80,15 +82,15 @@ catch {
 }
 # --- 設定ファイルの読み込み ---
 try {
-    # スクリプトと同じディレクトリに'config.yaml'が存在するか確認する。
-    $configFilePath = Join-Path $PSScriptRoot "config.yaml"
-    # 'config.yaml'が見つからない場合、代替として'config.yml'を探す。
+    # スクリプトと同じディレクトリに'recipe.yaml'が存在するか確認する。
+    $configFilePath = Join-Path $PSScriptRoot "recipe.yaml"
+    # 'recipe.yaml'が見つからない場合、代替として'recipe.yml'を探す。
     if (-not (Test-Path $configFilePath)) {
-        $configFilePath = Join-Path $PSScriptRoot "config.yml"
+        $configFilePath = Join-Path $PSScriptRoot "recipe.yml"
     }
     # どちらのファイルも見つからない場合は、エラーを発生させる。
     if (-not (Test-Path $configFilePath)) {
-        throw "設定ファイル 'config.yaml' または 'config.yml' が見つかりません。"
+        throw "設定ファイル 'recipe.yaml' または 'recipe.yml' が見つかりません。"
     }
     # 読み込むファイル名を取得して表示する。
     $configFileName = Split-Path -Leaf $configFilePath
@@ -130,39 +132,49 @@ if ($setupPhase -ne '2') {
     Write-Host "`n===============================================" -ForegroundColor Cyan
     Write-Host "  セットアップ フェーズ1 を開始します" -ForegroundColor Cyan
     Write-Host "===============================================`n" -ForegroundColor Cyan
+    # --- 既存タスクのクリーンアップ ---
+    # 過去の実行で残存している可能性のある自動実行タスクを、安全のために削除する。
+    Write-Host "-> 既存の自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
+    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     # --- Windowsのシステム設定変更 ---
-    # config.yamlに'phase1.windowsSettings'セクションが存在する場合にのみ実行する。
+    # recipe.yamlに'phase1.windowsSettings'セクションが存在する場合にのみ実行する。
     if ($config.phase1.windowsSettings) {
         Write-Host "--- 1. Windowsの各種設定を変更します ---`n" -ForegroundColor Green
         # 設定ファイルに記述された各設定項目を一つずつループ処理する。
         foreach ($setting in $config.phase1.windowsSettings) {
             Write-Host "-> $($setting.description)..."
-            # 実行すべきコマンドが定義されていることを確認する。
-            if (-not ([string]::IsNullOrEmpty($setting.command))) {
-                # 設定ファイルから読み取ったコマンド文字列を実行する。
-                Invoke-Expression -Command $setting.command
-                # 直前に実行した外部コマンドが正常に終了したかを確認する（終了コード0が成功）。
-                if ($LASTEXITCODE -ne 0) {
-                    # 失敗した場合、どの処理で失敗したかを示すエラーメッセージを作成する。
-                    $errorMessage = "設定変更失敗: $($setting.description)"
-                    Write-Warning "-> コマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
-                    # 失敗リストにエラーメッセージを追加する。
+            # onOffフラグが true の場合のみ設定を適用する。
+            if ($setting.onOff) {
+                # 実行すべきコマンドが定義されていることを確認する。
+                if (-not ([string]::IsNullOrEmpty($setting.command))) {
+                    # 設定ファイルから読み取ったコマンド文字列を実行する。
+                    Invoke-Expression -Command $setting.command
+                    # 直前に実行した外部コマンドが正常に終了したかを確認する（終了コード0が成功）。
+                    if ($LASTEXITCODE -ne 0) {
+                        # 失敗した場合、どの処理で失敗したかを示すエラーメッセージを作成する。
+                        $errorMessage = "設定変更失敗: $($setting.description)"
+                        Write-Warning "-> コマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
+                        # 失敗リストにエラーメッセージを追加する。
+                        $script:failedItems.Add($errorMessage)
+                    }
+                }
+                else {
+                    # 実行コマンドが定義されていなかった場合もエラーとして扱う。
+                    $errorMessage = "設定変更失敗: $($setting.description) - commandプロパティが定義されていません。"
+                    Write-Warning "-> commandプロパティが定義されていません。"
                     $script:failedItems.Add($errorMessage)
                 }
             }
             else {
-                # 実行コマンドが定義されていなかった場合もエラーとして扱う。
-                $errorMessage = "設定変更失敗: $($setting.description) - commandプロパティが定義されていません。"
-                Write-Warning "-> commandプロパティが定義されていません。"
-                $script:failedItems.Add($errorMessage)
+                Write-Host "-> onOffフラグがfalseのためスキップします。" -ForegroundColor Yellow
             }
         }
         Write-Host "`n--- Windowsの各種設定変更が完了しました ---`n" -ForegroundColor Green
     }
     # --- アプリケーションのインストール (winget) ---
-    # config.yamlに'phase1.wingetInstall'セクションが存在する場合にのみ実行する。
+    # recipe.yamlに'phase1.wingetInstall'セクションが存在する場合にのみ実行する。
     if ($config.phase1.wingetInstall) {
-        Write-Host "--- 2. アプリケーションのインストールを開始します ---`n" -ForegroundColor Green
+        Write-Host "--- 2. アプリケーションのインストール/アンインストールを開始します ---`n" -ForegroundColor Green
         # wingetのソースリポジトリをリセットし、潜在的な問題を解消する。
         winget source reset --force
         # 設定ファイルに記述された各アプリケーションを一つずつループ処理する。
@@ -170,53 +182,71 @@ if ($setupPhase -ne '2') {
             Write-Host "アプリ [$($wingetApp.id)] の状態を確認しています..."
             # 'winget list'を使い、対象のアプリが既にインストール済みかを確認する。
             winget list --id $wingetApp.id -e --accept-source-agreements --disable-interactivity
-            # 'winget list'の終了コードが0の場合、アプリはインストール済みと判断する。
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "-> [$($wingetApp.id)] はインストール済みです。`n" -ForegroundColor Cyan
-            }
-            else {
-                Write-Host "-> [$($wingetApp.id)] をインストールします..."
-                # 'winget install'コマンドの基本引数を配列として定義する。
-                $wingetArgs = @(
-                    'install',
-                    '--id', $wingetApp.id,
-                    '-e',
-                    '--accept-package-agreements',
-                    '--accept-source-agreements',
-                    '--disable-interactivity'
-                )
-                # もし設定ファイルに個別のインストールオプションが指定されていれば、引数配列に追加する。
-                if (-not ([string]::IsNullOrEmpty($wingetApp.options))) {
-                    $wingetArgs += $wingetApp.options.Split(' ')
-                    Write-Host "-> 個別オプション ($($wingetApp.options)) を適用します。" -ForegroundColor Yellow
-                }
-                # 配列に格納した引数をSplatting（@）で安全にコマンドに渡し、インストールを実行する。
-                winget @wingetArgs
-                # インストールが成功したか（終了コード0）を確認する。
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "-> [$($wingetApp.id)] のインストールに成功しました。`n" -ForegroundColor Green
+            $isInstalled = ($LASTEXITCODE -eq 0)
+            # onOffフラグが true の場合はインストールを試みる
+            if ($wingetApp.onOff) {
+                if ($isInstalled) {
+                    Write-Host "-> [$($wingetApp.id)] はインストール済みです。`n" -ForegroundColor Cyan
                 }
                 else {
-                    # インストールに失敗した場合、警告を表示し、失敗リストに追加する。
-                    Write-Warning "-> [$($wingetApp.id)] のインストール中にエラーが発生しました。終了コード: $LASTEXITCODE`n"
-                    $script:failedItems.Add("Winget Install: $($wingetApp.id)")
+                    Write-Host "-> [$($wingetApp.id)] をインストールします..."
+                    $wingetArgs = @(
+                        'install', '--id', $wingetApp.id, '-e',
+                        '--accept-package-agreements', '--accept-source-agreements', '--disable-interactivity'
+                    )
+                    if (-not ([string]::IsNullOrEmpty($wingetApp.options))) {
+                        $wingetArgs += $wingetApp.options.Split(' ')
+                        Write-Host "-> 個別オプション ($($wingetApp.options)) を適用します。" -ForegroundColor Yellow
+                    }
+                    winget @wingetArgs
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host "-> [$($wingetApp.id)] のインストールに成功しました。`n" -ForegroundColor Green
+                    }
+                    else {
+                        Write-Warning "-> [$($wingetApp.id)] のインストール中にエラーが発生しました。終了コード: $LASTEXITCODE`n"
+                        $script:failedItems.Add("Winget Install: $($wingetApp.id)")
+                    }
+                }
+            }
+            # onOffフラグが false の場合はアンインストールを試みる
+            else {
+                if ($isInstalled) {
+                    Write-Host "-> [$($wingetApp.id)] をアンインストールします..."
+                    winget uninstall --id $wingetApp.id -e --accept-source-agreements --disable-interactivity
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host "-> [$($wingetApp.id)] のアンインストールに成功しました。`n" -ForegroundColor Green
+                    }
+                    else {
+                        Write-Warning "-> [$($wingetApp.id)] のアンインストール中にエラーが発生しました。終了コード: $LASTEXITCODE`n"
+                        $script:failedItems.Add("Winget Uninstall: $($wingetApp.id)")
+                    }
+                }
+                else {
+                    Write-Host "-> [$($wingetApp.id)] はインストールされていません。`n" -ForegroundColor Cyan
                 }
             }
         }
-        Write-Host "--- アプリケーションのインストールが完了しました ---`n" -ForegroundColor Green
+        Write-Host "--- アプリケーションのインストール/アンインストールが完了しました ---`n" -ForegroundColor Green
     }
     # --- 不要な標準アプリの削除 ---
-    # config.yamlに'phase1.appxRemove'セクションが存在する場合にのみ実行する。
+    # recipe.yamlに'phase1.appxRemove'セクションが存在する場合にのみ実行する。
     if ($config.phase1.appxRemove) {
-        Write-Host "--- 3. 不要なプリインストールアプリの削除を開始します ---`n" -ForegroundColor Green
+        Write-Host "--- 3. プリインストールアプリの処理を開始します ---`n" -ForegroundColor Green
         # 設定ファイルに記述された各UWPアプリを一つずつループ処理する。
         foreach ($appxPackage in $config.phase1.appxRemove) {
-            Write-Host "[$($appxPackage.name)] を検索し、存在すれば削除します..."
-            # ワイルドカードを含むパッケージ名で対象アプリを検索し、PC上の全ユーザーから削除する。
-            # パッケージが存在しない場合でもエラーで停止しないよう、-ErrorActionをSilentlyContinueに設定。
-            Get-AppxPackage -AllUsers $appxPackage.name | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+            # onOffフラグが true の場合のみ削除を実行する。
+            if ($appxPackage.onOff) {
+                Write-Host "[$($appxPackage.name)] を削除します..."
+                # ワイルドカードを含むパッケージ名で対象アプリを検索し、PC上の全ユーザーから削除する。
+                Get-AppxPackage -AllUsers $appxPackage.name | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+                Write-Host "-> [$($appxPackage.name)] の削除処理を実行しました。`n"
+            }
+            else {
+                # onOffフラグが false の場合はスキップする。
+                Write-Host "-> [$($appxPackage.name)] はonOffフラグがfalseのためスキップします。`n" -ForegroundColor Yellow
+            }
         }
-        Write-Host "`n--- 不要なプリインストールアプリの削除が完了しました ---`n" -ForegroundColor Green
+        Write-Host "`n--- プリインストールアプリの処理が完了しました ---`n" -ForegroundColor Green
     }
     # --- インストール済みアプリ全体を更新 ---
     Write-Host "--- 4. インストール済みアプリ全体を更新します ---`n" -ForegroundColor Green
@@ -231,19 +261,23 @@ if ($setupPhase -ne '2') {
     # --- フェーズ2の自動実行設定と再起動 ---
     Write-Host "--- 5. 再起動後にフェーズ2を自動実行するよう設定します ---`n" -ForegroundColor Green
     try {
-        # 次回ユーザーがログオンした時に一度だけコマンドを実行するためのレジストリキーのパスを定義する。
-        $runOnceRegistryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
-        # 実行するコマンドを作成する。このスクリプト自身を、フェーズ2を指定する引数付きで呼び出す。
-        $runOnceCommand = "powershell.exe -ExecutionPolicy Bypass -File `"$PSCommandPath`" -setupPhase 2"
-        # 作成したコマンドをRunOnceレジストリキーに登録する。
-        Set-ItemProperty -Path $runOnceRegistryKeyPath -Name "AutoSetupPhase2" -Value $runOnceCommand -Force -ErrorAction Stop
-        Write-Host "再起動後の自動実行設定が完了しました。`n"
+        # タスクとして実行するアクション（このスクリプト自身を引数付きで呼び出す）を定義する。
+        $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -setupPhase 2"
+        # タスクを実行するトリガー（ユーザーのログオン時）を定義する。
+        $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+        # スクリプトを実行している現在のユーザーのIDを確実に取得する。
+        $currentUserId = ([System.Security.Principal.WindowsIdentity]::GetCurrent()).Name
+        # タスクの実行者情報と権限レベル（最高の権限）を定義する。
+        $taskPrincipal = New-ScheduledTaskPrincipal -UserId $currentUserId -LogonType Interactive -RunLevel Highest
+        # 上記で定義したアクション、トリガー、プリンシパルを組み合わせてタスクをOSに登録する。
+        Register-ScheduledTask -TaskName $TaskName -Action $taskAction -Trigger $taskTrigger -Principal $taskPrincipal -Force -ErrorAction Stop
+        Write-Host "-> タスクスケジューラに '$TaskName' を登録しました。" -ForegroundColor Green
     }
     catch {
-        # レジストリへの登録に失敗した場合、致命的なエラーとして報告する。
+        # タスクの登録に失敗した場合、致命的なエラーとして報告する。
         Write-Error "致命的エラー: 再起動後の自動実行設定に失敗しました。フェーズ2は開始されません。"
         Write-Error $_.Exception.Message
-        $script:failedItems.Add("致命的エラー: RunOnceレジストリ設定失敗")
+        $script:failedItems.Add("致命的エラー: タスクスケジューラ登録失敗")
     }
     # --- フェーズ1の完了報告と自動再起動 ---
     Write-Host "==============================================="
@@ -274,11 +308,15 @@ if ($setupPhase -eq '2') {
     Write-Host "`n===============================================" -ForegroundColor Cyan
     Write-Host "  セットアップ フェーズ2 を開始します" -ForegroundColor Cyan
     Write-Host "===============================================`n" -ForegroundColor Cyan
+    # --- 自動実行タスクのクリーンアップ ---
+    # フェーズ2が開始されたため、このタスクは不要。次の実行に備えて削除する。
+    Write-Host "-> 自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
+    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     # ネットワーク接続の確立などを待つため、少し待機する。
     Write-Host "10秒後に自動でパッケージのインストールが開始されます。" -ForegroundColor Yellow
     Start-Sleep -Seconds 10
     # --- パッケージインストールの実行ループ ---
-    # config.yamlに'phase2.packageManagers'セクションが存在する場合にのみ実行する。
+    # recipe.yamlに'phase2.packageManagers'セクションが存在する場合にのみ実行する。
     if ($config.phase2.packageManagers) {
         # 設定ファイルに記述された各パッケージマネージャー（npm, pipなど）をループ処理する。
         foreach ($manager in $config.phase2.packageManagers) {
@@ -289,7 +327,8 @@ if ($setupPhase -eq '2') {
                 continue
             }
             # 各パッケージマネージャーのインストール対象パッケージを一つずつループ処理する。
-            foreach ($packageName in $manager.packages) {
+            foreach ($package in $manager.packages) {
+                $packageName = $package.name
                 Write-Host "パッケージ [$($packageName)] の状態を確認しています..."
                 # 設定ファイルの'checkCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
                 $checkCommand = $manager.checkCommand -replace '\{package\}', $packageName
@@ -298,7 +337,7 @@ if ($setupPhase -eq '2') {
                 # 確認コマンドの終了コードが0の場合、パッケージはインストール済みと判断する。
                 if ($LASTEXITCODE -eq 0) {
                     Write-Host "-> [$($packageName)] はインストール済みです。スキップします。`n" -ForegroundColor Cyan
-                } 
+                }
                 else {
                     Write-Host "-> [$($packageName)] をインストールします..."
                     # 設定ファイルの'installCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
