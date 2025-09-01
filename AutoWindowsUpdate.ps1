@@ -60,7 +60,7 @@ try {
 
     # --- フェーズ1: 実行前チェック ---
     # スクリプトの実行に必要な管理者権限があるかを確認する。
-    if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         # 管理者権限がない場合は、警告を表示して処理を中断する。
         Write-Warning "管理者権限がありません。管理者としてPowerShellを再実行してください。"
         Start-Sleep -Seconds 10
