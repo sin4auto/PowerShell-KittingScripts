@@ -1,160 +1,191 @@
-# Windows 11にWSL2をインストールする手順書
+# Windows 11で始めるWSL2導入ガイド
 
-## 1. 前提条件の確認
+このガイドは、Windows 11にWSL2 (Windows Subsystem for Linux 2) をインストールし、開発環境を構築するための手順をまとめたものです。
 
-WSL2をインストールするために、以下の要件を満たしていることを確認してください。
+---
 
-- Windows 10 バージョン 2004 以上（ビルド 19041 以上）
-- Windows 11
+## Part 1：インストールと初期設定（必須）
 
-## 2. WSLのインストール
+まずはWSL2を動作させるための基本的な設定を行います。
 
-### 基本インストール（Ubuntu）
+### Step 1：前提条件の確認
 
-1. **管理者権限でコマンドプロンプトまたはPowerShellを開く**
-2. **WSLインストールコマンドを実行**
-   ```bash
+- **OS**: Windows 11 または Windows 10 (バージョン 2004 / ビルド 19041 以降)  
+- **仮想化**: PCのBIOS/UEFI設定で「仮想化支援機能（Intel VT-x や AMD-Vなど）」が有効になっている必要があります。  
+  - 最近のPCでは通常、デフォルトで有効になっています。
+
+### Step 2：WSL2のインストール
+
+現在のWindowsでは、コマンド一つで必要なコンポーネントの導入からLinuxのインストールまでが完了します。
+
+1. スタートボタンを右クリックし、**「ターミナル（管理者）」**または**「Windows PowerShell（管理者）」**を選択します。
+2. 開いたウィンドウで、以下のコマンドを実行します。
+
+   ```powershell
    wsl --install
    ```
-   - このコマンドにより、既定のディストリビューション（Ubuntu）がインストールされます
-3. **システムを再起動**
-   - インストール完了後、メッセージに従ってシステムを再起動してください
 
-## 3. Linuxユーザー情報の設定
+   > **【解説】** このコマンドは以下の処理を自動で行います。  
+   > - WSL2に必要なWindowsの機能（仮想マシンプラットフォームなど）を有効化します。  
+   > - 最新のLinuxカーネルをダウンロードし、インストールします。  
+   > - 標準のLinuxとして **Ubuntu** をダウンロードし、インストールします。  
 
-### 初回セットアップ
+3. 処理が完了したら、メッセージに従ってPCを**再起動**してください。
 
-1. **スタートメニューからUbuntuを起動**
-   - インストール完了後、スタートメニューにUbuntuが追加されます
+### Step 3：Linux (Ubuntu) の初期設定
 
-2. **初回インストール処理の完了を待つ**
-   - 初回起動時は自動的にインストール処理が実行されます
+再起動後、自動的にUbuntuのセットアップ画面が表示されます。
 
-3. **ユーザーアカウントとパスワードを作成**
-   - ユーザー名を入力
-   - パスワードを入力（2回）
-   - このユーザーはLinux管理者として設定され、sudoコマンドが実行可能です
+1. Linux環境で使用する**ユーザー名**を入力し、Enterキーを押します。  
+2. 次に、そのユーザーの**パスワード**を入力し、Enterキーを押します。（確認のため、もう一度入力します）  
+   - **注意**：パスワード入力時、セキュリティのため画面には何も表示されませんが、正しく入力されています。  
 
-### デフォルトユーザーの変更（必要に応じて）
+プロンプト（`ユーザー名@PC名:~$`のような表示）が出れば、インストールと初期設定は完了です。このユーザーは管理者権限（`sudo`コマンド）を持っています。
 
-1. **新しいユーザーをディストリビューション上で作成**
-   ```bash
-   # デフォルト設定確認
-   useradd -D
-   
-   # 新しいユーザーを追加
-   sudo useradd -m <新しいユーザー名>
-   exit
-   ```
+### Step 4：パッケージリストの更新
 
-2. **Windows側でデフォルトユーザーを変更**
-   ```bash
-   Ubuntu config --default-user <新しいユーザー名>
-   ```
-
-## 4. 基本設定とベストプラクティス
-
-### パッケージの更新
-
-WSLではLinuxディストリビューションの更新は自動で行われないため、定期的に手動で更新を実行してください。
+インストールしたLinuxを最新の状態に保つため、以下のコマンドを実行しましょう。これは新しい環境を構築した際の「お約束」です。
 
 ```bash
 sudo apt update && sudo apt upgrade
 ```
 
-### Windows Terminal（ターミナル）の利用
+---
 
-- 新しいディストリビューションをインストールするたびに、Windows Terminal内に新しいインスタンスが自動作成されます
-- Windows Terminal（ターミナル）から各ディストリビューションにアクセス可能です
+## Part 2：開発環境の構築（推奨）
 
-### ファイルストレージ
+WSL2をより快適に使うためのツールを導入します。
 
-WSLプロジェクトをWindowsエクスプローラーで開く場合：
+### 1. Visual Studio Code (VS Code) との連携
+
+Windows側にインストールしたVS Codeを使って、WSL内のファイルを直接編集・デバッグするのが最も効率的です。
+
+- Windows側にVS Codeがインストールされていない場合は、公式サイトからダウンロードしてインストールします。
+- WSLのターミナル（Ubuntu）で、プロジェクト用のディレクトリを作成し、移動します。
 
 ```bash
-explorer.exe .
+mkdir ~/myproject
+cd ~/myproject
 ```
 
-## 5. 開発環境の設定
+- 以下のコマンドを実行して、VS Codeを起動します。
 
-### Visual Studio Codeの設定
-
-1. **必要なライブラリをインストール**
-   ```bash
-   sudo apt-get update
-   sudo apt-get install wget ca-certificates
-   ```
-
-2. **Windows側にVS Codeをインストール後、WSLから起動**
-   ```bash
-   mkdir ~/helloworld
-   cd ~/helloworld
-   code .
-   ```
-   - 初回実行時にVS Code Serverが自動インストールされます
-
-### Gitの設定
-
-1. **Gitをインストール**
-   ```bash
-   sudo apt install git
-   ```
-
-2. **Git Credential Managerの設定**（Windows側のGit for Windowsを利用）
-   
-   以下のコマンドを実行：
-   
-   ```bash
-   # Git >= v2.39.0 の場合
-   git config --global credential.helper "/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe"
-   ```
-
-## 6. 追加機能
-
-### Linux GUIアプリケーションの実行
-
-WSL2ではLinux GUIアプリケーションをWindowsアプリのように実行できます。
-
-例：geditエディタのインストールと実行
 ```bash
-sudo apt install gedit -y
+code .
 ```
 
-インストール後、スタートメニューからgeditを選択するか、WSL上で`gedit`コマンドを実行すると、WindowsアプリケーションとしてGUIエディタが起動します。
-
-### Docker環境の設定
-
-Windows側にDocker Desktop for Windowsをインストールすることで、WSL2上でDockerコンテナを使用した開発が可能になります。
-
-## 7. 基本的なWSLコマンド
-
-### よく使用するコマンド
-
-- **インストール済みディストリビューション一覧表示**
-  ```bash
-  wsl --list --verbose
-  ```
-
-- **特定のディストリビューションを開始**
-  ```bash
-  wsl -d <ディストリビューション名>
-  ```
-
-- **WSLシャットダウン**
-  ```bash
-  wsl --shutdown
-  ```
-
-## 注意事項
-
-- WindowsとWSL間でのファイルシステムパフォーマンスを最適化するため、WSLプロジェクトはLinuxファイルシステム内で作業することを推奨
-- 定期的なパッケージ更新を忘れずに実行
-- 各ディストリビューションは独立したLinux環境として動作
-
-## トラブルシューティング
-
-問題が発生した場合は、Microsoft公式のWSLトラブルシューティングドキュメントを参照してください。
+> **解説**  
+> 初回実行時、WSL内にVS Codeのバックエンド機能（VS Code Server）が自動でインストールされます。これにより、WindowsのVS CodeからLinux内のファイルへシームレスにアクセスできるようになります。
 
 ---
 
-以上
+### 2. Gitの導入と資格情報管理
+
+WSL内にGitをインストールし、Windows側の認証情報を利用してGitHubなどへのアクセスを簡略化します。
+
+#### Gitのインストール
+
+```bash
+sudo apt install git
+```
+
+#### 認証情報の設定（推奨）
+
+WindowsにGit for Windowsがインストールされている場合、その認証情報管理システム（Credential Manager）をWSLから利用できます。これにより、GitHubなどへアクセスする際のパスワード入力を省略できます。
+
+```bash
+git config --global credential.helper "/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe"
+```
+
+---
+
+## Part 3：応用的な使い方
+
+WSL2の便利な機能や、さらに進んだ設定を紹介します。
+
+### 1. WindowsとLinux間のファイルアクセス
+
+- **WindowsからLinuxへ**  
+  エクスプローラーのアドレスバーに `\\wsl.localhost` と入力すると、インストールされているLinux（例：Ubuntu）のフォルダが表示され、直接ファイル操作ができます。
+
+- **LinuxからWindowsへ**  
+  Linux側からは `/mnt/` ディレクトリ配下にWindowsのドライブがマウントされています。
+  - Cドライブ: `/mnt/c/`  
+  - Dドライブ: `/mnt/d/`  
+
+- **ホームディレクトリに戻る**  
+  Linuxのターミナル上で以下を実行すると、常にUbuntuのホームディレクトリ（`/home/ユーザー名`）に移動できます。  
+
+  ```bash
+  cd ~
+  ```
+
+> **重要**  
+> パフォーマンスのため、開発プロジェクトのファイルは必ずLinux側（例：`/home/ユーザー名/myproject`）に配置してください。
+
+---
+
+### 2. Linux GUIアプリケーションの実行
+
+WSL2では、特別な設定なしにLinuxのGUIアプリを起動できます。
+
+例として、シンプルなGUIテキストエディタ `gedit` をインストールします。
+
+```bash
+sudo apt update
+sudo apt install gedit -y
+```
+
+ターミナルで以下を入力すると、Windowsアプリのようにgeditのウィンドウが起動します。
+
+```bash
+gedit
+```
+
+---
+
+### 3. Docker Desktopとの連携
+
+WindowsにDocker Desktopをインストールし、設定画面で **「Use the WSL 2 based engine」** を有効にすると、WSLのターミナルから直接 `docker` コマンドが利用可能になり、コンテナ開発ができます。
+
+---
+
+## Part 4：便利なWSLコマンドリファレンス
+
+PowerShellやコマンドプロンプトから使用できる、よく使う管理コマンドです。
+
+### インストール済みのLinux一覧と状態を確認
+
+```powershell
+wsl --list --verbose
+# 短縮形: wsl -l -v
+```
+
+### WSL全体を安全にシャットダウン
+
+```powershell
+wsl --shutdown
+```
+
+### 特定のLinuxを起動
+
+```powershell
+wsl -d <ディストリビューション名>
+# 例: wsl -d Ubuntu
+```
+
+### （参考）Linux環境の削除（初期化）
+
+> ⚠️ この操作は元に戻せません。
+
+```powershell
+wsl --unregister <ディストリビューション名>
+```
+
+---
+
+## トラブルシューティング
+
+問題が発生した場合は、Microsoft公式のトラブルシューティングガイドが最も信頼できます。  
+
+👉 [WSL のトラブルシューティング | Microsoft Learn](https://learn.microsoft.com/ja-jp/windows/wsl/troubleshooting)
