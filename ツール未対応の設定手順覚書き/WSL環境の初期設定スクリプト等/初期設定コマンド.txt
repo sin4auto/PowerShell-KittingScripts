@@ -1,0 +1,6 @@
+# Ubuntu ターミナルで
+chmod +x setup-wsl-ubuntu.sh
+./setup-wsl-ubuntu.sh
+
+# Pythonパッケージのインストール
+uv pip install -r requirements.txt

@@ -1,0 +1,36 @@
+# --- データ分析系 ---
+numpy             # 数値計算ライブラリ（ベクトル・行列演算）
+pandas            # データ分析用ライブラリ（表形式データ処理）
+scipy             # 科学技術計算ライブラリ（最適化、統計、信号処理など）
+matplotlib        # 代表的なグラフ描画ライブラリ
+seaborn           # matplotlib ベースの高機能な統計可視化ライブラリ
+plotly            # インタラクティブなグラフ描画（Web対応）
+jupyter           # Jupyter Notebook / Lab 環境（データ分析の定番）
+
+# --- Web / API 開発系 ---
+flask             # 軽量 Web アプリ/REST API フレームワーク
+fastapi           # 型ヒント対応の高速 Web API フレームワーク
+uvicorn[standard] # FastAPI 等を動かす高速 ASGI サーバー
+requests          # HTTP クライアントの定番ライブラリ
+httpx             # 非同期対応の次世代 HTTP クライアント
+sqlalchemy        # ORM（Python からDB操作を抽象化するライブラリ）
+pydantic          # データ検証・設定管理（FastAPI などで利用）
+
+# --- ゲーム開発系 ---
+pygame            # 2D ゲーム開発用フレームワーク
+arcade            # Python 製の 2D ゲームフレームワーク（pygame よりモダン）
+pyopengl          # OpenGL を Python から扱うためのライブラリ
+moderngl          # OpenGL を Python でモダンに利用するためのラッパー
+
+# --- 便利系（ユーティリティ） ---
+tqdm              # 進捗バー表示ライブラリ
+rich              # カラフルなログやテーブル出力、Markdown 表示対応
+click             # コマンドラインツール作成支援ライブラリ
+pyyaml            # YAML ファイルの読み書き用
+python-dotenv     # .env ファイルから環境変数を読み込む
+loguru            # 高機能なログ出力ライブラリ
+beautifulsoup4    # HTML/XML パース（スクレイピング用途）
+lxml              # 高速な XML/HTML パーサ（bs4 のバックエンドとしても利用）
+selenium          # Web ブラウザ自動操作（スクレイピングやUIテスト）
+pytest            # Python の代表的なテストフレームワーク
+ruff              # Rust 製の高速フォーマッター & リンター（black + flake8 + isort 相当）
