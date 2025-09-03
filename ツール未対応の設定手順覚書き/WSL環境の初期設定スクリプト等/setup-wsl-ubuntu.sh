@@ -23,6 +23,9 @@ sudo apt-get install -y build-essential git curl wget unzip ca-certificates gnup
   libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev \
   libncursesw5-dev xz-utils
 
+#---- gitのデフォルトブランチをmainにする ----#
+git config --global init.defaultBranch main
+
 #---- nvm & Node.js(LTS) ----#
 if ! command -v nvm >/dev/null 2>&1; then
   echo "==> Install nvm"

@@ -2,5 +2,10 @@
 chmod +x setup-wsl-ubuntu.sh
 ./setup-wsl-ubuntu.sh
 
-# Pythonパッケージのインストール
+
+
+# Gitリポジトリ初期化&Pythonパッケージのインストール
+git init
+uv venv
+source .venv/bin/activate
 uv pip install -r requirements.txt
