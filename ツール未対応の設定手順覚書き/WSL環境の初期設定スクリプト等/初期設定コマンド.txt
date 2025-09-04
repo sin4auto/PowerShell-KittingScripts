@@ -1,11 +1,14 @@
-# Ubuntu ターミナルで
+# Ubuntu ターミナルでシェルスクリプト実行
 chmod +x setup-wsl-ubuntu.sh
 ./setup-wsl-ubuntu.sh
 
 
 
-# Gitリポジトリ初期化&Pythonパッケージのインストール
+# Pythonプロジェクトの作成例
 git init
 uv venv
 source .venv/bin/activate
 uv pip install -r requirements.txt
+
+
+read Serena's initial instructions
