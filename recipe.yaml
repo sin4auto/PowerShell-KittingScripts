@@ -335,6 +335,8 @@ phase2:
           name: ruff
         - description: 'デファクトスタンダードのテストフレームワーク'
           name: pytest
+        - description: 'テストカバレッジ測定ツール'
+          name: coverage
         - description: 'ターミナル出力を見やすくリッチにする'
           name: rich
         # [データベース & ファイル操作]

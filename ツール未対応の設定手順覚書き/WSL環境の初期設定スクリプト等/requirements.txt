@@ -32,5 +32,8 @@ loguru            # 高機能なログ出力ライブラリ
 beautifulsoup4    # HTML/XML パース（スクレイピング用途）
 lxml              # 高速な XML/HTML パーサ（bs4 のバックエンドとしても利用）
 selenium          # Web ブラウザ自動操作（スクレイピングやUIテスト）
+
+# --- テスト・コード品質 ---
 pytest            # Python の代表的なテストフレームワーク
+coverage          # テストカバレッジ測定ツール
 ruff              # Rust 製の高速フォーマッター & リンター（black + flake8 + isort 相当）
