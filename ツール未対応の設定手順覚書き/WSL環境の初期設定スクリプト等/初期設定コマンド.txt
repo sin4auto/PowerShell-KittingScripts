@@ -2,13 +2,10 @@
 chmod +x setup-wsl-ubuntu.sh
 ./setup-wsl-ubuntu.sh
 
+# Rust環境をインストール
 
+# Go環境をインストール
 
-# Pythonプロジェクトの作成例
-git init
-uv venv
-source .venv/bin/activate
-uv pip install -r requirements.txt
+# Haskell環境をインストール
 
-
-read Serena's initial instructions
+# Ruby環境をインストール
