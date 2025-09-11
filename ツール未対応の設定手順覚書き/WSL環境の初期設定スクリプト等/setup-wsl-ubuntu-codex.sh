@@ -21,7 +21,7 @@ sudo timedatectl set-timezone Asia/Tokyo || true
 echo "==> Install base packages"
 sudo apt-get install -y build-essential git curl wget unzip ca-certificates gnupg lsb-release pkg-config \
   libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev \
-  libncursesw5-dev xz-utils ripgrep
+  libncursesw5-dev xz-utils ripgrep tar libgmp-dev
 
 #---- gitのデフォルトブランチをmainにする ----#
 git config --global init.defaultBranch main
