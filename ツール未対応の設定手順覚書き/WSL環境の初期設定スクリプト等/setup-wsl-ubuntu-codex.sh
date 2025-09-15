@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "==> WSL Ubuntu setup started"
 
-#---- 基本: ホーム直下で作業（/mnt/c 回避） ----#
+#---- ホーム直下で作業（/mnt/c 回避） ----#
 cd ~
 if [[ "$(pwd)" == /mnt/* ]]; then
   echo "ERROR: You are under /mnt/. Please move to your Linux home (e.g., cd ~) and re-run." >&2
