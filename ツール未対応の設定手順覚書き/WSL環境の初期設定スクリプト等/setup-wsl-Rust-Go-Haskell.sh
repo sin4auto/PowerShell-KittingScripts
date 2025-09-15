@@ -65,10 +65,11 @@ install_rust() {
   rustup default stable || true
 
   # 必須コンポーネント
-  for comp in rustfmt clippy rust-src; do
+  for comp in rustfmt clippy rust-src rust-analyzer; do
     rustup component add "$comp" || true
   done
-  rustup component add rust-analyzer || rustup component add rust-analyzer-preview || true
+
+  cargo install cargo-llvm-cov
 
   command -v cargo >/dev/null 2>&1 && cargo --version || true
   command -v rustc  >/dev/null 2>&1 && rustc  --version || true
