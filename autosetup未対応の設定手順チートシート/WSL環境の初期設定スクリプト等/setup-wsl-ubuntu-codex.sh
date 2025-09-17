@@ -109,25 +109,17 @@ model_reasoning_effort = "high"
 [tools]
 web_search = true
 
+# === Context7（最新ドキュメント取得＝手戻り削減） === #
+[mcp_servers.context7]
+command = "npx"
+args    = ["-y", "@upstash/context7-mcp@latest"]
+transport = "stdio"
+
 # === 思考の外化（トークン節約/品質安定） ===
 [mcp_servers.sequential-thinking]
 command = "npx"
 args    = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 transport = "stdio"
-
-# === コーディング能力強化（プロジェクト指向） ===
-[mcp_servers.serena]
-command = "uvx"
-args    = [
-  "--from", "git+https://github.com/oraios/serena",
-  "serena", "start-mcp-server", "--context", "ide-assistant"
-]
-transport = "stdio"
-disabled = false
-
-[mcp_servers.serena.env]
-PYTHONUTF8 = "1"
-PYTHONIOENCODING = "utf-8"
 
 # === 長期メモリ ===
 [mcp_servers.memory]
@@ -135,21 +127,24 @@ command = "npx"
 args    = ["-y", "@modelcontextprotocol/server-memory@latest"]
 transport = "stdio"
 
-# === Context7（最新ドキュメント取得＝手戻り削減） === #
-[mcp_servers.context7]
-command = "npx"
-args    = ["-y", "@upstash/context7-mcp@latest"]
-transport = "stdio"
-
 # === 拡張：E2E/品質/ウェブ取得 === #
-[mcp_servers.playwright]
-command = "npx"
-args    = ["-y", "@playwright/mcp@latest"]
-transport = "stdio"
+#[mcp_servers.playwright]
+#command = "npx"
+#args    = ["-y", "@playwright/mcp@latest"]
+#transport = "stdio"
 
-[projects."/home/hsin4/myproject/typelang-hm-rs"]
-trust_level = "trusted"
-
+# === コーディング能力強化（プロジェクト指向） ===
+#[mcp_servers.serena]
+#command = "uvx"
+#args    = [
+#  "--from", "git+https://github.com/oraios/serena",
+#  "serena", "start-mcp-server", "--context", "ide-assistant"
+#]
+#transport = "stdio"
+#disabled = false
+#[mcp_servers.serena.env]
+#PYTHONUTF8 = "1"
+#PYTHONIOENCODING = "utf-8"
 TOML
 
 #---- 推奨アドオン：Jupyter/開発補助など（必要なら後で） ----#
