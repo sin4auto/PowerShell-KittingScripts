@@ -86,29 +86,36 @@ npm install -g @openai/codex || {
   echo "WARN: Failed to install @openai/codex via npm. You can retry later: npm install -g @openai/codex" >&2
 }
 
-#---- MCP 設定ファイル生成 ----#
+#---- ~/.codex/config.tomlファイル生成 ----#
 echo "==> Write MCP config to ~/.codex/config.toml"
 mkdir -p ~/.codex
 cat > ~/.codex/config.toml <<'TOML'
-model_reasoning_effort = "high"
-hide_agent_reasoning = true
 network_access = true
+model = "gpt-5-codex"
+model_reasoning_effort = "high"
+
+[profiles.default]
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+model = "gpt-5-codex"
+model_reasoning_effort = "high"
+
+[profiles.readonly]
+approval_policy = "never"
+sandbox_mode    = "read-only"
+model = "gpt-5-codex"
+model_reasoning_effort = "high"
 
 [tools]
 web_search = true
 
+# === 思考の外化（トークン節約/品質安定） ===
 [mcp_servers.sequential-thinking]
 command = "npx"
 args    = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+transport = "stdio"
 
-[mcp_servers.context7]
-command = "npx"
-args    = ["-y", "@upstash/context7-mcp@latest"]
-
-[mcp_servers.playwright]
-command = "npx"
-args    = ["-y", "@playwright/mcp@latest"]
-
+# === コーディング能力強化（プロジェクト指向） ===
 [mcp_servers.serena]
 command = "uvx"
 args    = [
@@ -117,8 +124,32 @@ args    = [
 ]
 transport = "stdio"
 disabled = false
-env.PYTHONUTF8 = "1"
-env.PYTHONIOENCODING = "utf-8"
+
+[mcp_servers.serena.env]
+PYTHONUTF8 = "1"
+PYTHONIOENCODING = "utf-8"
+
+# === 長期メモリ ===
+[mcp_servers.memory]
+command = "npx"
+args    = ["-y", "@modelcontextprotocol/server-memory@latest"]
+transport = "stdio"
+
+# === Context7（最新ドキュメント取得＝手戻り削減） === #
+[mcp_servers.context7]
+command = "npx"
+args    = ["-y", "@upstash/context7-mcp@latest"]
+transport = "stdio"
+
+# === 拡張：E2E/品質/ウェブ取得 === #
+[mcp_servers.playwright]
+command = "npx"
+args    = ["-y", "@playwright/mcp@latest"]
+transport = "stdio"
+
+[projects."/home/hsin4/myproject/typelang-hm-rs"]
+trust_level = "trusted"
+
 TOML
 
 #---- 推奨アドオン：Jupyter/開発補助など（必要なら後で） ----#
