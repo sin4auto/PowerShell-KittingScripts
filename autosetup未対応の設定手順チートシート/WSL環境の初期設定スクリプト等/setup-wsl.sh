@@ -1,7 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
+# zshで実行するため、shebangをzshに変更
 set -euo pipefail
 
-echo "==> WSL Ubuntu setup started"
+echo "==> WSL development environment setup started (running with zsh)..."
 
 #---- ホーム直下で作業（/mnt/c 回避） ----#
 cd ~
@@ -29,7 +30,8 @@ git config --global init.defaultBranch main
 #---- nvm & Node.js(LTS) ----#
 if ! command -v nvm >/dev/null 2>&1; then
   echo "==> Install nvm"
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+  # nvmのバージョンは最新のものに更新される可能性があります
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 fi
 
 # シェルに反映
@@ -43,15 +45,12 @@ nvm alias default 'lts/*'
 node -v
 npm -v
 
-#---- pyenv & Python 3.12.11 ----#
+#---- pyenv & Python ----#
+PYTHON_VERSION="3.12.4" # 必要に応じてバージョンを指定
+
 if ! command -v pyenv >/dev/null 2>&1; then
   echo "==> Install pyenv"
-  curl https://pyenv.run | bash
-  {
-    echo 'export PYENV_ROOT="$HOME/.pyenv"'
-    echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
-    echo 'eval "$(pyenv init -)"'
-  } >> ~/.bashrc
+  curl https://pyenv.run | zsh # zshで実行
 fi
 
 # 反映
@@ -59,40 +58,23 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
-if ! pyenv versions --bare | grep -qx "3.12.11"; then
-  echo "==> Install Python 3.12.11 via pyenv"
-  pyenv install 3.12.11
+if ! pyenv versions --bare | grep -qx "$PYTHON_VERSION"; then
+  echo "==> Install Python $PYTHON_VERSION via pyenv"
+  pyenv install "$PYTHON_VERSION"
 fi
-pyenv global 3.12.11
+pyenv global "$PYTHON_VERSION"
 python --version
 
 #---- uv（超高速パッケージマネージャ） ----#
 if ! command -v uv >/dev/null 2>&1; then
   echo "==> Install uv"
   curl -LsSf https://astral.sh/uv/install.sh | sh
-  # uv は通常 ~/.local/bin 等に入る。PATH 追記（重複回避）
-  if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc; then
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-  fi
   export PATH="$HOME/.local/bin:$PATH"
 fi
 uv --version
 
-#---- Zsh & Oh My Zsh ----#
-echo "==> Install Zsh & Oh My Zsh"
-if ! command -v zsh >/dev/null 2>&1; then
-    sudo apt-get install -y zsh
-fi
-
-if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-  echo "--> Installing Oh My Zsh and setting zsh as default shell..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-else
-  echo "--> Oh My Zsh is already installed."
-fi
-
 #---- 共通設定ファイル (.commonrc) のセットアップ ----#
-echo "==> Setting up common config file (~/.commonrc)"
+echo "==> Setting up common config file (~/.commonrc) for both bash and zsh"
 COMMONRC_FILE="$HOME/.commonrc"
 touch "$COMMONRC_FILE" # ファイルがなければ作成
 
@@ -104,29 +86,27 @@ if ! grep -q 'PYENV_ROOT' "$COMMONRC_FILE"; then
   echo 'eval "$(pyenv init -)"' >> "$COMMONRC_FILE"
 fi
 
+# nvm の設定を .commonrc に書き込む (なければ)
+if ! grep -q 'NVM_DIR' "$COMMONRC_FILE"; then
+  echo -e "\n# nvm settings" >> "$COMMONRC_FILE"
+  echo 'export NVM_DIR="$HOME/.nvm"' >> "$COMMONRC_FILE"
+  echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> "$COMMONRC_FILE"
+fi
+
 # uv の PATH設定を .commonrc に書き込む (なければ)
 if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$COMMONRC_FILE"; then
   echo -e "\n# uv path" >> "$COMMONRC_FILE"
   echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$COMMONRC_FILE"
 fi
 
-# .bashrc に .commonrc の読み込み設定を追記 (なければ)
-BASHRC_LOAD_CMD='\n# Load common settings\nif [ -f ~/.commonrc ]; then\n    . ~/.commonrc\nfi'
-if ! grep -q ".commonrc" "$HOME/.bashrc"; then
-  echo -e "$BASHRC_LOAD_CMD" >> "$HOME/.bashrc"
-fi
+# .bashrc と .zshrc の両方から .commonrc を読み込む設定
+for SHELL_RC_FILE in "$HOME/.bashrc" "$HOME/.zshrc"; do
+  if [ -f "$SHELL_RC_FILE" ] && ! grep -q ".commonrc" "$SHELL_RC_FILE"; then
+    echo "--> Adding .commonrc source to $SHELL_RC_FILE"
+    echo -e '\n# Load common settings\nif [ -f ~/.commonrc ]; then\n    . ~/.commonrc\nfi' >> "$SHELL_RC_FILE"
+  fi
+done
 
-# .zshrc に .commonrc の読み込み設定を追記 (なければ)
-ZSHRC_LOAD_CMD='\n# Load common settings\nif [ -f ~/.commonrc ]; then\n    . ~/.commonrc\nfi'
-if ! grep -q ".commonrc" "$HOME/.zshrc"; then
-  echo -e "$ZSHRC_LOAD_CMD" >> "$HOME/.zshrc"
-fi
-#---- VSCode は Windows 側で導入。ここでは WSL 内連携のみ。 ----#
-
-#---- 推奨アドオン：Jupyter/開発補助など（必要なら後で） ----#
-# 例) uv で高速インストール:
-# uv pip install --upgrade pip
-# uv pip install jupyter numpy pandas matplotlib
-
-echo "==> Base environment setup is complete."
-echo "==> Next, run 'bash ./setup_codex.sh' to install Codex."
+echo ""
+echo "✅ All environment setup is complete."
+echo "Please restart your terminal one last time, or run 'source ~/.zshrc' to apply all changes."
