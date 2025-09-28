@@ -78,54 +78,55 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 uv --version
 
+#---- Zsh & Oh My Zsh ----#
+echo "==> Install Zsh & Oh My Zsh"
+if ! command -v zsh >/dev/null 2>&1; then
+    sudo apt-get install -y zsh
+fi
+
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+  echo "--> Installing Oh My Zsh and setting zsh as default shell..."
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+else
+  echo "--> Oh My Zsh is already installed."
+fi
+
+#---- 共通設定ファイル (.commonrc) のセットアップ ----#
+echo "==> Setting up common config file (~/.commonrc)"
+COMMONRC_FILE="$HOME/.commonrc"
+touch "$COMMONRC_FILE" # ファイルがなければ作成
+
+# pyenv の設定を .commonrc に書き込む (なければ)
+if ! grep -q 'PYENV_ROOT' "$COMMONRC_FILE"; then
+  echo -e "\n# pyenv settings" >> "$COMMONRC_FILE"
+  echo 'export PYENV_ROOT="$HOME/.pyenv"' >> "$COMMONRC_FILE"
+  echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> "$COMMONRC_FILE"
+  echo 'eval "$(pyenv init -)"' >> "$COMMONRC_FILE"
+fi
+
+# uv の PATH設定を .commonrc に書き込む (なければ)
+if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$COMMONRC_FILE"; then
+  echo -e "\n# uv path" >> "$COMMONRC_FILE"
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$COMMONRC_FILE"
+fi
+
+# .bashrc に .commonrc の読み込み設定を追記 (なければ)
+BASHRC_LOAD_CMD='\n# Load common settings\nif [ -f ~/.commonrc ]; then\n    . ~/.commonrc\nfi'
+if ! grep -q ".commonrc" "$HOME/.bashrc"; then
+  echo -e "$BASHRC_LOAD_CMD" >> "$HOME/.bashrc"
+fi
+
+# .zshrc に .commonrc の読み込み設定を追記 (なければ)
+ZSHRC_LOAD_CMD='\n# Load common settings\nif [ -f ~/.commonrc ]; then\n    . ~/.commonrc\nfi'
+if ! grep -q ".commonrc" "$HOME/.zshrc"; then
+  echo -e "$ZSHRC_LOAD_CMD" >> "$HOME/.zshrc"
+fi
 #---- VSCode は Windows 側で導入。ここでは WSL 内連携のみ。 ----#
-
-#---- Codex CLI ----#
-echo "==> Install Codex CLI (global)"
-npm install -g @openai/codex || {
-  echo "WARN: Failed to install @openai/codex via npm. You can retry later: npm install -g @openai/codex" >&2
-}
-
-#---- ~/.codex/config.tomlファイル生成 ----#
-echo "==> Write MCP config to ~/.codex/config.toml"
-mkdir -p ~/.codex
-cat > ~/.codex/config.toml <<'TOML'
-network_access = true
-model = "gpt-5-codex"
-model_reasoning_effort = "high"
-
-[tools]
-web_search = true
-
-# === Context7（最新ドキュメント取得＝手戻り削減） === #
-[mcp_servers.context7]
-command = "npx"
-args    = ["-y", "@upstash/context7-mcp@latest"]
-transport = "stdio"
-
-# === 拡張：E2E/品質/ウェブ取得 === #
-#[mcp_servers.playwright]
-#command = "npx"
-#args    = ["-y", "@playwright/mcp@latest"]
-#transport = "stdio"
-
-# === コーディング能力強化（プロジェクト指向） ===
-#[mcp_servers.serena]
-#command = "uvx"
-#args    = [
-#  "--from", "git+https://github.com/oraios/serena",
-#  "serena", "start-mcp-server", "--context", "ide-assistant"
-#]
-#transport = "stdio"
-#disabled = false
-#[mcp_servers.serena.env]
-#PYTHONUTF8 = "1"
-#PYTHONIOENCODING = "utf-8"
-TOML
 
 #---- 推奨アドオン：Jupyter/開発補助など（必要なら後で） ----#
 # 例) uv で高速インストール:
 # uv pip install --upgrade pip
 # uv pip install jupyter numpy pandas matplotlib
 
-echo "==> Done. Please open VSCode with Remote-WSL and run 'codex' in the WSL terminal."
+echo "==> Base environment setup is complete."
+echo "==> Next, run 'bash ./setup_codex.sh' to install Codex."
