@@ -135,8 +135,8 @@ try {
         # 見つかった全ての更新プログラムを承諾し、インストールを実行する。-AutoRebootにより、必要に応じて自動で再起動される。
         Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose
         # 再起動コマンドが実行された後のための短い待機時間。
-        Write-Host "-> 10秒間待機します..."
-        Start-Sleep -Seconds 10
+        Write-Host "-> 20秒間待機します..."
+        Start-Sleep -Seconds 20
 
         # --- [5/5] 再起動が不要だった場合の処理 ---
         # このステップに到達した場合、-AutoRebootが再起動をトリガーしなかったことを意味する。
