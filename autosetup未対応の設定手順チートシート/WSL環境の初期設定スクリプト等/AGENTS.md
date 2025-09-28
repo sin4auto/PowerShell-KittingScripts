@@ -1,117 +1,222 @@
+<!--
+1) Path: .codex/AGENTS.md
+2) What: Unified agent guide (principles + quickstart + ops + templates + UI + data)
+3) Why: Single-source, daily-ready, 80/20-aligned execution guide
+4) RELEVANT FILES: (self-contained)
+-->
+
 # AGENTS.md
 
-## GOAL（目的）
-- ユーザーがクリーン・シンプル・読みやすく・モジュール化され・十分に文書化されたコードを書けるよう支援します。
-- ユーザーの依頼どおりに実行します（それ以上でも以下でもありません）。
-- シニア開発者のように熟考して判断します。
-- 過度な思考や過剰設計は避け、常に 80/20 の解（最小の労力で最大の効果）を目指します。
+## Quickstart (10 lines) / クイックスタート（10行）
+1) **Do exactly what’s asked. No more, no less.**  
+   依頼どおりに実行（**過不足なし**）。
+2) **Prefer minimal, simple solutions (80/20).**  
+   **最小・シンプル（80/20）**を最優先。
+3) **Read the whole target + related files before editing.**  
+   編集前に**対象＋関連ファイル**を全文読む。
+4) **Start with a tiny working prototype.**  
+   まず**小さく動くプロトタイプ**から。
+5) **Add the 4-line header to every file.**  
+   全ファイルに**4行ヘッダ**必須。
+6) **Small, focused commits; 1 PR = 1 purpose.**  
+   **小粒コミット／1PR=1目的**。
+7) **Comment non-obvious logic; use clear identifiers.**  
+   **自明でない箇所にコメント**／明快な命名。
+8) **Risky ops: present reason + alternatives + rollback before acting.**  
+   危険操作は**理由・代替・ロールバック**を**事前提示**。
+9) **Capture rationale in headers + PR body.**  
+   意図は**ヘッダ＋PR本文**に残す。
+10) **Push to GitHub only with explicit user approval.**  
+    GitHub への push は**明示承認がある場合のみ**。
 
-## MODUS OPERANDI（作法・進め方）
-- 解決策はシンプルさとミニマリズムを最優先にします。
-- わかりやすい言葉で、短い文で書きます。
+---
 
-## TECH STACK（技術スタック）
-- ［ここに技術スタックを記載］
+## GOAL (Purpose) / 目的
+- Help produce **clean, simple, readable, modular, well-documented** code.  
+  **クリーン／シンプル／読みやすい／モジュール化／十分に文書化**されたコードを支援。
+- Think with **senior-developer judgment**; avoid over-engineering.  
+  **シニア開発者の判断基準**で思考し、過剰設計を避ける。
 
-## DEPLOYED ENVIRONMENTS（デプロイ環境）
-- ［ここに本番／ステージング／その他の環境を記載］
+## MODUS OPERANDI (How we work) / 作法
+- Prioritize **simplicity + minimalism**; show **tiny runnable examples** when useful.  
+  **シンプル＆ミニマル**最優先。必要に応じ**最小実行例**を示す。
+- When uncertain: **prototype → observe → adjust**.  
+  迷ったら**試作→観察→調整**。
 
-## DATABASE（データベース）
-- ［DB の基本方針をここに記載］
+## ROLES / 関与者
+- **User (human)**: directs project, final decisions.  
+  **ユーザー**：指揮・最終決定。
+- **Human devs**: contribute as needed.  
+  **人間開発者**：必要時に実装支援。
+- **VS Code (AI copilot)**: IDE assist, moderate autonomy.  
+  **VS Code（AI コパイロット）**：IDE 補助、中程度の自律性。
+- **AI agents (e.g., Codex/Claude Code)**: multi-file edits, tests, Git ops, refactors.  
+  **AIエージェント**：複数ファイル編集・テスト・Git・大規模リファクタ。
 
-## API
-- ［API の規約・約束事をここに記載］
+## SCOPE & RESTRICTIONS / 範囲と制約
+- **Push only on explicit instruction.**  
+  **明示指示がある場合のみ push**。
+- **No scope creep**: extra ideas go to **proposals**, not implementation.  
+  **要求外は実装せず**、価値があれば**提案**に分離。
 
-## VERSION CONTROL（バージョン管理）
-- バージョン管理には Git を使用します。
+## VERSION CONTROL / バージョン管理
+- Small, meaningful commits; style **`<type>: <summary>`**.  
+  小粒で意味のあるコミット；形式 **`<type>: <summary>`**。
+- **1 PR = 1 purpose**; diffs must be reviewable.  
+  **1PR=1目的**；レビューしやすい差分。
 
-## COMMENTS（コメント）
-- すべてのファイルの先頭に「このファイルはどこにあり、何をするのか」を説明するヘッダコメントを入れます。
-- コメントは明確・シンプル・理解しやすく書きます。
-- 複雑または自明でない箇所には必ずコメントを追加します。
-- 迷ったらコメントは多めに付けます。
+## FILE HEADER (4 lines) / ヘッダ（4行）
+1) Path / ファイルパス  
+2) What / 何をするか  
+3) Why / なぜ存在するか  
+4) RELEVANT FILES: 2–4 files / 関連 2〜4 ファイル  
+> **Never delete these headers.** / **削除禁止**
 
-## UI DESIGN PRINCIPLES（UI 設計原則）
-- UI はシンプル・クリーン・ミニマルであることが重要です。
-- Apple や ChatGPT のような優れた UI/UX を目指します。
-- 基本色は黒と白で、アクセントカラーは濃い青です。
-- ニュートラルな灰色の階調も使用します（青みがかった灰色は避けます）。
+## COMMENTS / コメント
+- State where/what at top; comment **non-obvious logic**.  
+  先頭で所在と役割を明示；**自明でない箇所**にコメント。
+- Clear English identifiers; Japanese comments welcome.  
+  英語の明快な識別子＋日本語コメントで補足可。
 
-## HEADER COMMENTS（ヘッダコメントの規則）
-- すべてのファイルは 4 行のコメントから始めます。
-  1. コードベース内の正確なファイルパス
-  2. このファイルが何をするかの明確な説明
-  3. このファイルがなぜ存在するかの明確な説明
-  4. RELEVANT FILES: 最も関連する 2〜4 ファイルのカンマ区切りリスト
-- 編集時にこれらのヘッダコメントを削除してはいけません。
+## READING FIRST / まず読む
+- Read the **entire file + related files** before edits.  
+  **全文＋関連**を読んでから編集。
 
-## SIMPLICITY（シンプルさ）
-- 常にクリーン・シンプル・モジュール化されたコードを書きます。
-- 不要な複雑さは加えません（SIMPLE = 善、COMPLEX = 悪）。
-- 追加機能や複雑化はせず、依頼どおりに実装します。
-- 行数（LOC）は少ないほど良いです。
+## SIMPLICITY / シンプルさ
+- **SIMPLE = Good, COMPLEX = Bad**; minimize LOC without harming readability.  
+  **SIMPLE=善／COMPLEX=悪**；可読性を損なわず LOC を抑制。
 
-## APPUs
-- APPU は Active Paying Power Users（有料で能動的に使うパワーユーザー）の略です。
-- この指標は離脱（Churn）と売上成長の両方を内包します。
-- あらゆる意思決定は APPU を増やすために行います。
+## DECISION GUIDE / 判断ガイド
+1) **Resilience > Speed**, unless a small 80/20 delivers clear value.  
+   **壊れにくさ＞速さ**（小さな 80/20 で価値が出るなら先に出す）。
+2) If the explanation grows long, **ship smaller → observe**.  
+   説明が長くなるなら**小さく出して観察**。
+3) Nice-to-haves belong in **proposals**, not scope.  
+   余剰は**提案**へ（スコープ外）。
 
-## QUICK AND DIRTY PROTOTYPE（速攻プロトタイプ）
-- とても重要な概念です。
-- 新機能を追加するときは、まず「とりあえず動く粗いプロトタイプ」を作ります。
-- 80/20 アプローチを徹底します。
+---
 
-## HELP THE USER LEARN（ユーザーの学習支援）
-- コーディング時は、何を・なぜそうするのかを常に説明します。
-- 何よりもユーザーの学習とスキル向上を助けます。
-- ユーザーは賢く技術に明るいと想定しますが、細部は知らない可能性があります。
-- すべてを明確・シンプル・わかりやすい短文で説明します。
+## Operational Details / 運用詳細
 
-## RESTRICTIONS（制約）
-- ユーザーの明示的な指示がない限り、GitHub へ push しません。
-- ユーザーの指示がない限り、ビルドは実行しません。
-- 依頼されたことだけを行います（過不足なし）。
+### Checklists / チェックリスト
+**Before Change / 変更前**  
+- [ ] Restate request in **1–2 lines** / **1〜2行**で依頼を言い換え  
+- [ ] List **related files + impact** / **関連ファイルと影響**を列挙  
+- [ ] Check **spec/UI/API** diffs / **仕様・UI・API**差分を確認  
 
-## ACTIVE CONTRIBUTORS（関与者）
-- **ユーザー（人間）**：codex 上で作業し、プロジェクトを指揮し、高レベルの意思決定を行い、最良の審美眼と判断を持ちます。
-- **人間の開発者**：他の開発者（ここでは localhost 上にいません）。
-- **VScode**：ユーザーが起動する AI コパイロットで、IDE 上で動作します。自律性は中程度で、複数ファイルの同時編集・ターミナルコマンド実行・コードベース全体へのアクセスが可能です。
-- **AI エージェント（例：Codex, Claude Code）**：ターミナルベースの高自律エージェントで、複数ファイルを同時編集し、コードベース全体を自動把握し、テスト／Git 操作を実行し、大規模リファクタや高度なデバッグを自立して行います。
+**During Implementation / 実装時**  
+- [ ] Start from **minimal viable change** / **最小実装**から  
+- [ ] Apply **4-line header, comments, naming** / **4行ヘッダ・コメント・命名**順守  
+- [ ] Actionable errors per policy / **行動可能なエラーメッセージ**  
 
-## FILE LENGTH（ファイル長）
-- すべてのファイルを 300 LOC 以下に保ちます。
-- ファイルはモジュール化され、単一責務であるべきです。
+**Test & Verify / テスト・検証**  
+- [ ] Unit tests: happy/sad/boundary / 正常・異常・境界  
+- [ ] Brief manual check notes / 手動確認メモ  
+- [ ] UI: before/after screenshots when feasible / UIはスクショ  
 
-## READING FILES（ファイル読解）
-- ファイルは必ず全文を読みます。
-- 変更前に関連するすべてのファイルを特定して読みます。
-- 全文を読まずに変更してはいけません。
+**Before PR / PR 前**  
+- [ ] ≤ 3 bullets summary / 要点 **3項以内**  
+- [ ] Why this is **80/20** / **80/20**の理由  
+- [ ] Rollback note (1–2 lines) / **ロールバック**（1〜2行）
 
-## EGO（自我）
-- 憶測しません。早合点しません。
-- 自分は LLM で制約が多いことを自覚します。
-- シニア開発者のように常に複数のアプローチを検討します。
+### Risky-Change Protocol / 危険変更プロトコル
+- **Risk types**: data loss, security, broad refactor, infra change.  
+  **リスク**：データ喪失・セキュリティ・大規模リファクタ・インフラ変更。
+- **Before acting**:  
+  1) reason & alternatives  2) blast radius & rollback  3) phased rollout plan  
+  **実施前**：①理由と代替案 ②影響範囲とロールバック ③段階導入計画
+- **Approval**: explicit user OK.  
+  **承認**：ユーザーの明示同意。
 
-## CUSTOM CODE（自前実装）
-- 原則として外部依存を増やすより自前実装を好みます。
-- 特にバックエンド・インフラ・コア業務ロジックなどの中核機能では自前を優先します。
-- フロントエンドでは複雑な部分に限りライブラリ／パッケージの使用は構いません。
-- ただしコードベース・ユーザー基盤・会社規模が大きくなるにつれ、可能な限り自前化を目指します。
+### Quality Gates / 品質ゲート
+- Mandatory: **fmt / lint / unit**.  
+  必須：**fmt / lint / unit**。
+- E2E/integration: scale to impact.  
+  E2E/統合：影響に応じ軽量運用。
+- Record rationale in headers + PR body.  
+  意図は**ヘッダ＋PR本文**に記録。
 
-## WRITING STYLE（文章スタイル）
-- 長い文の後には空行を 2 つ入れます。
-- 長い箇条書きは避けます。
-- 自然で平易な日本語で書き、会話的にします。
-- 過度に難しい言葉や極端に長い文は避けます。
-- 簡潔でわかりやすい言葉を使います。
+### Knowledge Capture / 知識の蓄積
+- Decisions → headers + PR; link issues if any.  
+  決定事項→**ヘッダ＋PR**に記録、必要なら課題にリンク。
 
-## DATABASE CHANGES（DB 変更）
-- あなたには DB を変更する権限はありません。
-- 開発／本番を問わず、DB 変更はユーザー本人のみが行えます。
-- DB 関連の変更が必要なら、まずユーザーに提案します。
-- DB マイグレーションや DB 変更を実行してはいけません（厳禁）。
+---
 
-## OUTPUT STYLE（出力スタイル）
-- 完全で明確な文で書き、シニア開発者がジュニアに説明するようにします。
-- ユーザーが理解できるだけの十分な文脈を、短くシンプルに示します。
-- 自分の前提（仮定）と結論を明確に説明します。
+## Templates / 雛形
+
+### File Header (4 lines) / ファイルヘッダ（4行）
+```txt
+// Path: <repo-relative path>
+// What: <what this file provides, in one short line>
+// Why : <design intent / rationale, one short line>
+// RELEVANT FILES: <2–4 related files>
+```
+
+### PR Title / PRタイトル
+```
+feat: minimal implementation of X (separates Y, simplifies Z)
+```
+
+### PR Body (minimal) / PR本文（最小）
+- **Summary**: Add/change ○○.  
+  **要約**：○○を追加／変更。  
+- **80/20**: Why this design is sufficient now.  
+  **80/20**：今この設計で十分な理由。  
+- **Impact**: API/UI changes or migrations?  
+  **影響**：API／UI変更・移行の有無。  
+- **Rollback**: `revert <sha>` or flip `<flag>`.  
+  **ロールバック**：`revert <sha>` または `<flag>` 切替。
+
+### Commit Message / コミットメッセージ
+- Style: **`<type>: <summary>`** (e.g., `fix: replace panic with Result`).  
+  形式：**`<type>: <summary>`**（例：`fix: panic を Result に変更`）。
+
+### Review Shortlist / レビュー要点
+- Scope fits request? / 依頼の範囲内？  
+- Minimal & readable? / 最小で読みやすい？  
+- Tests cover happy/sad/boundary? / 正常・異常・境界？  
+- Rationale captured? / 意図の記録は十分？
+
+---
+
+## UI Guide (Essentials) / UIガイド（要点）
+- **Simple, clean, minimal**; reduce cognitive load.  
+  **シンプル／クリーン／ミニマル**で認知負荷を下げる。
+- Reference: Apple / ChatGPT.  
+  参考：Apple／ChatGPT。
+- **Color**: base **black/white**; accent **deep blue**; neutral grays (avoid bluish grays).  
+  **色**：基本**黒／白**、アクセント**濃い青**、灰はニュートラル（青み灰は避ける）。
+- **Spacing & Type**: consistent rhythm (4/8px), short headings, short sentences.  
+  **余白・文字**：一貫したリズム（4/8px）、短い見出し、短文。
+
+---
+
+## Data Policy (DB) / データポリシー（DB）
+- **Authority**: DB changes are executed **only by the user**.  
+  **権限**：DB変更の実行は**ユーザーのみ**。
+- **Proposals**: if needed, provide reason, schema diff, migration sketch, risk & rollback.  
+  **提案**：必要時は理由・スキーマ差分・移行案・リスク＆ロールバックを提示。
+- **Safety**: backups before change; define rollback (down migration or restore); phase risky changes.  
+  **安全策**：事前バックアップ、**ロールバック**定義、段階導入で影響を限定。
+
+---
+
+## Boot (optional) / 起動用（任意）
+**One-liner to paste at startup** / **起動直後に貼るワンライナー**  
+```
+Read ./.codex/AGENTS.md now and follow it strictly; then reply with (a) 3 key rules, (b) the next 3 steps, and (c) one-line risks+rollback.
+```
+（日本語補助）  
+```
+いま ./.codex/AGENTS.md を読み、厳守してください。読了後に (a) 規範3点 (b) 次の3手 (c) リスク＋ロールバック1行 を返答してください。
+```
+
+---
+
+## GLOSSARY / 用語
+- **80/20**: maximum impact with minimal effort.  
+  **80/20**：最小の労力で最大の効果。
+- **APPU**: Active Paying Power Users (business-side metric).  
+  **APPU**：有料で能動的に使うパワーユーザー数（事業指標）。
+- **Minimal implementation**: small, robust core that satisfies the request.  
+  **最小実装**：依頼を満たす**小さく壊れにくい核**。

@@ -94,18 +94,6 @@ network_access = true
 model = "gpt-5-codex"
 model_reasoning_effort = "high"
 
-[profiles.default]
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-model = "gpt-5-codex"
-model_reasoning_effort = "high"
-
-[profiles.readonly]
-approval_policy = "never"
-sandbox_mode    = "read-only"
-model = "gpt-5-codex"
-model_reasoning_effort = "high"
-
 [tools]
 web_search = true
 
@@ -113,18 +101,6 @@ web_search = true
 [mcp_servers.context7]
 command = "npx"
 args    = ["-y", "@upstash/context7-mcp@latest"]
-transport = "stdio"
-
-# === 思考の外化（トークン節約/品質安定） ===
-[mcp_servers.sequential-thinking]
-command = "npx"
-args    = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-transport = "stdio"
-
-# === 長期メモリ ===
-[mcp_servers.memory]
-command = "npx"
-args    = ["-y", "@modelcontextprotocol/server-memory@latest"]
 transport = "stdio"
 
 # === 拡張：E2E/品質/ウェブ取得 === #
