@@ -26,7 +26,7 @@ sudo apt-get install -y build-essential git curl wget unzip ca-certificates gnup
 #---- gitのデフォルトブランチをmainにする ----#
 git config --global init.defaultBranch main
 
-#---- Zsh & Oh My Zsh & デフォルトシェル変更 ----#
+#---- Zsh & Oh My Zsh ----#
 echo "==> Install Zsh & Oh My Zsh"
 if ! command -v zsh >/dev/null 2>&1; then
     sudo apt-get install -y zsh
@@ -37,24 +37,6 @@ if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 else
   echo "--> Oh My Zsh is already installed."
-fi
-
-ZSH_PATH=$(which zsh)
-if ! grep -Fxq "$ZSH_PATH" /etc/shells; then
-  echo "--> Adding $ZSH_PATH to /etc/shells..."
-  echo "$ZSH_PATH" | sudo tee -a /etc/shells
-fi
-
-if [ "${SHELL##*/}" != "zsh" ]; then
-  echo "--> Setting zsh as default shell for user $USER..."
-  sudo usermod -s "$ZSH_PATH" "$USER"
-  if [ $? -eq 0 ]; then
-    echo "--> Default shell successfully changed to zsh."
-  else
-    echo "--> ERROR: Failed to change default shell." >&2
-  fi
-else
-  echo "--> zsh is already the default shell."
 fi
 
 #---- nvm & Node.js(LTS) ----#
