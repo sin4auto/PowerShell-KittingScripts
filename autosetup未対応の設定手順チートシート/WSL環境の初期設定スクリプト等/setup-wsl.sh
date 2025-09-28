@@ -39,6 +39,44 @@ else
   echo "--> Oh My Zsh is already installed."
 fi
 
+#---- Zsh必須プラグイン (autosuggestions & syntax-highlighting) ----#
+echo "==> Install essential Zsh plugins"
+# zsh-autosuggestions (コマンド履歴から候補を薄く表示)
+ZSH_AUTOSUGGESTIONS_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+if [[ ! -d "$ZSH_AUTOSUGGESTIONS_DIR" ]]; then
+  echo "--> Cloning zsh-autosuggestions..."
+  git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_DIR"
+else
+  echo "--> zsh-autosuggestions is already cloned."
+fi
+
+# zsh-syntax-highlighting (コマンドの構文をハイライト)
+ZSH_SYNTAX_HIGHLIGHTING_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+if [[ ! -d "$ZSH_SYNTAX_HIGHLIGHTING_DIR" ]]; then
+  echo "--> Cloning zsh-syntax-highlighting..."
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_SYNTAX_HIGHLIGHTING_DIR"
+else
+  echo "--> zsh-syntax-highlighting is already cloned."
+fi
+
+# .zshrcのプラグイン設定を更新 (冪等性を担保)
+if [[ -f "$HOME/.zshrc" ]]; then
+  # zsh-autosuggestionsを有効化 (まだ設定されていない場合)
+  if ! grep -q "zsh-autosuggestions" "$HOME/.zshrc"; then
+    echo "--> Adding zsh-autosuggestions to .zshrc plugins"
+    sed -i '/^plugins=(/ s/)$/ zsh-autosuggestions)/' "$HOME/.zshrc"
+  else
+    echo "--> zsh-autosuggestions already enabled in .zshrc."
+  fi
+  # zsh-syntax-highlightingを有効化 (まだ設定されていない場合)
+  if ! grep -q "zsh-syntax-highlighting" "$HOME/.zshrc"; then
+    echo "--> Adding zsh-syntax-highlighting to .zshrc plugins"
+    sed -i '/^plugins=(/ s/)$/ zsh-syntax-highlighting)/' "$HOME/.zshrc"
+  else
+    echo "--> zsh-syntax-highlighting already enabled in .zshrc."
+  fi
+fi
+
 #---- nvm & Node.js(LTS) ----#
 echo "==> Install nvm & Node.js"
 if ! command -v nvm >/dev/null 2>&1; then
@@ -58,7 +96,6 @@ echo "==> Install pyenv & Python"
 PYTHON_VERSION="3.12.4"
 
 if ! command -v pyenv >/dev/null 2>&1; then
-  # bashで実行するため、パイプ先のシェルをbashに変更
   curl https://pyenv.run | bash
 fi
 
