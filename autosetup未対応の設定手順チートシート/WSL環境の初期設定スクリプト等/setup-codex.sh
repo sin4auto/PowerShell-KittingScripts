@@ -18,9 +18,8 @@ npm install -g @openai/codex || {
 echo "==> Write MCP config to ~/.codex/config.toml"
 mkdir -p ~/.codex
 cat > ~/.codex/config.toml <<'TOML'
-network_access = true
 model = "gpt-5-codex"
-model_reasoning_effort = "high"
+network_access = true
 
 [tools]
 web_search = true
@@ -40,10 +39,7 @@ transport = "stdio"
 # === コーディング能力強化（プロジェクト指向） ===
 [mcp_servers.serena]
 command = "uvx"
-args    = [
-  "--from", "git+https://github.com/oraios/serena",
-  "serena", "start-mcp-server", "--context", "ide-assistant"
-]
+args    = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant"]
 transport = "stdio"
 disabled = false
 [mcp_servers.serena.env]
