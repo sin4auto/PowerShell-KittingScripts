@@ -2,6 +2,7 @@
 # Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
 # ================================================================
 # このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
 
 # ----------------------------------------------------------------
 # ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
@@ -12,178 +13,125 @@ phase1:
     # [エクスプローラー設定]
     - description: 'エクスプローラーで隠しファイルを表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
-      onOff: true
     - description: 'エクスプローラーで登録されている拡張子を常に表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: 'アドレスバーに常に完全なパスを表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
-      onOff: true
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-      onOff: true
     - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
       command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
-      onOff: true
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
-      onOff: true
     # [通知・プライバシー設定]
     - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: 'デバイス設定の完了を促す通知を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: 'OSの診断データを必須なものに限定する'
       command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
-      onOff: true
     - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
-      onOff: true
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: 'デバイス上の検索履歴の保存を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
-      onOff: true
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
-      onOff: true
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
-      onOff: true
     - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
-      onOff: true
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
-      onOff: true
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
-      onOff: true
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
-      onOff: true
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
-      onOff: true
 
   # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     - description: '最新版のPowerShell'
       id: Microsoft.PowerShell
-      onOff: true
     - description: '定番のWebブラウザ'
       id: Google.Chrome
-      onOff: true
     - description: '高機能なファイル圧縮解凍ソフト'
       id: 7zip.7zip
-      onOff: true
     - description: 'Windowsを便利にする公式ツール群'
       id: Microsoft.PowerToys
-      onOff: true
     - description: 'オンライン会議ツール'
       id: Zoom.Zoom
-      onOff: true
     - description: 'バージョン管理システム'
       id: Git.Git
-      onOff: true
     - description: 'JavaScript実行環境 (長期安定版)'
       id: OpenJS.NodeJS.LTS
-      onOff: true
     - description: 'プログラミング言語 Python'
       id: Python.Python.3.13
-      onOff: true
     - description: '高速なPythonパッケージインストーラー'
       id: astral-sh.uv
-      onOff: true
     - description: '高機能コードエディタ'
       id: Microsoft.VisualStudioCode
       options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
-      onOff: true
     - description: 'PDF閲覧ソフト'
       id: Adobe.Acrobat.Reader.64-bit
       options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
-      onOff: true
 
-  # --- Appx (不要なプリインストールアプリの削除"onOff: true"） ---
+  # --- Appx (不要なプリインストールアプリの削除) ---
   appxRemove:
     # [基本機能・情報]
     - description: 'AIアシスタント'
       name: "*Cortana*"
-      onOff: true
     - description: 'ニュース'
       name: "*Microsoft.BingNews*"
-      onOff: true
     - description: '天気'
       name: "*Microsoft.BingWeather*"
-      onOff: true
     - description: 'マップ'
       name: "*Microsoft.WindowsMaps*"
-      onOff: true
     - description: 'ヘルプ'
       name: "*Microsoft.GetHelp*"
-      onOff: true
     - description: 'ヒント'
       name: "*Microsoft.Getstarted*"
-      onOff: true
     - description: 'フィードバックHub'
       name: "*Microsoft.WindowsFeedbackHub*"
-      onOff: true
     - description: 'スマートフォン連携'
       name: "*Microsoft.YourPhone*"
-      onOff: true
     # [生産性・ユーティリティ]
     - description: 'OneNote (ストアアプリ版)'
       name: "*Microsoft.Office.OneNote*"
-      onOff: true
     - description: 'メール/カレンダー'
       name: "*microsoft.windowscommunicationsapps*"
-      onOff: true
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
-      onOff: true
     # [エンターテイメント・メディア]
     - description: 'Grooveミュージック'
       name: "*Microsoft.ZuneMusic*"
-      onOff: true
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
-      onOff: true
-    - description: 'フォト'
-      name: "*Microsoft.Windows.Photos*"
-      onOff: false
-    - description: 'ペイント 3D'
-      name: "*Microsoft.MSPaint*"
-      onOff: false
-    - description: 'ビデオエディター'
-      name: "*Clipchamp.Clipchamp*"
-      onOff: false
-    - description: '複合現実ポータル'
-      name: "*Microsoft.MixedReality.Portal*"
-      onOff: false
-    - description: 'ソリティア & カジュアルゲーム'
-      name: "*Microsoft.MicrosoftSolitaireCollection*"
-      onOff: false
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
@@ -346,15 +294,3 @@ phase2:
           name: openpyxl
         - description: '.envファイル読み込み'
           name: python-dotenv
-
-    # --- cargo (Rustパッケージ設定例) ---
-    # - managerName: 'cargo'
-    #   checkCommand: 'cargo install --list | findstr {package}'
-    #   installCommand: 'cargo install {package}'
-    #   packages:
-    #     - description: '高速なgrep代替ツール'
-    #       name: ripgrep
-    #     - description: 'シンタックスハイライト付きcat'
-    #       name: bat
-    #     - description: '高速なfind代替ツール'
-    #       name: fd-find

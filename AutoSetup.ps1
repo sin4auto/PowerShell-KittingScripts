@@ -143,30 +143,24 @@ if ($setupPhase -ne '2') {
         # 設定ファイルに記述された各設定項目を一つずつループ処理する。
         foreach ($setting in $config.phase1.windowsSettings) {
             Write-Host "-> $($setting.description)..."
-            # onOffフラグが true の場合のみ設定を適用する。
-            if ($setting.onOff) {
-                # 実行すべきコマンドが定義されていることを確認する。
-                if (-not ([string]::IsNullOrEmpty($setting.command))) {
-                    # 設定ファイルから読み取ったコマンド文字列を実行する。
-                    Invoke-Expression -Command $setting.command
-                    # 直前に実行した外部コマンドが正常に終了したかを確認する（終了コード0が成功）。
-                    if ($LASTEXITCODE -ne 0) {
-                        # 失敗した場合、どの処理で失敗したかを示すエラーメッセージを作成する。
-                        $errorMessage = "設定変更失敗: $($setting.description)"
-                        Write-Warning "-> コマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
-                        # 失敗リストにエラーメッセージを追加する。
-                        $script:failedItems.Add($errorMessage)
-                    }
-                }
-                else {
-                    # 実行コマンドが定義されていなかった場合もエラーとして扱う。
-                    $errorMessage = "設定変更失敗: $($setting.description) - commandプロパティが定義されていません。"
-                    Write-Warning "-> commandプロパティが定義されていません。"
+            # 実行すべきコマンドが定義されていることを確認する。
+            if (-not ([string]::IsNullOrEmpty($setting.command))) {
+                # 設定ファイルから読み取ったコマンド文字列を実行する。
+                Invoke-Expression -Command $setting.command
+                # 直前に実行した外部コマンドが正常に終了したかを確認する（終了コード0が成功）。
+                if ($LASTEXITCODE -ne 0) {
+                    # 失敗した場合、どの処理で失敗したかを示すエラーメッセージを作成する。
+                    $errorMessage = "設定変更失敗: $($setting.description)"
+                    Write-Warning "-> コマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
+                    # 失敗リストにエラーメッセージを追加する。
                     $script:failedItems.Add($errorMessage)
                 }
             }
             else {
-                Write-Host "-> onOffフラグがfalseのためスキップします。" -ForegroundColor Yellow
+                # 実行コマンドが定義されていなかった場合もエラーとして扱う。
+                $errorMessage = "設定変更失敗: $($setting.description) - commandプロパティが定義されていません。"
+                Write-Warning "-> commandプロパティが定義されていません。"
+                $script:failedItems.Add($errorMessage)
             }
         }
         Write-Host "`n--- Windowsの各種設定変更が完了しました ---`n" -ForegroundColor Green
@@ -174,7 +168,7 @@ if ($setupPhase -ne '2') {
     # --- アプリケーションのインストール (winget) ---
     # recipe.yamlに'phase1.wingetInstall'セクションが存在する場合にのみ実行する。
     if ($config.phase1.wingetInstall) {
-        Write-Host "--- 2. アプリケーションのインストール/アンインストールを開始します ---`n" -ForegroundColor Green
+        Write-Host "--- 2. アプリケーションのインストールを開始します ---`n" -ForegroundColor Green
         # wingetのソースリポジトリをリセットし、潜在的な問題を解消する。
         winget source reset --force
         # 設定ファイルに記述された各アプリケーションを一つずつループ処理する。
@@ -182,71 +176,44 @@ if ($setupPhase -ne '2') {
             Write-Host "アプリ [$($wingetApp.id)] の状態を確認しています..."
             # 'winget list'を使い、対象のアプリが既にインストール済みかを確認する。
             winget list --id $wingetApp.id -e --accept-source-agreements --disable-interactivity
-            $isInstalled = ($LASTEXITCODE -eq 0)
-            # onOffフラグが true の場合はインストールを試みる
-            if ($wingetApp.onOff) {
-                if ($isInstalled) {
-                    Write-Host "-> [$($wingetApp.id)] はインストール済みです。`n" -ForegroundColor Cyan
+            # インストール済みでなければインストールを実行する
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "-> [$($wingetApp.id)] をインストールします..."
+                $wingetArgs = @(
+                    'install', '--id', $wingetApp.id, '-e',
+                    '--accept-package-agreements', '--accept-source-agreements', '--disable-interactivity'
+                )
+                if (-not ([string]::IsNullOrEmpty($wingetApp.options))) {
+                    $wingetArgs += $wingetApp.options.Split(' ')
+                    Write-Host "-> 個別オプション ($($wingetApp.options)) を適用します。" -ForegroundColor Yellow
+                }
+                winget @wingetArgs
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "-> [$($wingetApp.id)] のインストールに成功しました。`n" -ForegroundColor Green
                 }
                 else {
-                    Write-Host "-> [$($wingetApp.id)] をインストールします..."
-                    $wingetArgs = @(
-                        'install', '--id', $wingetApp.id, '-e',
-                        '--accept-package-agreements', '--accept-source-agreements', '--disable-interactivity'
-                    )
-                    if (-not ([string]::IsNullOrEmpty($wingetApp.options))) {
-                        $wingetArgs += $wingetApp.options.Split(' ')
-                        Write-Host "-> 個別オプション ($($wingetApp.options)) を適用します。" -ForegroundColor Yellow
-                    }
-                    winget @wingetArgs
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-Host "-> [$($wingetApp.id)] のインストールに成功しました。`n" -ForegroundColor Green
-                    }
-                    else {
-                        Write-Warning "-> [$($wingetApp.id)] のインストール中にエラーが発生しました。終了コード: $LASTEXITCODE`n"
-                        $script:failedItems.Add("Winget Install: $($wingetApp.id)")
-                    }
+                    Write-Warning "-> [$($wingetApp.id)] のインストール中にエラーが発生しました。終了コード: $LASTEXITCODE`n"
+                    $script:failedItems.Add("Winget Install: $($wingetApp.id)")
                 }
             }
-            # onOffフラグが false の場合はアンインストールを試みる
             else {
-                if ($isInstalled) {
-                    Write-Host "-> [$($wingetApp.id)] をアンインストールします..."
-                    winget uninstall --id $wingetApp.id -e --accept-source-agreements --disable-interactivity
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-Host "-> [$($wingetApp.id)] のアンインストールに成功しました。`n" -ForegroundColor Green
-                    }
-                    else {
-                        Write-Warning "-> [$($wingetApp.id)] のアンインストール中にエラーが発生しました。終了コード: $LASTEXITCODE`n"
-                        $script:failedItems.Add("Winget Uninstall: $($wingetApp.id)")
-                    }
-                }
-                else {
-                    Write-Host "-> [$($wingetApp.id)] はインストールされていません。`n" -ForegroundColor Cyan
-                }
+                Write-Host "-> [$($wingetApp.id)] はインストール済みです。スキップします。`n" -ForegroundColor Cyan
             }
         }
-        Write-Host "--- アプリケーションのインストール/アンインストールが完了しました ---`n" -ForegroundColor Green
+        Write-Host "--- アプリケーションのインストールが完了しました ---`n" -ForegroundColor Green
     }
     # --- 不要な標準アプリの削除 ---
     # recipe.yamlに'phase1.appxRemove'セクションが存在する場合にのみ実行する。
     if ($config.phase1.appxRemove) {
-        Write-Host "--- 3. プリインストールアプリの処理を開始します ---`n" -ForegroundColor Green
+        Write-Host "--- 3. プリインストールアプリの削除を開始します ---`n" -ForegroundColor Green
         # 設定ファイルに記述された各UWPアプリを一つずつループ処理する。
         foreach ($appxPackage in $config.phase1.appxRemove) {
-            # onOffフラグが true の場合のみ削除を実行する。
-            if ($appxPackage.onOff) {
-                Write-Host "[$($appxPackage.name)] を削除します..."
-                # ワイルドカードを含むパッケージ名で対象アプリを検索し、PC上の全ユーザーから削除する。
-                Get-AppxPackage -AllUsers $appxPackage.name | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-                Write-Host "-> [$($appxPackage.name)] の削除処理を実行しました。`n"
-            }
-            else {
-                # onOffフラグが false の場合はスキップする。
-                Write-Host "-> [$($appxPackage.name)] はonOffフラグがfalseのためスキップします。`n" -ForegroundColor Yellow
-            }
+            Write-Host "-> [$($appxPackage.name)] を削除します..."
+            # ワイルドカードを含むパッケージ名で対象アプリを検索し、PC上の全ユーザーから削除する。
+            Get-AppxPackage -AllUsers $appxPackage.name | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+            Write-Host "-> [$($appxPackage.name)] の削除処理を実行しました。`n"
         }
-        Write-Host "`n--- プリインストールアプリの処理が完了しました ---`n" -ForegroundColor Green
+        Write-Host "`n--- プリインストールアプリの削除が完了しました ---`n" -ForegroundColor Green
     }
     # --- インストール済みアプリ全体を更新 ---
     Write-Host "--- 4. インストール済みアプリ全体を更新します ---`n" -ForegroundColor Green
