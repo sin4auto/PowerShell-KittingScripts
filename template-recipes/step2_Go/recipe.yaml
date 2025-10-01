@@ -1,0 +1,219 @@
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+  # --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    - description: '最新版のPowerShell'
+      id: Microsoft.PowerShell
+    - description: '定番のWebブラウザ'
+      id: Google.Chrome
+    - description: '高機能なファイル圧縮解凍ソフト'
+      id: 7zip.7zip
+    - description: 'Windowsを便利にする公式ツール群'
+      id: Microsoft.PowerToys
+    - description: 'オンライン会議ツール'
+      id: Zoom.Zoom
+    - description: 'バージョン管理システム'
+      id: Git.Git
+    - description: 'JavaScript実行環境 (長期安定版)'
+      id: OpenJS.NodeJS.LTS
+    - description: 'プログラミング言語 Python'
+      id: Python.Python.3.13
+    - description: '高速なPythonパッケージインストーラー'
+      id: astral-sh.uv
+    - description: '高機能コードエディタ'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    - description: 'PDF閲覧ソフト'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [Terminal & Containers & Secrets]
+    - description: 'Windows Terminal（モダンなターミナル。タブ/ペイン/UTF-8/PowerShell/WSL連携に最適）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナ実行環境。WSL2統合・Kubernetesオプション・Compose同梱）'
+      id: Docker.DockerDesktop
+    - description: 'Bitwarden（オープンソースのパスワード管理。デスクトップ/ブラウザ/CLI）'
+      id: Bitwarden.Bitwarden
+    # [Build Toolchain]
+    - description: 'CMake（クロスプラットフォームのビルド生成ツール。C/C++の事実上標準）'
+      id: Kitware.CMake
+    - description: 'Ninja（超高速ビルドツール。CMakeのジェネレータとして利用推奨）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（モダンC/C++/LLVMツールチェーン。clang/clang-cl/llvm-ar等を含む）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC/Windows SDK等のビルド環境。IDEなしの軽量セット）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [Runtimes / SDKs]
+    - description: '.NET SDK（最新系の .NET 開発用SDK。C#/F#/VB、`dotnet` CLI を含む）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'Rust ツールチェーン（rustupで安定版/ベータ/ナイトリーやコンポーネントを切替管理）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go言語ツールチェーン。`go` コマンドによるビルド/テスト/取得）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin版のLTS JDK。ビルド/実行用の汎用Java環境）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [CLI Essentials]
+    - description: 'ripgrep（超高速のgrep代替。`.gitignore`尊重・正規表現対応）'
+      id: BurntSushi.ripgrep
+    - description: 'fd（扱いやすいfind代替。並列検索・パターン/拡張子フィルタ）'
+      id: sharkdp.fd
+    - description: 'fzf（インタラクティブなファジー検索。CLIやエディタから呼び出し可能）'
+      id: junegunn.fzf
+    - description: 'bat（シンタックスハイライト付きcat代替。行番号/プレビューが便利）'
+      id: sharkdp.bat
+    - description: 'eza（見やすいls代替。アイコン/ツリー/権限表示が強化）'
+      id: eza-community.eza
+    - description: 'jq（JSON処理CLI。フィルタ/整形/抽出に最適）'
+      id: jqlang.jq
+    # [Dev Tools]
+    - description: 'WinMerge（GUI差分・マージツール。ファイル/フォルダ比較、3-wayマージ）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（APIクライアント。REST/GraphQL・環境変数・テストに強い）'
+      id: Insomnia.Insomnia
+    # [System Utils]
+    - description: 'Everything（超高速ファイル名検索。NTFSインデックスで即時ヒット）'
+      id: Voidtools.Everything
+    - description: 'ShareX（スクリーンショット/録画。自動アップロードやワークフローが豊富）'
+      id: ShareX.ShareX
+    # [Diagnostics / Internals]
+    - description: 'Sysinternals Suite（Windows内部解析ツール群。ProcMon/ProcExp/Autoruns等）'
+      id: Microsoft.Sysinternals
+    - description: 'Wireshark（ネットワークパケット解析。pcap/TLS/ディスプレイフィルタ対応）'
+      id: WiresharkFoundation.Wireshark
+    # [Fonts]
+    - description: 'JetBrains Mono（開発者向け等幅フォント。Ligature対応で可読性UP）'
+      id: JetBrains.Mono
+    - description: 'Cascadia Code（等幅フォント。ターミナル/コード表示向け、Ligature版あり）'
+      id: Microsoft.CascadiaCode
+    # [Dev Hub]
+    - description: 'Dev Home（Windows公式の開発者ハブ。Dev Drive/GitHub連携/WinGet導入支援）'
+      id: Microsoft.DevHome
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  # =================================================================
+  # ■ パッケージマネージャーごとの設定
+  # =================================================================
+  packageManagers:
+    # --- go ---
+    - managerName: 'go'
+      # PATHに<leaf>があればOK（<leaf>は {package} の末尾名。@latest は除去）
+      checkCommand: powershell -NoProfile -Command "$l=(Split-Path '{package}' -Leaf)-replace('@latest$',''); if(Get-Command $l -ErrorAction SilentlyContinue){ exit 0 } else { exit 1 }"
+      installCommand: 'go install {package}'
+      packages:
+        - description: 'Go言語サーバ'
+          name: golang.org/x/tools/gopls@latest
+        - description: 'import自動整形'
+          name: golang.org/x/tools/cmd/goimports@latest
+        - description: '厳格整形（gofumpt）'
+          name: mvdan.cc/gofumpt@latest
+        - description: '静的解析（Staticcheck）'
+          name: honnef.co/go/tools/cmd/staticcheck@latest
+        - description: '脆弱性検出（公式）'
+          name: golang.org/x/vuln/cmd/govulncheck@latest
+        - description: '包括的リンター'
+          name: github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        - description: 'デバッガ（Delve）'
+          name: github.com/go-delve/delve/cmd/dlv@latest
+        - description: 'モック生成（uber/mock）'
+          name: go.uber.org/mock/mockgen@latest
+        - description: 'iota→String 生成'
+          name: golang.org/x/tools/cmd/stringer@latest
+        - description: 'テストスケルトン生成'
+          name: github.com/cweill/gotests/gotests@latest

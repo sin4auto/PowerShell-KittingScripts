@@ -1,0 +1,131 @@
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+  # --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    - description: '最新版のPowerShell'
+      id: Microsoft.PowerShell
+    - description: '定番のWebブラウザ'
+      id: Google.Chrome
+    - description: '高機能なファイル圧縮解凍ソフト'
+      id: 7zip.7zip
+    - description: 'Windowsを便利にする公式ツール群'
+      id: Microsoft.PowerToys
+    - description: 'オンライン会議ツール'
+      id: Zoom.Zoom
+    - description: 'PDF閲覧ソフト'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  # =================================================================
+  # ■ パッケージマネージャーごとの設定
+  # =================================================================
