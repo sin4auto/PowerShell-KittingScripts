@@ -72,6 +72,8 @@ phase1:
       id: Google.Chrome
     - description: '高機能なファイル圧縮解凍ソフト'
       id: 7zip.7zip
+    - description: '多機能メディアプレイヤー'
+      id: VideoLAN.VLC
     - description: 'Windowsを便利にする公式ツール群'
       id: Microsoft.PowerToys
     - description: 'オンライン会議ツール'
