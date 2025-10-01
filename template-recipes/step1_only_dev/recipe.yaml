@@ -94,8 +94,6 @@ phase1:
       id: Microsoft.WindowsTerminal
     - description: 'Docker Desktop（コンテナ実行環境。WSL2統合・Kubernetesオプション・Compose同梱）'
       id: Docker.DockerDesktop
-    - description: 'Bitwarden（オープンソースのパスワード管理。デスクトップ/ブラウザ/CLI）'
-      id: Bitwarden.Bitwarden
     # [Build Toolchain]
     - description: 'CMake（クロスプラットフォームのビルド生成ツール。C/C++の事実上標準）'
       id: Kitware.CMake
@@ -182,6 +180,16 @@ phase1:
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ

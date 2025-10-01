@@ -94,8 +94,6 @@ phase1:
       id: Microsoft.WindowsTerminal
     - description: 'Docker Desktop（コンテナ実行環境。WSL2統合・Kubernetesオプション・Compose同梱）'
       id: Docker.DockerDesktop
-    - description: 'Bitwarden（オープンソースのパスワード管理。デスクトップ/ブラウザ/CLI）'
-      id: Bitwarden.Bitwarden
     # [Build Toolchain]
     - description: 'CMake（クロスプラットフォームのビルド生成ツール。C/C++の事実上標準）'
       id: Kitware.CMake
