@@ -193,7 +193,7 @@ phase2:
   packageManagers:
     # --- VSCode (拡張機能) ---
     - managerName: 'vscode'
-      checkCommand: powershell -NoProfile -Command "if(code --list-extensions 2>$null | Select-String -SimpleMatch '{package}'){ exit 0 } else { exit 1 }"
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
       installCommand: 'code --install-extension {package}'
       packages:
         # [UI / 表示]

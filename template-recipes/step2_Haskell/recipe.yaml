@@ -188,23 +188,55 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
-    # --- ghcup: GHC（バージョン指定） ---
-    - managerName: 'ghcup-ghc'
-      checkCommand: "powershell -NoProfile -Command \"ghcup whereis ghc {package} *> $null; if($LASTEXITCODE -eq 0){ exit 0 } else { exit 1 }\""
-      installCommand: 'ghcup install ghc {package} && ghcup set ghc {package}'
+    # --- rustup: ツールチェーン ---
+    - managerName: 'rustup-toolchain'
+      checkCommand: 'rustup toolchain list | findstr /b /i "{package}-"'
+      installCommand: 'rustup toolchain install {package}'
       packages:
-        - { name: "9.8.2" }
+        - { name: stable }
+        - { name: nightly }
 
-    # --- ghcup: cabal ---
-    - managerName: 'ghcup-cabal'
-      checkCommand: "powershell -NoProfile -Command \"if(Get-Command cabal -ErrorAction SilentlyContinue){ exit 0 } else { exit 1 }\""
-      installCommand: 'ghcup install cabal && ghcup set cabal'
+    # --- rustup: コンポーネント (stable) ---
+    - managerName: 'rustup-component-stable'
+      checkCommand: 'rustup component list --installed --toolchain stable | findstr /b /i "{package}"'
+      installCommand: 'rustup component add {package} --toolchain stable'
       packages:
-        - { name: cabal }
+        - { name: rustfmt }
+        - { name: clippy }
+        - { name: rust-src }
+        - { name: llvm-tools-preview }
 
-    # --- ghcup: Haskell Language Server ---
-    - managerName: 'ghcup-hls'
-      checkCommand: "powershell -NoProfile -Command \"if(Get-Command haskell-language-server -ErrorAction SilentlyContinue){ exit 0 } else { exit 1 }\""
-      installCommand: 'ghcup install hls && ghcup set hls'
+    # --- rustup: ターゲット ---
+    - managerName: 'rustup-target'
+      checkCommand: 'rustup target list --installed | findstr /b /i {package}'
+      installCommand: 'rustup target add {package}'
       packages:
-        - { name: hls }
+        - { name: wasm32-unknown-unknown }
+        - { name: wasm32-wasi }
+        - { name: x86_64-unknown-linux-gnu }
+
+    # --- cargo: CLIツール (stable) ---
+    - managerName: 'cargo-stable'
+      checkCommand: 'cargo install --list | findstr /b /i /c:"{package} v"'
+      installCommand: 'cargo install --locked {package}'
+      packages:
+        - { name: cargo-edit }
+        - { name: cargo-audit }
+        - { name: cargo-outdated }
+        - { name: cargo-nextest }
+        - { name: cargo-llvm-cov }
+
+    # --- rustup: コンポーネント (nightly) ---
+    - managerName: 'rustup-component-nightly'
+      checkCommand: 'rustup component list --installed --toolchain nightly | findstr /b /i "{package}"'
+      installCommand: 'rustup component add {package} --toolchain nightly'
+      packages:
+        - { name: miri }
+        - { name: rust-src }
+
+    # --- cargo: CLIツール (nightly) ---
+    - managerName: 'cargo-nightly'
+      checkCommand: 'cargo +nightly install --list | findstr /b /i /c:"{package} v"'
+      installCommand: 'cargo +nightly install --locked {package}'
+      packages:
+        - { name: cargo-udeps }

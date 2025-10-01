@@ -193,7 +193,7 @@ phase2:
   packageManagers:
     # --- npm (グローバルNode.jsパッケージ) ---
     - managerName: 'npm'
-      checkCommand:  powershell -NoProfile -Command "npm ls -g --depth=0 {package} *> $null; if($LASTEXITCODE -eq 0){ exit 0 } else { exit 1 }"
+      checkCommand:  'npm list -g {package}'
       installCommand: 'npm install -g {package}'
       packages:
         # [パッケージマネージャ補助]

@@ -190,10 +190,10 @@ phase2:
   # =================================================================
   # ■ パッケージマネージャーごとの設定
   # =================================================================
-packageManagers:
+  packageManagers:
   # --- rustup (ツールチェーン) ---
   - managerName: 'rustup-toolchain'
-    checkCommand: "powershell -NoProfile -Command \"if(rustup toolchain list 2>$null | Select-String -SimpleMatch '{package}-'){ exit 0 } else { exit 1 }\""
+    checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
     installCommand: 'rustup toolchain install {package}'
     packages:
       - description: 'Rust 安定版ツールチェーン'
@@ -202,7 +202,7 @@ packageManagers:
         name: nightly
   # --- rustup (コンポーネント / stable) ---
   - managerName: 'rustup-component-stable'
-    checkCommand: "powershell -NoProfile -Command \"if(rustup component list --installed --toolchain stable 2>$null | Select-String -SimpleMatch '{package}'){ exit 0 } else { exit 1 }\""
+    checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
     installCommand: 'rustup component add {package} --toolchain stable'
     packages:
       - description: 'コード整形（rustfmt）'
@@ -215,7 +215,7 @@ packageManagers:
         name: llvm-tools-preview
   # --- rustup (ターゲット追加 / cross & WASM) ---
   - managerName: 'rustup-target'
-    checkCommand: "powershell -NoProfile -Command \"if(rustup target list --installed 2>$null | Select-String -SimpleMatch '{package}'){ exit 0 } else { exit 1 }\""
+    checkCommand: 'rustup target list --installed | findstr /b /i {package}'
     installCommand: 'rustup target add {package}'
     packages:
       - description: 'WASM（ブラウザ系）'
@@ -224,9 +224,9 @@ packageManagers:
         name: wasm32-wasi
       - description: 'Linux向けクロスビルド'
         name: x86_64-unknown-linux-gnu
-  # --- cargo (CLIツール / stable) ---
+  # --- rustup (ターゲット追加 / cross & WASM) ---
   - managerName: 'cargo-stable'
-    checkCommand: "powershell -NoProfile -Command \"if(cargo install --list 2>$null | Select-String -Pattern '^{package}\\s+v'){ exit 0 } else { exit 1 }\""
+    checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
     installCommand: 'cargo install --locked {package}'
     packages:
       - description: '依存追加/更新（cargo-edit）'
@@ -241,7 +241,7 @@ packageManagers:
         name: cargo-llvm-cov
   # --- rustup (コンポーネント / nightly：Miri) ---
   - managerName: 'rustup-component-nightly'
-    checkCommand: "powershell -NoProfile -Command \"if(rustup component list --installed --toolchain nightly 2>$null | Select-String -SimpleMatch '{package}'){ exit 0 } else { exit 1 }\""
+    checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
     installCommand: 'rustup component add {package} --toolchain nightly'
     packages:
       - description: '未定義動作検査 Miri 本体（cargo miri）'
@@ -250,7 +250,7 @@ packageManagers:
         name: rust-src
   # --- cargo (CLIツール / nightly専用) ---
   - managerName: 'cargo-nightly'
-    checkCommand: "powershell -NoProfile -Command \"if(cargo +nightly install --list 2>$null | Select-String -Pattern '^{package}\\s+v'){ exit 0 } else { exit 1 }\""
+    checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
     installCommand: 'cargo +nightly install --locked {package}'
     packages:
       - description: '未使用依存検出（nightly）'

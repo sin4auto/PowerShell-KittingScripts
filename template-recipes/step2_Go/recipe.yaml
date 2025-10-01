@@ -194,7 +194,7 @@ phase2:
     # --- go ---
     - managerName: 'go'
       # PATHに<leaf>があればOK（<leaf>は {package} の末尾名。@latest は除去）
-      checkCommand: powershell -NoProfile -Command "$l=(Split-Path '{package}' -Leaf)-replace('@latest$',''); if(Get-Command $l -ErrorAction SilentlyContinue){ exit 0 } else { exit 1 }"
+      checkCommand: "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$cmd = ('{package}'.Split('/')[-1]).Split('@')[0]; if (Get-Command $cmd -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }\""
       installCommand: 'go install {package}'
       packages:
         - description: 'Go言語サーバ'

@@ -192,7 +192,7 @@ phase2:
   # =================================================================
   packageManagers:
     - managerName: 'pip'
-      checkCommand: powershell -NoProfile -Command "uv pip show {package} *> $null; if($LASTEXITCODE -eq 0){ exit 0 } else { exit 1 }"
+      checkCommand: 'pip show {package}'
       installCommand: 'uv pip install {package} --system'
       packages:
         # [CLIツール群：どのプロジェクトでも使う]
