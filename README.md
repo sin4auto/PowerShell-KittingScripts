@@ -12,8 +12,8 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 
 - **Windows Updateの完全自動化**: 更新プログラムがなくなるまで、確認・インストール・再起動を無人で繰り返します。
 - **柔軟なアプリケーション管理**: `winget` を利用し、`recipe.yaml` に基づいてアプリの一括インストールや不要なプリインストールアプリの削除を行います。
-- **開発環境の自動構築**: `recipe.yaml` で定義された `npm` (Node.js) や `pip` (Python) などのパッケージマネージャーを通じて、開発用ライブラリを一括でインストールします。
-- **システム設定のデータ駆動化**: エクスプローラーの拡張子表示などのシステム設定を`recipe.yaml`に直接記述することで、スクリプトを編集することなく柔軟に設定を変更できます。
+- **開発環境の自動構築**: `recipe.yaml` で定義された `code` (VSCode拡張機能)、 `npm` (Node.js) 、 `pip` (Python) などのパッケージマネージャーを通じて、開発用ライブラリを一括でインストールします。
+- **設定ファイルによる柔軟なシステム構築**: エクスプローラーの拡張子表示などのシステム設定を`recipe.yaml`に直接記述することで、スクリプトを編集することなく柔軟に設定を変更できます。
 - **安定した2フェーズ実行**: アプリインストール（フェーズ1）と、PATH環境変数を参照する開発ツール（フェーズ2）の間に再起動を挟むことで、安定した動作を保証します。
 - **対話的な操作メニュー**: `Start-Admin.bat` を実行するだけで、ユーザーはメニューから実行したい処理を簡単に選択できます。
 
@@ -70,23 +70,31 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 ```yaml
 phase2:
   packageManagers:
-    - managerName: 'npm'
-      checkCommand: 'npm list -g {package} --depth=0'
-      installCommand: 'npm install -g {package}'
+    # --- VSCode (拡張機能) ---
+    - managerName: 'vscode'
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
+      installCommand: 'code --install-extension {package}'
       packages:
-        - name: typescript
-        - name: eslint
-    - managerName: 'pip'
-      checkCommand: 'uv pip show {package}'
-      installCommand: 'uv pip install {package} --system'
-      packages:
-        - name: jupyterlab
-        - name: numpy
+        # [UI / 表示]
+        - description: 'UIの日本語化'
+          name: ms-ceintl.vscode-language-pack-ja
+        - description: 'インデントを色付け'
+          name: oderwat.indent-rainbow
+        - description: '全角スペースをハイライト'
+          name: mosapride.zenkaku
+        - description: '行末の不要な空白をハイライト'
+          name: shardulm94.trailing-spaces
+        - description: 'コメントを種類別に色分け'
+          name: aaron-bond.better-comments
+        - description: 'エラー/警告を行内表示'
+          name: usernamehw.errorlens
+        - description: 'EditorConfig（書式統一）'
+          name: EditorConfig.EditorConfig
 ```
 
 ## テンプレートレシピの活用
 
-`template-recipes/` ディレクトリには、フェーズや目的別に分かれたサンプル `recipe.yaml` が格納されています。`step1_only_basic/` のようにフェーズ1のみを含む最小構成から、`step2_Rust/` や `step2_VSCode/` のように開発言語・ツール別の拡張セットまで揃っています。環境構築のたたき台がほしい場合は、近い構成のテンプレートをリポジトリ直下にコピーし、自分の要件に合わせて調整してから `AutoSetup.ps1` を実行してください。
+`template-recipes/` ディレクトリには、フェーズや目的別に分かれたサンプル `recipe.yaml` が格納されています。`step1_only_basic/` のようにフェーズ1のみを含む最小構成から `step2_VSCode/`や`step2_Rust/` のように開発言語・ツール別の拡張セットまで揃っています。環境構築のたたき台がほしい場合は、近い構成のテンプレートをリポジトリ直下にコピーし、自分の要件に合わせて調整してから `AutoSetup.ps1` を実行してください。
 
 ## Winget Configurationとの違い
 
