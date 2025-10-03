@@ -188,55 +188,50 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
-    # --- rustup: ツールチェーン ---
-    - managerName: 'rustup-toolchain'
-      checkCommand: 'rustup toolchain list | findstr /b /i "{package}-"'
-      installCommand: 'rustup toolchain install {package}'
+    # --- ghcup: Haskell コンパイラ (GHC) ---
+    - managerName: 'ghcup-ghc'
+      checkCommand: 'ghcup whereis ghc {package}'
+      installCommand: 'ghcup install ghc {package}'
       packages:
-        - { name: stable }
-        - { name: nightly }
+        - description: 'GHC 9.8 系（最新安定版）'
+          name: 9.8.2
+        #- description: 'GHC 9.6 系（LTS / 保守互換）'
+        #  name: 9.6.5
 
-    # --- rustup: コンポーネント (stable) ---
-    - managerName: 'rustup-component-stable'
-      checkCommand: 'rustup component list --installed --toolchain stable | findstr /b /i "{package}"'
-      installCommand: 'rustup component add {package} --toolchain stable'
+    # --- ghcup: Cabal CLI ---
+    - managerName: 'ghcup-cabal'
+      checkCommand: 'cabal --version'
+      installCommand: 'ghcup install cabal latest'
       packages:
-        - { name: rustfmt }
-        - { name: clippy }
-        - { name: rust-src }
-        - { name: llvm-tools-preview }
+        - description: 'Cabal（公式ビルドシステム）'
+          name: latest
 
-    # --- rustup: ターゲット ---
-    - managerName: 'rustup-target'
-      checkCommand: 'rustup target list --installed | findstr /b /i {package}'
-      installCommand: 'rustup target add {package}'
+    # --- ghcup: Stack CLI ---
+    - managerName: 'ghcup-stack'
+      checkCommand: 'stack --version'
+      installCommand: 'ghcup install stack latest'
       packages:
-        - { name: wasm32-unknown-unknown }
-        - { name: wasm32-wasi }
-        - { name: x86_64-unknown-linux-gnu }
+        - description: 'Stack（プロジェクト/ビルドツール）'
+          name: latest
 
-    # --- cargo: CLIツール (stable) ---
-    - managerName: 'cargo-stable'
-      checkCommand: 'cargo install --list | findstr /b /i /c:"{package} v"'
-      installCommand: 'cargo install --locked {package}'
+    # --- ghcup: Haskell Language Server ---
+    - managerName: 'ghcup-hls'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''haskell-language-server-wrapper'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      installCommand: 'ghcup install hls latest'
       packages:
-        - { name: cargo-edit }
-        - { name: cargo-audit }
-        - { name: cargo-outdated }
-        - { name: cargo-nextest }
-        - { name: cargo-llvm-cov }
+        - description: 'Haskell Language Server（LSPサポート）'
+          name: latest
 
-    # --- rustup: コンポーネント (nightly) ---
-    - managerName: 'rustup-component-nightly'
-      checkCommand: 'rustup component list --installed --toolchain nightly | findstr /b /i "{package}"'
-      installCommand: 'rustup component add {package} --toolchain nightly'
+    # --- cabal: グローバルCLIユーティリティ ---
+    - managerName: 'cabal-global'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''{package}'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      installCommand: 'cabal update && cabal install --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
       packages:
-        - { name: miri }
-        - { name: rust-src }
-
-    # --- cargo: CLIツール (nightly) ---
-    - managerName: 'cargo-nightly'
-      checkCommand: 'cargo +nightly install --list | findstr /b /i /c:"{package} v"'
-      installCommand: 'cargo +nightly install --locked {package}'
-      packages:
-        - { name: cargo-udeps }
+        - description: 'コード整形（fourmolu）'
+          name: fourmolu
+        - description: '静的解析（hlint）'
+          name: hlint
+        - description: '関数/型検索（hoogle）'
+          name: hoogle
+        - description: '未使用コード検出（weeder）'
+          name: weeder
