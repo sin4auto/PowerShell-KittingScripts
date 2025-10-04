@@ -63,7 +63,7 @@ phase1:
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
 
-  # --- Winget (基本アプリケーションのインストール) ---
+# --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     - description: '最新版のPowerShell'
       id: Microsoft.PowerShell
@@ -114,9 +114,11 @@ phase1:
       id: GoLang.Go
     - description: 'OpenJDK 17（Temurin版のLTS JDK。ビルド/実行用の汎用Java環境）'
       id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'Haskell ツールチェーン (GHC/Cabal/Stack/HLSをghcupで管理)'
+      id: GHC.GHCup
     # [CLI Essentials]
     - description: 'ripgrep（超高速のgrep代替。`.gitignore`尊重・正規表現対応）'
-      id: BurntSushi.ripgrep
+      id: BurntSushi.ripgrep.MSVC
     - description: 'fd（扱いやすいfind代替。並列検索・パターン/拡張子フィルタ）'
       id: sharkdp.fd
     - description: 'fzf（インタラクティブなファジー検索。CLIやエディタから呼び出し可能）'
@@ -134,12 +136,12 @@ phase1:
       id: Insomnia.Insomnia
     # [System Utils]
     - description: 'Everything（超高速ファイル名検索。NTFSインデックスで即時ヒット）'
-      id: Voidtools.Everything
+      id: voidtools.Everything
     - description: 'ShareX（スクリーンショット/録画。自動アップロードやワークフローが豊富）'
       id: ShareX.ShareX
     # [Diagnostics / Internals]
     - description: 'Sysinternals Suite（Windows内部解析ツール群。ProcMon/ProcExp/Autoruns等）'
-      id: Microsoft.Sysinternals
+      id: Microsoft.SysinternalsSuite
     - description: 'Wireshark（ネットワークパケット解析。pcap/TLS/ディスプレイフィルタ対応）'
       id: WiresharkFoundation.Wireshark
     # [Fonts]

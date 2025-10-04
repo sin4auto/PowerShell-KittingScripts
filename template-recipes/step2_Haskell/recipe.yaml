@@ -62,8 +62,11 @@ phase1:
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [GHCupのインストール] ★★★ Haslellのみ ★★★
+    - description: 'Haskell ツールチェーン (GHCup) を公式スクリプトでインストール'
+      command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
 
-  # --- Winget (基本アプリケーションのインストール) ---
+# --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     - description: '最新版のPowerShell'
       id: Microsoft.PowerShell
@@ -114,9 +117,11 @@ phase1:
       id: GoLang.Go
     - description: 'OpenJDK 17（Temurin版のLTS JDK。ビルド/実行用の汎用Java環境）'
       id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'Haskell ツールチェーン (GHC/Cabal/Stack/HLSをghcupで管理)'
+      id: GHC.GHCup
     # [CLI Essentials]
     - description: 'ripgrep（超高速のgrep代替。`.gitignore`尊重・正規表現対応）'
-      id: BurntSushi.ripgrep
+      id: BurntSushi.ripgrep.MSVC
     - description: 'fd（扱いやすいfind代替。並列検索・パターン/拡張子フィルタ）'
       id: sharkdp.fd
     - description: 'fzf（インタラクティブなファジー検索。CLIやエディタから呼び出し可能）'
@@ -134,12 +139,12 @@ phase1:
       id: Insomnia.Insomnia
     # [System Utils]
     - description: 'Everything（超高速ファイル名検索。NTFSインデックスで即時ヒット）'
-      id: Voidtools.Everything
+      id: voidtools.Everything
     - description: 'ShareX（スクリーンショット/録画。自動アップロードやワークフローが豊富）'
       id: ShareX.ShareX
     # [Diagnostics / Internals]
     - description: 'Sysinternals Suite（Windows内部解析ツール群。ProcMon/ProcExp/Autoruns等）'
-      id: Microsoft.Sysinternals
+      id: Microsoft.SysinternalsSuite
     - description: 'Wireshark（ネットワークパケット解析。pcap/TLS/ディスプレイフィルタ対応）'
       id: WiresharkFoundation.Wireshark
     # [Fonts]
@@ -193,10 +198,10 @@ phase2:
       checkCommand: 'ghcup whereis ghc {package}'
       installCommand: 'ghcup install ghc {package}'
       packages:
-        - description: 'GHC 9.8 系（最新安定版）'
-          name: 9.8.2
-        #- description: 'GHC 9.6 系（LTS / 保守互換）'
-        #  name: 9.6.5
+        - description: 'GHC 9.12 系（最新安定版）'
+          name: 9.12.2
+        #- description: 'GHC 9.10 系（LTS / 保守互換）'
+        #  name: 9.10.2
 
     # --- ghcup: Cabal CLI ---
     - managerName: 'ghcup-cabal'
@@ -225,7 +230,7 @@ phase2:
     # --- cabal: グローバルCLIユーティリティ ---
     - managerName: 'cabal-global'
       checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''{package}'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
-      installCommand: 'cabal update && cabal install --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      installCommand: 'cabal update; cabal install --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
       packages:
         - description: 'コード整形（fourmolu）'
           name: fourmolu
