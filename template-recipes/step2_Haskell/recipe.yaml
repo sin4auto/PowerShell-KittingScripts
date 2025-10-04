@@ -213,7 +213,7 @@ phase2:
 
     # --- ghcup: Stack CLI ---
     - managerName: 'ghcup-stack'
-      checkCommand: 'stack --version'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''stack'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
       installCommand: 'ghcup install stack latest'
       packages:
         - description: 'Stack（プロジェクト/ビルドツール）'
