@@ -1,0 +1,28 @@
+{
+  // --- 末尾空白の可視化と自動削除（Trailing Spaces拡張の代替） ---
+  "editor.renderWhitespace": "trailing",      // 末尾の空白文字のみを可視化する
+  "files.trimTrailingWhitespace": true,       // ファイル保存時に末尾の空白を自動で削除する
+
+  // --- HTMLタグの自動補完＆同時リネーム（Auto Close/Auto Rename拡張の代替） ---
+  "html.autoClosingTags": true,               // 開きタグ入力時に対応する閉じタグを自動で挿入する
+  "editor.linkedEditing": true,               // 開閉タグの片方を編集したらもう片方も同時に更新する
+
+  // --- フォーマットと行末 ---
+  "editor.formatOnSave": true,                // 保存時に有効なフォーマッタでコード整形を実行する
+  "files.insertFinalNewline": true,           // 最終行の末尾に改行を自動で追加する（POSIX推奨スタイル）
+
+  // --- インデント関連 ---
+  "editor.tabSize": 4,                        // タブ幅を4に設定する（見た目のスペース数）
+  "editor.detectIndentation": true,           // 既存ファイルのインデントスタイル（タブ幅/スペース）を自動検出する
+
+  // --- Markdownプレビュー（操作感の同期） ---
+  "markdown.preview.scrollPreviewWithEditor": true,  // エディタをスクロールしたらプレビューも追従させる
+  "markdown.preview.scrollEditorWithPreview": true,  // プレビューをスクロールしたらエディタも追従させる
+
+  // --- Git差分（空白の扱い） ---
+  "diffEditor.ignoreTrimWhitespace": false,   // 末尾空白の追加・削除も差分として表示する（レビュー精度を優先）
+
+  // --- 言語別の推奨（必要なとき有効化） ---
+   "rust-analyzer.checkOnSave.command": "clippy",  // Rust：保存時にclippyで静的解析を走らせる
+   "python.analysis.typeCheckingMode": "basic"     // Python：Pylanceの型チェック強度（"off"|"basic"|"strict"）
+}

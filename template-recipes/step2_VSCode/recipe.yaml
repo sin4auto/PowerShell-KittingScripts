@@ -190,7 +190,6 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
-    # --- VSCode (拡張機能) ---
     - managerName: 'vscode'
       checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
       installCommand: 'code --install-extension {package}'
@@ -202,8 +201,6 @@ phase2:
           name: oderwat.indent-rainbow
         - description: '全角スペースをハイライト'
           name: mosapride.zenkaku
-        - description: '行末の不要な空白をハイライト'
-          name: shardulm94.trailing-spaces
         - description: 'コメントを種類別に色分け'
           name: aaron-bond.better-comments
         - description: 'エラー/警告を行内表示'
@@ -211,6 +208,8 @@ phase2:
         - description: 'EditorConfig（書式統一）'
           name: EditorConfig.EditorConfig
         # [ユーティリティ / Markdown]
+        - description: '印刷（コード/Markdown をブラウザ経由で印刷・PDF化）'
+          name: pdconsec.vscode-print
         - description: 'Markdown編集サポート'
           name: yzhang.markdown-all-in-one
         - description: 'MarkdownのMermaid記法'
@@ -221,10 +220,6 @@ phase2:
           name: gruntfuggly.todo-tree
         - description: 'ファイルパス入力補完'
           name: christian-kohler.path-intellisense
-        - description: 'HTMLタグのペア名を同時変更'
-          name: formulahendry.auto-rename-tag
-        - description: 'HTMLタグを自動で閉じる'
-          name: formulahendry.auto-close-tag
         - description: 'dotenvファイル支援'
           name: mikestead.dotenv
         # [コーディング支援（AI）]
@@ -276,13 +271,13 @@ phase2:
           name: haskell.haskell
         - description: 'Go言語サポート'
           name: golang.Go
+        - description: 'C#言語サポート'
+          name: ms-dotnettools.csharp
+        - description: 'Java言語サポート'
+          name: redhat.java
+        - description: 'PowerShell言語サポート'
+          name: ms-vscode.powershell
         - description: 'YAML言語サポート'
           name: redhat.vscode-yaml
         - description: 'TOMLサポート（Cargo/設定）'
           name: tamasfe.even-better-toml
-        - description: 'C#言語サポート'
-          name: ms-dotnettools.csharp
-        - description: 'PowerShell言語サポート'
-          name: ms-vscode.powershell
-        - description: 'Java言語サポート'
-          name: redhat.java
