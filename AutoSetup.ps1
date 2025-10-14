@@ -301,11 +301,8 @@ if ($setupPhase -eq '2') {
                 $checkCommand = $manager.checkCommand -replace '\{package\}', $packageName
                 # 生成した確認コマンドを実行する。
                 Invoke-Expression -Command $checkCommand
-                # 確認コマンドの終了コードが0の場合、パッケージはインストール済みと判断する。
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "-> [$($packageName)] はインストール済みです。スキップします。`n" -ForegroundColor Cyan
-                }
-                else {
+                # 確認コマンドの終了コードが0でない場合、パッケージは未インストールと判断してインストールを実行する。
+                if ($LASTEXITCODE -ne 0) {
                     Write-Host "-> [$($packageName)] をインストールします..."
                     # 設定ファイルの'installCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
                     $installCommand = $manager.installCommand -replace '\{package\}', $packageName
@@ -321,6 +318,9 @@ if ($setupPhase -eq '2') {
                         Write-Warning "-> インストールコマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
                         $script:failedItems.Add($errorMessage)
                     }
+                }
+                else {
+                    Write-Host "-> [$($packageName)] はインストール済みです。スキップします。`n" -ForegroundColor Cyan
                 }
             }
             Write-Host "--- $($manager.managerName) パッケージのインストールが完了しました ---" -ForegroundColor Green
