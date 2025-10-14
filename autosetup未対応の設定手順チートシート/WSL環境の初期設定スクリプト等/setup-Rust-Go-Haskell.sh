@@ -62,11 +62,24 @@ if ! command -v ghcup >/dev/null 2>&1; then
   export BOOTSTRAP_HASKELL_INSTALL_HLS=1
   curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | GHCUP_INSTALL_BASE_PREFIX="$HOME" sh
 
-  # GHCupは自動で .bashrc と .zshrc の両方に設定を追記しようとするので、
-  # .commonrc への手動追記は不要な場合が多い。念のため確認。
-  echo "--> GHCup installer modified shell configs automatically."
+  # GHCupのインストール後、手動でPATH設定を .commonrc に追記する (なければ)
+  GHCUP_PATH_SNIPPET='[ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env"'
+  if ! grep -qF "$GHCUP_PATH_SNIPPET" "$COMMONRC_FILE"; then
+    echo "--> Adding GHCup env to .commonrc"
+    echo -e '\n# Haskell (GHCup)' >> "$COMMONRC_FILE"
+    echo "$GHCUP_PATH_SNIPPET" >> "$COMMONRC_FILE"
+  fi
 else
   echo "==> Haskell (GHCup) is already installed."
 fi
+
+# 現在のシェルセッションに設定を反映させる
+if [ -f "$HOME/.ghcup/env" ]; then
+  source "$HOME/.ghcup/env"
+fi
+echo "GHC version:"
+ghc --version
+echo "Cabal version:"
+cabal --version
 
 echo "==> Programming Languages setup finished."
