@@ -139,7 +139,7 @@ phase1:
       id: ShareX.ShareX
     # [Diagnostics / Internals]
     - description: 'Sysinternals Suite（Windows内部解析ツール群。ProcMon/ProcExp/Autoruns等）'
-      id: Microsoft.Sysinternals.Suite
+      id: 9P7KNL5RWT25
     - description: 'Wireshark（ネットワークパケット解析。pcap/TLS/ディスプレイフィルタ対応）'
       id: WiresharkFoundation.Wireshark
 

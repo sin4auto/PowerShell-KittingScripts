@@ -117,8 +117,6 @@ phase1:
       id: GoLang.Go
     - description: 'OpenJDK 17（Temurin版のLTS JDK。ビルド/実行用の汎用Java環境）'
       id: EclipseAdoptium.Temurin.17.JDK
-    - description: 'Haskell ツールチェーン (GHC/Cabal/Stack/HLSをghcupで管理)'
-      id: GHC.GHCup
     # [CLI Essentials]
     - description: 'ripgrep（超高速のgrep代替。`.gitignore`尊重・正規表現対応）'
       id: BurntSushi.ripgrep.MSVC
@@ -144,17 +142,9 @@ phase1:
       id: ShareX.ShareX
     # [Diagnostics / Internals]
     - description: 'Sysinternals Suite（Windows内部解析ツール群。ProcMon/ProcExp/Autoruns等）'
-      id: Microsoft.SysinternalsSuite
+      id: 9P7KNL5RWT25
     - description: 'Wireshark（ネットワークパケット解析。pcap/TLS/ディスプレイフィルタ対応）'
       id: WiresharkFoundation.Wireshark
-    # [Fonts]
-    - description: 'JetBrains Mono（開発者向け等幅フォント。Ligature対応で可読性UP）'
-      id: JetBrains.Mono
-    - description: 'Cascadia Code（等幅フォント。ターミナル/コード表示向け、Ligature版あり）'
-      id: Microsoft.CascadiaCode
-    # [Dev Hub]
-    - description: 'Dev Home（Windows公式の開発者ハブ。Dev Drive/GitHub連携/WinGet導入支援）'
-      id: Microsoft.DevHome
 
   # --- Appx (不要なプリインストールアプリの削除) ---
   appxRemove:
