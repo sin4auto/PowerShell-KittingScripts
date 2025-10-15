@@ -213,7 +213,23 @@ phase2:
         name: wasm32-wasi
       - description: 'Linux向けクロスビルド'
         name: x86_64-unknown-linux-gnu
-  # --- rustup (ターゲット追加 / cross & WASM) ---
+      - description: 'macOS向けクロスビルド (Intel Mac)'
+        name: x86_64-apple-darwin
+      - description: 'macOS向けクロスビルド (Apple Silicon)'
+        name: aarch64-apple-darwin
+      - description: 'Windows向けクロスビルド (MSVC)'
+        name: x86_64-pc-windows-msvc
+      - description: 'Windows向けクロスビルド (GNU)'
+        name: x86_64-pc-windows-gnu
+      - description: 'ARMv7 Linux向けクロスビルド (Raspberry Piなど)'
+        name: armv7-unknown-linux-gnueabihf
+      - description: 'AArch64 Linux向けクロスビルド (ARMv8, Raspberry Pi 64bitなど)'
+        name: aarch64-unknown-linux-gnu
+      - description: 'Android ARMv7向けクロスビルド'
+        name: armv7-linux-androideabi
+      - description: 'Android AArch64向けクロスビルド'
+        name: aarch64-linux-android
+  # --- cargo (CLIツール / stable) ---
   - managerName: 'cargo-stable'
     checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
     installCommand: 'cargo install --locked {package}'
@@ -228,6 +244,8 @@ phase2:
         name: cargo-nextest
       - description: 'カバレッジ（llvm-cov統合）'
         name: cargo-llvm-cov
+      - description: 'ファイル変更監視・再実行'
+        name: cargo-watch
   # --- rustup (コンポーネント / nightly：Miri) ---
   - managerName: 'rustup-component-nightly'
     checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
