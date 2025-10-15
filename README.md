@@ -20,7 +20,7 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 ## 推奨ワークフロー
 
 1.  **OSのクリーンインストール**: Windows 11をクリーンインストールします。
-2.  **リポジトリの配置**: このリポジトリのファイルをPCの任意の場所（例: `C:\Work`）に配置します。
+2.  **リポジトリの配置**: このリポジトリをダウンロードし、フォルダをPCの任意の場所（例: `C:\Work`）に配置します。USBメモリ、外付けストレージ内で実行しても基本的に安全です。
 3.  **設定ファイルの編集**: `recipe.yaml` をテキストエディタで開き、不要な項目を行頭に `#` を付けてコメントアウトし、自分の好みに合わせて編集します。
 4.  **スクリプトの実行**:
     1.  `Start-Admin.bat` を**右クリック**し、「**管理者として実行**」を選択します。
@@ -35,7 +35,7 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 
 | ファイル名 | 役割 |
 |---|---|
-| `Start-Admin.bat` | **起点となるファイル。** 管理者権限を確認し、対話形式で実行するスクリプトを選択させます。（メモ帳などで開くと文字化けすることがありますが、実行には影響ありません） |
+| `Start-Admin.bat` | **起点となるファイル。** 管理者権限を確認し、対話形式で実行するスクリプトを選択させます。 |
 | `AutoWindowsUpdate.ps1` | Windows Updateを全自動で実行します。更新がなくなるまで、更新の確認・インストール・再起動を繰り返します。 |
 | `AutoSetup.ps1` | `recipe.yaml` に基づき、アプリのインストール、システム設定、開発環境の構築を2フェーズ（再起動を挟む）に分けて実行します。 |
 | `recipe.yaml` | **カスタマイズの中心。** インストールするアプリ、システム設定、開発パッケージなどを、コメント付きで分かりやすく定義します。 |
@@ -46,6 +46,23 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 ## カスタマイズ
 
 セットアップ内容は `recipe.yaml` を編集することで自由にカスタマイズできます。不要な項目は行頭に `#` を付けてコメントアウトしてください。
+
+## 実行場所ごとの注意点
+
+### ローカル固定ディスク（例: `C:` / `D:`）
+- 最も安全です。再起動後もパスが安定して参照できます。
+
+### USBメモリ／外付けストレージ
+- 基本的に安全ですが、再起動やログオン後も同じドライブレターでマウントされ続ける必要があります。
+- 取り外しやレター変更が発生するとフェーズ2や再開処理が開始できません。失敗した場合はドライブを接続し直し、手動で再実行してください。
+
+### Active Directory管理のファイルサーバー共有
+- UNCパス上でも実行できますが、共有への書き込み権限と安定した接続が必須です。
+- ログオン時に自動再接続されない環境ではタスクスケジューラがスクリプトを見つけられず失敗します。必要に応じてローカルにコピーしてから実行してください。
+
+### NAS共有
+- 基本的な制約はファイルサーバー共有と同じです。
+- NASのスリープや再接続遅延によりタスクが失敗することがあります。長時間処理が続く場合はローカルディスクでの実行を検討してください。
 
 ### フェーズ1 (`phase1`)
 
@@ -69,7 +86,6 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 ```yaml
 phase2:
   packageManagers:
-    # --- VSCode (拡張機能) ---
     - managerName: 'vscode'
       checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
       installCommand: 'code --install-extension {package}'
@@ -81,14 +97,23 @@ phase2:
           name: oderwat.indent-rainbow
         - description: '全角スペースをハイライト'
           name: mosapride.zenkaku
-        - description: '行末の不要な空白をハイライト'
-          name: shardulm94.trailing-spaces
         - description: 'コメントを種類別に色分け'
           name: aaron-bond.better-comments
         - description: 'エラー/警告を行内表示'
           name: usernamehw.errorlens
         - description: 'EditorConfig（書式統一）'
           name: EditorConfig.EditorConfig
+        # [ユーティリティ / Markdown]
+        - description: '印刷（コード/Markdown をブラウザ経由で印刷・PDF化）'
+          name: pdconsec.vscode-print
+        - description: 'Markdown編集サポート'
+          name: yzhang.markdown-all-in-one
+        - description: 'TODOコメントの一覧表示'
+          name: gruntfuggly.todo-tree
+        - description: 'ファイルパス入力補完'
+          name: christian-kohler.path-intellisense
+        - description: 'dotenvファイル支援'
+          name: mikestead.dotenv
 ```
 
 ## テンプレートレシピの活用
