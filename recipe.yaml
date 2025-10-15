@@ -1,9 +1,8 @@
 # ================================================================
 # Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
 # ================================================================
-# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。  
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
 # 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
- 
 # ----------------------------------------------------------------
 # ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
 # ----------------------------------------------------------------
@@ -64,7 +63,7 @@ phase1:
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
 
-  # --- Winget (基本アプリケーションのインストール) ---
+# --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     - description: '最新版のPowerShell'
       id: Microsoft.PowerShell
@@ -78,9 +77,71 @@ phase1:
       id: Microsoft.PowerToys
     - description: 'オンライン会議ツール'
       id: Zoom.Zoom
+    - description: 'バージョン管理システム'
+      id: Git.Git
+    - description: 'JavaScript実行環境 (長期安定版)'
+      id: OpenJS.NodeJS.LTS
+    - description: 'プログラミング言語 Python'
+      id: Python.Python.3.13
+    - description: '高速なPythonパッケージインストーラー'
+      id: astral-sh.uv
+    - description: '高機能コードエディタ'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
     - description: 'PDF閲覧ソフト'
       id: Adobe.Acrobat.Reader.64-bit
       options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [Terminal & Containers & Secrets]
+    - description: 'Windows Terminal（モダンなターミナル。タブ/ペイン/UTF-8/PowerShell/WSL連携に最適）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナ実行環境。WSL2統合・Kubernetesオプション・Compose同梱）'
+      id: Docker.DockerDesktop
+    # [Build Toolchain]
+    - description: 'CMake（クロスプラットフォームのビルド生成ツール。C/C++の事実上標準）'
+      id: Kitware.CMake
+    - description: 'Ninja（超高速ビルドツール。CMakeのジェネレータとして利用推奨）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（モダンC/C++/LLVMツールチェーン。clang/clang-cl/llvm-ar等を含む）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC/Windows SDK等のビルド環境。IDEなしの軽量セット）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [Runtimes / SDKs]
+    - description: '.NET SDK（最新系の .NET 開発用SDK。C#/F#/VB、`dotnet` CLI を含む）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'Rust ツールチェーン（rustupで安定版/ベータ/ナイトリーやコンポーネントを切替管理）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go言語ツールチェーン。`go` コマンドによるビルド/テスト/取得）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin版のLTS JDK。ビルド/実行用の汎用Java環境）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [CLI Essentials]
+    - description: 'ripgrep（超高速のgrep代替。`.gitignore`尊重・正規表現対応）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（扱いやすいfind代替。並列検索・パターン/拡張子フィルタ）'
+      id: sharkdp.fd
+    - description: 'fzf（インタラクティブなファジー検索。CLIやエディタから呼び出し可能）'
+      id: junegunn.fzf
+    - description: 'bat（シンタックスハイライト付きcat代替。行番号/プレビューが便利）'
+      id: sharkdp.bat
+    - description: 'eza（見やすいls代替。アイコン/ツリー/権限表示が強化）'
+      id: eza-community.eza
+    - description: 'jq（JSON処理CLI。フィルタ/整形/抽出に最適）'
+      id: jqlang.jq
+    # [Dev Tools]
+    - description: 'WinMerge（GUI差分・マージツール。ファイル/フォルダ比較、3-wayマージ）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（APIクライアント。REST/GraphQL・環境変数・テストに強い）'
+      id: Insomnia.Insomnia
+    # [System Utils]
+    - description: 'Everything（超高速ファイル名検索。NTFSインデックスで即時ヒット）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショット/録画。自動アップロードやワークフローが豊富）'
+      id: ShareX.ShareX
+    # [Diagnostics / Internals]
+    - description: 'Sysinternals Suite（Windows内部解析ツール群。ProcMon/ProcExp/Autoruns等）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークパケット解析。pcap/TLS/ディスプレイフィルタ対応）'
+      id: WiresharkFoundation.Wireshark
 
   # --- Appx (不要なプリインストールアプリの削除) ---
   appxRemove:
@@ -113,22 +174,91 @@ phase1:
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
-    # - description: 'フォト'
-    #   name: "*Microsoft.Windows.Photos*"
-    # - description: 'ペイント 3D'
-    #   name: "*Microsoft.MSPaint*"
-    # - description: 'ビデオエディター'
-    #   name: "*Clipchamp.Clipchamp*"
-    # - description: '複合現実ポータル'
-    #   name: "*Microsoft.MixedReality.Portal*"
-    # - description: 'ソリティア & カジュアルゲーム'
-    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
 # ----------------------------------------------------------------
 phase2:
-  # =================================================================
-  # ■ パッケージマネージャーごとの設定
-  # =================================================================
-  packageManagers: []
+  packageManagers:
+  # --- rustup (ツールチェーン) ---
+  - managerName: 'rustup-toolchain'
+    checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
+    installCommand: 'rustup toolchain install {package}'
+    packages:
+      - description: 'Rust 安定版ツールチェーン'
+        name: stable
+      - description: 'Rust ナイトリー版ツールチェーン'
+        name: nightly
+  # --- rustup (コンポーネント / stable) ---
+  - managerName: 'rustup-component-stable'
+    checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
+    installCommand: 'rustup component add {package} --toolchain stable'
+    packages:
+      - description: 'コード整形（rustfmt）'
+        name: rustfmt
+      - description: '静的解析（clippy）'
+        name: clippy
+      - description: '標準ライブラリのソース'
+        name: rust-src
+      - description: 'LLVMツール群（カバレッジ等）'
+        name: llvm-tools-preview
+  # --- rustup (ターゲット追加 / cross & WASM) ---
+  - managerName: 'rustup-target'
+    checkCommand: 'rustup target list --installed | findstr /b /i {package}'
+    installCommand: 'rustup target add {package}'
+    packages:
+      - description: 'WASM（ブラウザ系）'
+        name: wasm32-unknown-unknown
+      - description: 'WASI（サーバサイドWASM）'
+        name: wasm32-wasip1
+      - description: 'Linux向けクロスビルド'
+        name: x86_64-unknown-linux-gnu
+      - description: 'macOS向けクロスビルド (Intel Mac)'
+        name: x86_64-apple-darwin
+      - description: 'macOS向けクロスビルド (Apple Silicon)'
+        name: aarch64-apple-darwin
+      - description: 'Windows向けクロスビルド (MSVC)'
+        name: x86_64-pc-windows-msvc
+      - description: 'Windows向けクロスビルド (GNU)'
+        name: x86_64-pc-windows-gnu
+      - description: 'ARMv7 Linux向けクロスビルド (Raspberry Piなど)'
+        name: armv7-unknown-linux-gnueabihf
+      - description: 'AArch64 Linux向けクロスビルド (ARMv8, Raspberry Pi 64bitなど)'
+        name: aarch64-unknown-linux-gnu
+      - description: 'Android ARMv7向けクロスビルド'
+        name: armv7-linux-androideabi
+      - description: 'Android AArch64向けクロスビルド'
+        name: aarch64-linux-android
+  # --- cargo (CLIツール / stable) ---
+  - managerName: 'cargo-stable'
+    checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
+    installCommand: 'cargo install --locked {package}'
+    packages:
+      - description: '依存追加/更新（cargo-edit）'
+        name: cargo-edit
+      - description: '脆弱性監査（RustSec）'
+        name: cargo-audit
+      - description: '依存の更新状況'
+        name: cargo-outdated
+      - description: '高速テストランナー'
+        name: cargo-nextest
+      - description: 'カバレッジ（llvm-cov統合）'
+        name: cargo-llvm-cov
+      - description: 'ファイル変更監視・再実行'
+        name: cargo-watch
+  # --- rustup (コンポーネント / nightly：Miri) ---
+  - managerName: 'rustup-component-nightly'
+    checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
+    installCommand: 'rustup component add {package} --toolchain nightly'
+    packages:
+      - description: '未定義動作検査 Miri 本体（cargo miri）'
+        name: miri
+      - description: '標準ライブラリのソース（Miri用）'
+        name: rust-src
+  # --- cargo (CLIツール / nightly専用) ---
+  - managerName: 'cargo-nightly'
+    checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
+    installCommand: 'cargo +nightly install --locked {package}'
+    packages:
+      - description: '未使用依存検出（nightly）'
+        name: cargo-udeps

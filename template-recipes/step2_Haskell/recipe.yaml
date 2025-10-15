@@ -62,7 +62,7 @@ phase1:
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
-    # [GHCupのインストール] ★★★ Haslellのみ ★★★
+    # [GHCupのインストール] ★★★ HasKellのみ ★★★
     - description: 'Haskell ツールチェーン (GHCup) を公式スクリプトでインストール'
       command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
 
@@ -109,8 +109,6 @@ phase1:
     - description: 'Visual Studio 2022 Build Tools（MSVC/Windows SDK等のビルド環境。IDEなしの軽量セット）'
       id: Microsoft.VisualStudio.2022.BuildTools
     # [Runtimes / SDKs]
-    - description: '.NET SDK（最新系の .NET 開発用SDK。C#/F#/VB、`dotnet` CLI を含む）'
-      id: Microsoft.DotNet.SDK.9
     - description: 'Rust ツールチェーン（rustupで安定版/ベータ/ナイトリーやコンポーネントを切替管理）'
       id: Rustlang.Rustup
     - description: 'Go（Go言語ツールチェーン。`go` コマンドによるビルド/テスト/取得）'
