@@ -2,7 +2,7 @@
 
 Windows PCのキッティング（初期セットアップ）から開発環境構築までの一連の作業を自動化するPowerShellスクリプト群です。
 
-**`recipe.yaml`** に設定を定義するだけで、手作業による時間のかかるセットアップ作業を大幅に削減し、誰でも一貫性のある環境を迅速に構築できます。
+**`recipe.yaml`** に設定を定義し **`Start-Admin.bat`** を管理者権限で実行するだけで、手作業による時間のかかるセットアップ作業を大幅に削減し、誰でも一貫性のある環境を迅速に構築できます。
 
 <p align="center">
 <img src="./images/launcher-screenshot.png" alt="コマンドプロンプトのランチャー画面" width="70%">
@@ -41,7 +41,7 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 | `recipe.yaml` | **カスタマイズの中心。** インストールするアプリ、システム設定、開発パッケージなどを、コメント付きで分かりやすく定義します。 |
 | `template-recipes/` | `recipe.yaml` のテンプレート集。代表的な構成例をフォルダ単位で保持し、必要に応じてコピーして利用できます。 |
 | `キッティング手順.txt` | 自動化スクリプトを使用する際の、手動作業を含めた全体的な作業フローのメモです。 |
-| `ツール未対応の設定手順覚書き/` | スクリプトによる自動化範囲外の、各種手動設定に関する手順書が格納されています。（例: Hyper-V、WSL2のセットアップなど） |
+| `AutoSetup未対応の設定手順チートシート/` | スクリプトによる自動化範囲外の、各種手動設定に関する手順書が格納されています。（例: Hyper-V、WSL2のセットアップなど） |
 
 ## カスタマイズ
 
@@ -139,3 +139,146 @@ Microsoftが提供する `winget configuration` は、宣言的な環境構築�
 ## ライセンス
 
 このプロジェクトは [MIT License](LICENSE) の下で公開されています。
+
+---
+# Windows PC Kitting Automation Scripts (English)
+
+This repository provides a collection of PowerShell scripts that automate the entire workflow from Windows PC kitting (initial provisioning) to development environment setup.
+
+Define your settings in **`recipe.yaml`** and simply run **`Start-Admin.bat`** with administrative privileges to dramatically cut down on time-consuming manual setup while letting anyone build a consistent environment quickly.
+
+<p align="center">
+<img src="./images/launcher-screenshot.png" alt="Launcher menu in Command Prompt" width="70%">
+</p>
+
+## Key Features
+
+- **Fully automated Windows Update**: Checks, installs, and reboots unattended until no updates remain.
+- **Flexible application management**: Leverages `winget` to batch-install apps and remove unwanted preinstalled software based on `recipe.yaml`.
+- **Automated development environment provisioning**: Installs development libraries at once via package managers defined in `recipe.yaml`, such as `code` (VS Code extensions), `npm` (Node.js), and `pip` (Python).
+- **Configuration-driven system setup**: Describe system tweaks directly in `recipe.yaml`—for example, file extension visibility—so you can adjust behavior without editing scripts.
+- **Reliable two-phase execution**: Inserts a reboot between the app installation phase and the development tool phase to ensure stable behavior.
+- **Interactive menu-driven experience**: Running `Start-Admin.bat` lets users choose tasks from a simple menu with minimal PowerShell knowledge.
+
+## Recommended Workflow
+
+1.  **Perform a clean OS installation**: Install Windows 11 fresh.
+2.  **Place the repository**: Download this repository and put the folder anywhere on the PC (e.g., `C:\Work`). It also runs safely from a USB drive or other external storage.
+3.  **Edit the configuration file**: Open `recipe.yaml` in a text editor. Comment out unnecessary entries with `#` and tailor it to your preferences.
+4.  **Run the scripts**:
+    1.  Right-click `Start-Admin.bat` and choose **Run as administrator**.
+    2.  From the menu, select `1. AutoWindowsUpdate` to bring the OS fully up to date (**strongly recommended**).
+    3.  After it finishes, run `Start-Admin.bat` as administrator again.
+    4.  Select `2. AutoSetup` from the menu to begin app installation and environment provisioning.
+5.  **Final checks**:
+    - After all automated tasks finish, restart the PC manually once.
+    - Open Windows Update and Device Manager to confirm there are no missing updates or unknown devices.
+
+## Script Structure
+
+| File Name | Role |
+|---|---|
+| `Start-Admin.bat` | **Entry point.** Confirms administrative privileges and lets you pick scripts interactively. |
+| `AutoWindowsUpdate.ps1` | Runs Windows Update end-to-end. Repeats checking, installing, and rebooting until nothing remains. |
+| `AutoSetup.ps1` | Executes app installation, system tweaks, and development environment setup in two phases (with a reboot in between) based on `recipe.yaml`. |
+| `recipe.yaml` | **Customization hub.** Defines apps to install, system settings, development packages, and more with explanatory comments. |
+| `template-recipes/` | Template collection for `recipe.yaml`. Stores representative examples arranged by folder so you can copy and adapt them. |
+| `キッティング手順.txt` | Notes covering the full operational flow, including manual steps when using the automation scripts. |
+| `AutoSetup未対応の設定手順チートシート/` | Guides for manual tasks outside the automation scope (e.g., Hyper-V, WSL2 setup). |
+
+## Customization
+
+You can freely customize the setup by editing `recipe.yaml`. Comment out any unnecessary entries with `#`.
+
+## Location-Specific Considerations
+
+### Local fixed drives (e.g., `C:` / `D:`)
+- Safest option. Paths remain stable after reboots.
+
+### USB drives / external storage
+- Generally safe, but the volume must stay mounted under the same drive letter after reboots or logons.
+- If the drive is removed or the letter changes, phase 2 or resume processing cannot start. Reattach the drive and rerun manually if a failure occurs.
+
+### Active Directory-managed file shares
+- Works over UNC paths, but requires write permissions and a stable connection.
+- In environments where the share does not reconnect automatically on logon, Task Scheduler cannot find the scripts. Copy them locally first if needed.
+
+### NAS shares
+- Follow constraints similar to file shares.
+- NAS sleep or reconnection delays may cause tasks to fail. When running long processes, consider executing from a local disk.
+
+### Phase 1 (`phase1`)
+
+Defines the fundamental system setup that runs before the reboot.
+
+- `windowsSettings`: Describe system tweaks (including registry edits) with `description` and `command`.
+- `wingetInstall`: List `winget` app IDs and optional install arguments.
+- `appxRemove`: List the built-in Windows app names (supports wildcards) you want to remove.
+
+### Phase 2 (`phase2`)
+
+Defines developer-oriented package installation executed after the reboot.
+
+- `packageManagers`: List multiple package managers as objects.
+  - `managerName`: Label shown in logs (e.g., 'npm', 'pip').
+  - `checkCommand`: Command used to verify whether a package is installed. `{package}` is substituted with the package name.
+  - `installCommand`: Command used to install a package. `{package}` is replaced accordingly.
+  - `packages`: Array of packages to install with that manager.
+
+**Example configuration (`recipe.yaml`):**
+```yaml
+phase2:
+  packageManagers:
+    - managerName: 'vscode'
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
+      installCommand: 'code --install-extension {package}'
+      packages:
+        # [UI / Display]
+        - description: 'Japanese UI localization'
+          name: ms-ceintl.vscode-language-pack-ja
+        - description: 'Colorize indentation'
+          name: oderwat.indent-rainbow
+        - description: 'Highlight full-width spaces'
+          name: mosapride.zenkaku
+        - description: 'Colorize comments by type'
+          name: aaron-bond.better-comments
+        - description: 'Inline error / warning display'
+          name: usernamehw.errorlens
+        - description: 'EditorConfig (format consistency)'
+          name: EditorConfig.EditorConfig
+        # [Utilities / Markdown]
+        - description: 'Print via browser to paper / PDF'
+          name: pdconsec.vscode-print
+        - description: 'Markdown authoring support'
+          name: yzhang.markdown-all-in-one
+        - description: 'TODO comment overview'
+          name: gruntfuggly.todo-tree
+        - description: 'File path completion'
+          name: christian-kohler.path-intellisense
+        - description: 'dotenv support'
+          name: mikestead.dotenv
+```
+
+## Using Template Recipes
+
+The `template-recipes/` directory contains sample `recipe.yaml` files grouped by phase and purpose. They range from minimal configurations such as `step1_only_basic/`, to developer-focused setups like `step1_only_dev/`, and language/tool-specific add-ons like `step2_VSCode/` or `step2_Rust/`. Copy the template closest to your desired environment to the repository root, adjust it to your needs, and then run `AutoSetup.ps1`.
+
+## How This Differs from Winget Configuration
+
+Microsoft's `winget configuration` is a powerful declarative option, but this project offers several unique capabilities to automate a specific workflow more deeply.
+
+1.  **Automated Windows Update Loop**
+    While `winget configuration` typically runs once, `AutoWindowsUpdate.ps1` **autonomously loops through "check for updates → install → reboot" until no updates remain.** It leverages Task Scheduler so that once invoked, it continues unattended until the system is fully patched.
+
+2.  **Strict Two-Phase Execution for Stability**
+    `winget configuration` can handle reboots, but this project **guarantees avoidance of PATH-related issues by architecting a strict two-phase flow with an enforced reboot between "system changes" and "developer tool installation".** That prevents scenarios where commands such as `npm` or `uv` are unavailable in phase 2.
+
+3.  **Interactive Menu-Driven User Experience**
+    `winget configuration` is command-line only, whereas this project provides a simple menu starting from `Start-Admin.bat`. Even users unfamiliar with PowerShell can intuitively follow "1. Update first" → "2. Then run setup".
+
+4.  **Easily Extensible Package Manager Definitions**
+    Installation logic for package managers like `npm` or `pip` is defined directly in `recipe.yaml`. Users just specify `checkCommand` and `installCommand` in the configuration to **add new managers such as `cargo` (Rust) without touching the scripts.** This delivers high maintainability by letting you extend the toolchain to match project needs.
+
+## License
+
+This project is released under the [MIT License](LICENSE).
