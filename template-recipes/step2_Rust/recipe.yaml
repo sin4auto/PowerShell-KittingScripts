@@ -208,7 +208,7 @@ phase2:
       - description: 'WASM（ブラウザ系）'
         name: wasm32-unknown-unknown
       - description: 'WASI（サーバサイドWASM）'
-        name: wasm32-wasi
+        name: wasm32-wasip1
       - description: 'Linux向けクロスビルド'
         name: x86_64-unknown-linux-gnu
       - description: 'macOS向けクロスビルド (Intel Mac)'
