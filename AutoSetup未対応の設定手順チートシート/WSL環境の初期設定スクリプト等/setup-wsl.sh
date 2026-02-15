@@ -26,57 +26,6 @@ sudo apt-get install -y build-essential git curl wget unzip ca-certificates gnup
 #---- gitのデフォルトブランチをmainにする ----#
 git config --global init.defaultBranch main
 
-#---- Zsh & Oh My Zsh ----#
-echo "==> Install Zsh & Oh My Zsh"
-if ! command -v zsh >/dev/null 2>&1; then
-    sudo apt-get install -y zsh
-fi
-
-if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-  echo "--> Installing Oh My Zsh..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-else
-  echo "--> Oh My Zsh is already installed."
-fi
-
-#---- Zsh必須プラグイン (autosuggestions & syntax-highlighting) ----#
-echo "==> Install essential Zsh plugins"
-# zsh-autosuggestions (コマンド履歴から候補を薄く表示)
-ZSH_AUTOSUGGESTIONS_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
-if [[ ! -d "$ZSH_AUTOSUGGESTIONS_DIR" ]]; then
-  echo "--> Cloning zsh-autosuggestions..."
-  git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_DIR"
-else
-  echo "--> zsh-autosuggestions is already cloned."
-fi
-
-# zsh-syntax-highlighting (コマンドの構文をハイライト)
-ZSH_SYNTAX_HIGHLIGHTING_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-if [[ ! -d "$ZSH_SYNTAX_HIGHLIGHTING_DIR" ]]; then
-  echo "--> Cloning zsh-syntax-highlighting..."
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_SYNTAX_HIGHLIGHTING_DIR"
-else
-  echo "--> zsh-syntax-highlighting is already cloned."
-fi
-
-# .zshrcのプラグイン設定を更新 (冪等性を担保)
-if [[ -f "$HOME/.zshrc" ]]; then
-  # zsh-autosuggestionsを有効化 (まだ設定されていない場合)
-  if ! grep -q "zsh-autosuggestions" "$HOME/.zshrc"; then
-    echo "--> Adding zsh-autosuggestions to .zshrc plugins"
-    sed -i '/^plugins=(/ s/)$/ zsh-autosuggestions)/' "$HOME/.zshrc"
-  else
-    echo "--> zsh-autosuggestions already enabled in .zshrc."
-  fi
-  # zsh-syntax-highlightingを有効化 (まだ設定されていない場合)
-  if ! grep -q "zsh-syntax-highlighting" "$HOME/.zshrc"; then
-    echo "--> Adding zsh-syntax-highlighting to .zshrc plugins"
-    sed -i '/^plugins=(/ s/)$/ zsh-syntax-highlighting)/' "$HOME/.zshrc"
-  else
-    echo "--> zsh-syntax-highlighting already enabled in .zshrc."
-  fi
-fi
-
 #---- nvm & Node.js(LTS) ----#
 echo "==> Install nvm & Node.js"
 if ! command -v nvm >/dev/null 2>&1; then
@@ -117,43 +66,41 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 uv --version
 
-#---- 共通設定ファイル (.commonrc) のセットアップ ----#
-echo "==> Setting up common config file (~/.commonrc) for both bash and zsh"
-COMMONRC_FILE="$HOME/.commonrc"
-touch "$COMMONRC_FILE"
+#---- bash設定ファイル (.bashrc) のセットアップ ----#
+echo "==> Setting up bash config (~/.bashrc)"
+BASHRC_FILE="$HOME/.bashrc"
+touch "$BASHRC_FILE"
 
-# pyenv の設定を .commonrc に書き込む (なければ)
-if ! grep -q 'PYENV_ROOT' "$COMMONRC_FILE"; then
-  echo -e "\n# pyenv settings" >> "$COMMONRC_FILE"
-  echo 'export PYENV_ROOT="$HOME/.pyenv"' >> "$COMMONRC_FILE"
-  echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> "$COMMONRC_FILE"
-  echo 'eval "$(pyenv init -)"' >> "$COMMONRC_FILE"
+# 既存 managed block を削除してから再生成することで、内容変更時も自動更新する
+sed -i '/^### setup-wsl.sh managed block: pyenv\/nvm\/uv ###$/,/^### end setup-wsl.sh managed block ###$/d' "$BASHRC_FILE"
+
+cat >> "$BASHRC_FILE" <<'EOF'
+
+### setup-wsl.sh managed block: pyenv/nvm/uv ###
+export PYENV_ROOT="$HOME/.pyenv"
+case ":$PATH:" in
+  *":$PYENV_ROOT/bin:"*) ;;
+  *) export PATH="$PYENV_ROOT/bin:$PATH" ;;
+esac
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init - bash)"
 fi
 
-# nvm の設定を .commonrc に書き込む (なければ)
-if ! grep -q 'NVM_DIR' "$COMMONRC_FILE"; then
-  echo -e "\n# nvm settings" >> "$COMMONRC_FILE"
-  echo 'export NVM_DIR="$HOME/.nvm"' >> "$COMMONRC_FILE"
-  echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> "$COMMONRC_FILE"
+export NVM_DIR="$HOME/.nvm"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  . "$NVM_DIR/nvm.sh"
 fi
 
-# uv の PATH設定を .commonrc に書き込む (なければ)
-if ! grep -q '.local/bin' "$COMMONRC_FILE"; then
-  echo -e "\n# Add ~/.local/bin to PATH (for uv, etc.)" >> "$COMMONRC_FILE"
-  echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$COMMONRC_FILE"
-fi
-
-# .bashrc と .zshrc の両方から .commonrc を読み込む設定
-for SHELL_RC_FILE in "$HOME/.bashrc" "$HOME/.zshrc"; do
-  if [ -f "$SHELL_RC_FILE" ] && ! grep -q ".commonrc" "$SHELL_RC_FILE"; then
-    echo "--> Adding .commonrc source to $SHELL_RC_FILE"
-    echo -e '\n# Load common settings\nif [ -f ~/.commonrc ]; then\n    . ~/.commonrc\nfi' >> "$SHELL_RC_FILE"
-  fi
-done
+case ":$PATH:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
+### end setup-wsl.sh managed block ###
+EOF
 
 echo ""
 echo "✅ All environment setup is complete!"
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo "!!! PLEASE CLOSE AND RE-OPEN YOUR WSL TERMINAL to start    !!!"
-echo "!!! using zsh with the new development environment.        !!!"
+echo "!!! using bash with the new development environment.       !!!"
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
