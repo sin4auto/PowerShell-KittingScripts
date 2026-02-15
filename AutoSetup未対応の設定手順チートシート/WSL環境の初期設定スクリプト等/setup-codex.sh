@@ -5,7 +5,7 @@ echo "==> Codex setup started"
 
 #---- nvm環境を読み込む ----#
 export NVM_DIR="$HOME/.nvm"
-# shellcheck disable=SC1090
+# shellcheck disable=SC1090,SC1091
 [[ -s "$NVM_DIR/nvm.sh" ]] && . "$NVM_DIR/nvm.sh"
 
 #---- Codex CLI ----#

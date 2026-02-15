@@ -1,3 +1,3 @@
-curl -sSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/autosetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-wsl.sh | bash
-curl -sSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/autosetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-Rust-Go-Haskell.sh | bash
-curl -sSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/autosetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-codex.sh | bash
+curl -fsSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/autosetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-wsl.sh | bash
+curl -fsSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/autosetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-Rust-Go-Haskell.sh | bash
+curl -fsSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/autosetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-codex.sh | bash

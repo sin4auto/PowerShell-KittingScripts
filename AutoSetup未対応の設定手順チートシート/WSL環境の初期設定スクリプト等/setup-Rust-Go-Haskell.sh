@@ -16,7 +16,7 @@ if ! command -v cargo >/dev/null 2>&1; then
   # RustのPATH設定を .commonrc に書き込む (なければ)
   if ! grep -q "$HOME/.cargo/bin" "$COMMONRC_FILE"; then
     echo -e '\n# Rust (cargo) path' >> "$COMMONRC_FILE"
-    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> "$COMMONRC_FILE"
+    echo "export PATH=\"\$HOME/.cargo/bin:\$PATH\"" >> "$COMMONRC_FILE"
   fi
 else
   echo "==> Rust is already installed. Updating..."
@@ -63,7 +63,7 @@ if ! command -v ghcup >/dev/null 2>&1; then
   curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | GHCUP_INSTALL_BASE_PREFIX="$HOME" sh
 
   # GHCupのインストール後、手動でPATH設定を .commonrc に追記する (なければ)
-  GHCUP_PATH_SNIPPET='[ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env"'
+  GHCUP_PATH_SNIPPET="[ -f \"\$HOME/.ghcup/env\" ] && source \"\$HOME/.ghcup/env\""
   if ! grep -qF "$GHCUP_PATH_SNIPPET" "$COMMONRC_FILE"; then
     echo "--> Adding GHCup env to .commonrc"
     echo -e '\n# Haskell (GHCup)' >> "$COMMONRC_FILE"
@@ -75,6 +75,7 @@ fi
 
 # 現在のシェルセッションに設定を反映させる
 if [ -f "$HOME/.ghcup/env" ]; then
+  # shellcheck disable=SC1091
   source "$HOME/.ghcup/env"
 fi
 echo "GHC version:"
