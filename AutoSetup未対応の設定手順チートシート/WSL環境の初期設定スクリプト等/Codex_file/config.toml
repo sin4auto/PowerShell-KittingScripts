@@ -1,0 +1,57 @@
+# GPT-5.3 Codex向け: 最小MCPプロファイル
+# 常時ON（2つ）: OpenAI Docs MCP / Context7
+# 必要時のみON（3つ）: GitHub / Playwright / Linear
+
+model = "gpt-5.3-codex"
+model_reasoning_effort = "high"
+personality = "pragmatic"
+
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+network_access = true
+web_search = "live"
+# リモートMCPのログイン時にRMCP対応が必要な場合はコメント解除:
+# experimental_use_rmcp_client = true
+
+# --- 常時ON ---
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+transport = "stdio"
+startup_timeout_ms = 20000
+# 任意（レート上限を上げたい場合）:
+# [mcp_servers.context7.env]
+# CONTEXT7_API_KEY = "YOUR_CONTEXT7_API_KEY"
+
+# --- 必要時のみON（デフォルト無効） ---
+[mcp_servers.github]
+command = "docker"
+args = [
+  "run",
+  "-i",
+  "--rm",
+  "-e",
+  "GITHUB_PERSONAL_ACCESS_TOKEN",
+  "-e",
+  "GITHUB_READ_ONLY=1",
+  "-e",
+  "GITHUB_TOOLSETS=repos,issues,pull_requests,actions",
+  "ghcr.io/github/github-mcp-server"
+]
+transport = "stdio"
+disabled = true
+# 有効化前にシェル環境変数でトークンを設定（このファイルへ直書きしない）:
+# export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]
+transport = "stdio"
+disabled = true
+
+[mcp_servers.linear]
+url = "https://mcp.linear.app/mcp"
+disabled = true
