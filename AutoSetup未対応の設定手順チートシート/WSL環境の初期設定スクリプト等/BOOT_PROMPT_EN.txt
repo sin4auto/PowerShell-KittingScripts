@@ -1,1 +1,0 @@
-Read $HOME/.codex/AGENTS.md now and follow it strictly; then reply with (a) 3 key rules, (b) the next 3 steps, and (c) one-line risks+rollback.
