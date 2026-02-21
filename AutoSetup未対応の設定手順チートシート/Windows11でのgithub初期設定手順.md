@@ -1,9 +1,10 @@
-# Windows11でのGit・GitHub初期設定手順（HTTPS接続版）
+# Windows11でのGit・GitHub初期設定手順（SSH接続版）
 
 ## 前提条件
-- Windows11がインストールされている
+- Windows 11がインストールされている
 - Gitがインストール済み（未インストールの場合は[Git公式サイト](https://git-scm.com/)からダウンロード）
 - GitHubアカウントを作成済み
+- Git Bash または PowerShell を利用できる
 
 ## 1. Gitの基本設定
 
@@ -28,41 +29,69 @@ git config --global init.defaultBranch main
 git config --global core.autocrlf true
 ```
 
-## 2. HTTPS認証の設定
+## 2. SSH認証の設定
 
-### Git Credential Managerの設定
+### 既存SSHキーの確認
 ```bash
-git config --global credential.helper manager-core
+ls -la ~/.ssh
 ```
 
-この設定により、初回認証後は認証情報が安全に保存され、毎回入力する必要がなくなります。
+`id_ed25519` と `id_ed25519.pub` が既にある場合は再作成不要です。ない場合は次へ進みます。
 
-### Personal Access Token（PAT）の作成
+### SSHキーを作成（推奨: Ed25519）
+```bash
+ssh-keygen -t ed25519 -C "your-email@example.com"
+```
+
+キー保存先は通常そのまま（`~/.ssh/id_ed25519`）で問題ありません。  
+パスフレーズは空でも動作しますが、設定を推奨します。
+
+### ssh-agentを起動して秘密鍵を登録
+```bash
+# Git Bash
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+```
+
+PowerShellで利用する場合:
+```powershell
+Get-Service ssh-agent | Set-Service -StartupType Automatic
+Start-Service ssh-agent
+ssh-add $env:USERPROFILE\.ssh\id_ed25519
+```
+
+### 公開鍵をGitHubに登録
+```bash
+# 公開鍵を表示
+cat ~/.ssh/id_ed25519.pub
+
+# クリップボードへコピー（Git Bash）
+clip < ~/.ssh/id_ed25519.pub
+```
 
 1. GitHubにログインし、右上のプロフィール画像をクリック
 2. **Settings** を選択
-3. 左側メニューから **Developer settings** を選択
-4. **Personal access tokens** → **Tokens (classic)** を選択
-5. **Generate new token** → **Generate new token (classic)** をクリック
-6. 以下の項目を設定：
-   - **Note**: トークンの用途を記入（例：Windows11 PC用）
-   - **Expiration**: 有効期限を設定（30日、60日、90日、1年、または無期限）
-   - **Select scopes**: 最低限 `repo` をチェック（プライベートリポジトリにアクセスする場合）
-7. **Generate token** をクリック
-8. 表示されたトークンをコピーして安全な場所に保存
+3. 左側メニューから **SSH and GPG keys** を選択
+4. **New SSH key** をクリック
+5. **Title** を入力（例: Windows11-PC）
+6. **Key type** は `Authentication Key` を選択
+7. **Key** に公開鍵を貼り付け
+8. **Add SSH key** をクリック
 
-**重要**: このトークンは再表示されないため、必ずコピーして保存してください。
+### SSH接続の確認
+```bash
+ssh -T git@github.com
+```
+
+初回はホスト確認が表示されるため `yes` を入力します。  
+`Hi <username>! You've successfully authenticated...` と表示されれば成功です。
 
 ## 3. 最初のリポジトリ操作
 
-### 既存のリポジトリをクローン
+### 既存のリポジトリをSSHでクローン
 ```bash
-git clone https://github.com/username/repository-name.git
+git clone git@github.com:username/repository-name.git
 ```
-
-初回クローン時に認証が求められた場合：
-- **Username**: GitHubのユーザー名
-- **Password**: 作成したPersonal Access Token（GitHubのパスワードではない）
 
 ### 新しいリポジトリの作成と初期化
 
@@ -90,14 +119,23 @@ git add README.md
 # 初回コミット
 git commit -m "Initial commit"
 
-# GitHubのリモートリポジトリと連携
-git remote add origin https://github.com/username/my-project.git
+# GitHubのリモートリポジトリと連携（SSH URL）
+git remote add origin git@github.com:username/my-project.git
 
 # メインブランチ名を設定
 git branch -M main
 
-# GitHubにプッシュ（初回認証が求められます）
+# GitHubにプッシュ
 git push -u origin main
+```
+
+### 既存ローカルリポジトリをHTTPSからSSHに切り替える
+```bash
+# 現在のURL確認
+git remote -v
+
+# SSH URLへ変更
+git remote set-url origin git@github.com:username/repository-name.git
 ```
 
 ## 4. よく使用するGitコマンド
@@ -162,42 +200,43 @@ git diff
 
 ### よくある問題と解決方法
 
-**認証エラー（remote: Support for password authentication was removed）**
-- GitHubはパスワード認証を廃止しているため、Personal Access Tokenを使用する必要があります
-- ユーザー名はGitHubユーザー名、パスワード欄にはPATを入力
+**`Permission denied (publickey)` が出る**
+- GitHubに公開鍵（`.pub`）を登録済みか確認
+- `ssh-add -l` で鍵がagentに読み込まれているか確認
+- 読み込まれていない場合は `ssh-add ~/.ssh/id_ed25519` を実行
 
-**403 Forbiddenエラー**
-- Personal Access Tokenの権限不足の可能性があります
-- GitHubでトークンの権限（scopes）を確認し、必要に応じて `repo` 権限を追加
+**`Host key verification failed` が出る**
+- `~/.ssh/known_hosts` に古い `github.com` 情報がある可能性があります
+- 以下で削除後、再接続して登録し直します
 
-**Credential Managerに古い認証情報が残っている場合**
 ```bash
-# Windows Credential Managerから古い認証情報を削除
-git config --global --unset credential.helper
-git config --global credential.helper manager-core
+ssh-keygen -R github.com
+ssh -T git@github.com
 ```
 
-**リモートURLの確認・変更**
+**HTTPS URLのままになっている**
 ```bash
-# 現在のリモートURL確認
 git remote -v
+git remote set-url origin git@github.com:username/repository-name.git
+```
 
-# リモートURLを変更（必要に応じて）
-git remote set-url origin https://github.com/username/repository-name.git
+**接続詳細を確認したい**
+```bash
+ssh -vT git@github.com
 ```
 
 ## 6. セキュリティのベストプラクティス
 
-### Personal Access Tokenの管理
-- **有効期限を設定**: 無期限は避け、定期的に更新する
-- **最小権限の原則**: 必要最小限の権限のみ付与
-- **安全な保存**: パスワードマネージャーなどで管理
-- **定期的な見直し**: 不要になったトークンは削除
+### SSHキーの管理
+- **パスフレーズを設定**: 秘密鍵が漏えいした場合のリスクを下げる
+- **秘密鍵を共有しない**: 共有すべきなのは公開鍵（`.pub`）のみ
+- **端末ごとに鍵を分離**: PCごとに別鍵を作成し、不要鍵はGitHubから削除
+- **定期的な見直し**: 使っていない鍵はGitHub側で無効化・削除
 
 ### 認証情報の保護
-- Personal Access Tokenをコードにハードコーディングしない
-- `.gitignore`ファイルで認証情報ファイルを除外
-- 共有PCでは作業後にCredential Managerから認証情報をクリア
+- 秘密鍵をコードやリポジトリに含めない
+- `.gitignore` で秘密情報ファイルを除外
+- 共有PCでは作業後に鍵を削除またはセッションを終了
 
 ## 7. 推奨設定
 
@@ -246,4 +285,5 @@ git commit -m "機能Aを追加"
 git push
 ```
 
-この手順でWindows11でのGit・GitHub初期設定（HTTPS接続）は完了です。HTTPS接続は設定が簡単で、企業環境でも広く使用されている安全な方法です。
+この手順でWindows11でのGit・GitHub初期設定（SSH接続）は完了です。  
+Git操作で毎回トークンを入力する必要がなく、日常開発の運用がシンプルになります。

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PYTHON_VERSION="3.12.4"
 NVM_INSTALL_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh"
+PYTHON_VERSION="3.12.4"
 PYENV_INSTALL_URL="https://pyenv.run"
 UV_INSTALL_URL="https://astral.sh/uv/install.sh"
 BLOCK_START="### setup-wsl.sh managed block: pyenv/nvm/uv ###"
@@ -81,9 +81,9 @@ configure_locale_and_timezone() {
   fi
 }
 
-  # 開発環境の土台となる基本パッケージを導入する
-  install_base_packages() {
-    local packages=(
+# 開発環境の土台となる基本パッケージを導入する
+install_base_packages() {
+  local packages=(
     # 必須ツール（セットアップと運用に直接必要）
     ca-certificates  # TLS 検証用のルート証明書ストア
     curl             # HTTP(S) 通信クライアント（パイプ実行向け）
@@ -110,7 +110,7 @@ configure_locale_and_timezone() {
     libncursesw5-dev # wide-char ncurses 開発ヘッダ（TUI）
     tk-dev           # Tk GUI 開発ヘッダ（例: tkinter）
     libgmp-dev       # GNU MP 多倍長演算ライブラリ開発ヘッダ
-    )
+  )
 
   log "Install base packages"
   apt_install "${packages[@]}"
