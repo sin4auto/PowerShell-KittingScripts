@@ -186,7 +186,9 @@ if ($setupPhase -ne '2') {
                     '--accept-package-agreements', '--accept-source-agreements', '--disable-interactivity'
                 )
                 if (-not ([string]::IsNullOrEmpty($wingetApp.options))) {
-                    $wingetArgs += $wingetApp.options.Split(' ')
+                    # 空白で単純に区切ると --override "..." の中身までばらばらになるため、
+                    # 二重引用符で囲まれた部分は1つの引数として扱う（引用符は外して渡す）。
+                    $wingetArgs += @([regex]::Matches($wingetApp.options, '"[^"]*"|\S+') | ForEach-Object { $_.Value.Trim('"') })
                     Write-Host "-> 個別オプション ($($wingetApp.options)) を適用します。" -ForegroundColor Yellow
                 }
                 winget @wingetArgs
