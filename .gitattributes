@@ -1,0 +1,12 @@
+# 改行コードのルールを固定する（どのPC・どの Git 設定で取り出しても同じ状態にする）
+
+# WSL（Linux）で実行するシェルスクリプトは、常に LF
+*.sh   text eol=lf
+
+# バッチファイルは CRLF + Shift-JIS で保存しているため、Git に一切変換させない
+*.bat  -text
+*.cmd  -text
+
+# 画像はバイナリとして扱う
+*.png  binary
+*.jpg  binary
