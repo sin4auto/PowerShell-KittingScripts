@@ -1,0 +1,3506 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>レシピ作成アプリ</title>
+<style>
+/* 色・余白は Microsoft の Fluent 2 デザインの考え方（4px 単位の余白、中立色＋ブランド色）にそろえている。 */
+:root {
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --surface-sunken: #fafafa;
+  --hover: #f0f0f0;
+  --border: #e0e0e0;
+  --border-strong: #c7c7c7;
+  --text: #242424;
+  --muted: #616161;
+  --subtle: #8a8a8a;
+  --brand-fill: #0f6cbd;
+  --brand-fill-hover: #115ea3;
+  --on-brand: #ffffff;
+  --brand-fg: #0f6cbd;
+  --brand-soft: #ebf3fc;
+  --danger: #c50f1f;
+  --danger-soft: #fdf3f4;
+  --success: #107c10;
+  --warn-bg: #fff9f5;
+  --warn-border: #f4bfab;
+  --warn-text: #8a3707;
+  --code-key: #0f6cbd;
+  --code-string: #8a3707;
+  --code-comment: #6e6e6e;
+  /* タブごとの色。どの種類の項目を見ているか、色で分かるようにする。 */
+  --c-settings: #0f6cbd;
+  --c-settings-soft: #ebf3fc;
+  --c-apps: #107c10;
+  --c-apps-soft: #f1faf1;
+  --c-remove: #c50f1f;
+  --c-remove-soft: #fdf3f4;
+  --c-packages: #6b3fa0;
+  --c-packages-soft: #f5f0fb;
+  --shadow-2: 0 0 2px rgba(0, 0, 0, .12), 0 1px 2px rgba(0, 0, 0, .14);
+  --shadow-16: 0 0 2px rgba(0, 0, 0, .12), 0 8px 16px rgba(0, 0, 0, .14);
+  --radius: 4px;
+  --radius-lg: 8px;
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+  --sans: "Segoe UI Variable Text", "Segoe UI", "Yu Gothic UI", "Meiryo UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1f1f1f;
+    --surface: #292929;
+    --surface-sunken: #242424;
+    --hover: #333333;
+    --border: #3d3d3d;
+    --border-strong: #5c5c5c;
+    --text: #ffffff;
+    --muted: #d1d1d1;
+    --subtle: #adadad;
+    --brand-fill: #115ea3;
+    --brand-fill-hover: #0f6cbd;
+    --on-brand: #ffffff;
+    --brand-fg: #62abf5;
+    --brand-soft: #082338;
+    --danger: #f1707b;
+    --danger-soft: #3b1c1f;
+    --success: #54b054;
+    --warn-bg: #411200;
+    --warn-border: #8a3707;
+    --warn-text: #faa06b;
+    --code-key: #62abf5;
+    --code-string: #faa06b;
+    --code-comment: #adadad;
+    --c-settings: #62abf5;
+    --c-settings-soft: #082338;
+    --c-apps: #54b054;
+    --c-apps-soft: #052505;
+    --c-remove: #f1707b;
+    --c-remove-soft: #3b1c1f;
+    --c-packages: #b9a2f0;
+    --c-packages-soft: #2a1f3d;
+    --shadow-2: 0 0 2px rgba(0, 0, 0, .24), 0 1px 2px rgba(0, 0, 0, .28);
+    --shadow-16: 0 0 2px rgba(0, 0, 0, .24), 0 8px 16px rgba(0, 0, 0, .28);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1f1f1f;
+  --surface: #292929;
+  --surface-sunken: #242424;
+  --hover: #333333;
+  --border: #3d3d3d;
+  --border-strong: #5c5c5c;
+  --text: #ffffff;
+  --muted: #d1d1d1;
+  --subtle: #adadad;
+  --brand-fill: #115ea3;
+  --brand-fill-hover: #0f6cbd;
+  --on-brand: #ffffff;
+  --brand-fg: #62abf5;
+  --brand-soft: #082338;
+  --danger: #f1707b;
+  --danger-soft: #3b1c1f;
+  --success: #54b054;
+  --warn-bg: #411200;
+  --warn-border: #8a3707;
+  --warn-text: #faa06b;
+  --code-key: #62abf5;
+  --code-string: #faa06b;
+  --code-comment: #adadad;
+  --c-settings: #62abf5;
+  --c-settings-soft: #082338;
+  --c-apps: #54b054;
+  --c-apps-soft: #052505;
+  --c-remove: #f1707b;
+  --c-remove-soft: #3b1c1f;
+  --c-packages: #b9a2f0;
+  --c-packages-soft: #2a1f3d;
+  --shadow-2: 0 0 2px rgba(0, 0, 0, .24), 0 1px 2px rgba(0, 0, 0, .28);
+  --shadow-16: 0 0 2px rgba(0, 0, 0, .24), 0 8px 16px rgba(0, 0, 0, .28);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/20px var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p { margin: 0; }
+[hidden] { display: none !important; }
+
+/* ---- ボタン・入力欄 ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: 600 14px/20px var(--sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--hover); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--brand-fill); border-color: transparent; color: var(--on-brand); }
+.btn.primary:hover { background: var(--brand-fill-hover); }
+.btn.subtle { border-color: transparent; background: transparent; color: var(--muted); font-weight: 400; }
+.btn.subtle:hover { background: var(--hover); color: var(--text); }
+.btn.danger { color: var(--danger); }
+.btn.small { min-height: 24px; padding: 1px 8px; font-size: 12px; font-weight: 400; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.field {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-strong);
+  border-bottom-color: var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: 14px/20px var(--sans);
+  min-width: 0;
+}
+.field.mono { font-family: var(--mono); font-size: 13px; }
+.field::placeholder { color: var(--subtle); }
+:focus-visible { outline: 2px solid var(--brand-fg); outline-offset: 2px; }
+.field:focus-visible { outline: none; border-bottom: 2px solid var(--brand-fg); padding-bottom: 4px; }
+input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--brand-fill); flex: none; cursor: pointer; }
+
+/* ---- 上部のバー ---- */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.app-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.app-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-lg);
+  background: var(--brand-fill);
+  color: var(--on-brand);
+  flex: none;
+}
+.app-icon svg { width: 20px; height: 20px; }
+.app-title h1 { font-size: 16px; line-height: 22px; font-weight: 600; }
+.app-title p { color: var(--muted); font-size: 12px; line-height: 16px; }
+.app-actions { display: flex; gap: 8px; align-items: center; }
+.selection-total { color: var(--muted); font-size: 12px; margin-right: 4px; white-space: nowrap; }
+@media (max-width: 600px) {
+  /* 狭い画面では上部のバーが場所を取りすぎないよう、説明文を省いてボタンを横いっぱいに並べる。 */
+  .app-title p { display: none; }
+  .app-actions { width: 100%; }
+  .selection-total { flex: 1; }
+  .hide-narrow { display: none; }
+}
+.selection-total strong { color: var(--text); font-size: 14px; }
+
+/* ---- 出発点を選ぶ帯 ---- */
+.startbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 24px;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border);
+}
+.startbar label { font-weight: 600; }
+.startbar .hint { color: var(--muted); font-size: 12px; }
+.startbar .spacer { flex: 1; }
+
+/* ---- 本体の2列 ---- */
+.layout {
+  display: grid;
+  /* 長いコマンドを折り返さずに読めるよう、プレビューを広めに取る。一覧は 480px より狭くしない。 */
+  grid-template-columns: minmax(480px, 1fr) minmax(560px, 2.5fr);
+  gap: 24px;
+  padding: 24px;
+  max-width: 2400px;
+  margin: 0 auto;
+  align-items: start;
+}
+@media (max-width: 1120px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; }
+  .appbar, .startbar { padding-left: 16px; padding-right: 16px; }
+}
+
+/* ---- タブ ---- */
+.tabs { display: flex; gap: 4px; overflow-x: auto; overflow-y: hidden; box-shadow: inset 0 -1px 0 var(--border); margin-bottom: 16px; }
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: 14px/20px var(--sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--text); font-weight: 600; }
+.tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--brand-fill);
+}
+.pill {
+  display: inline-block;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--hover);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+.pill.on { background: var(--brand-soft); color: var(--brand-fg); }
+
+/* ---- タブごとの色分け ---- */
+[data-tab="windowsSettings"] { --tab-color: var(--c-settings); --tab-soft: var(--c-settings-soft); }
+[data-tab="wingetInstall"] { --tab-color: var(--c-apps); --tab-soft: var(--c-apps-soft); }
+[data-tab="appxRemove"] { --tab-color: var(--c-remove); --tab-soft: var(--c-remove-soft); }
+[data-tab="packageManagers"] { --tab-color: var(--c-packages); --tab-soft: var(--c-packages-soft); }
+.tab::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tab-color); flex: none; }
+.tab[aria-selected="true"]::after { background: var(--tab-color); }
+.tab .pill { background: var(--tab-soft); color: var(--tab-color); }
+#tab-body .group { border-top: 3px solid var(--tab-color); }
+#tab-body input[type="checkbox"] { accent-color: var(--tab-color); }
+#tab-body .pill.on, #tab-body .tag { background: var(--tab-soft); color: var(--tab-color); }
+#tab-body .add-card summary svg { color: var(--tab-color); }
+
+/* ---- 一覧の上の道具 ---- */
+.list-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.search { position: relative; flex: 1 1 240px; min-width: 0; }
+.search svg { position: absolute; left: 10px; top: 8px; width: 16px; height: 16px; color: var(--subtle); pointer-events: none; }
+.search .field { width: 100%; padding-left: 34px; }
+.tab-lead { color: var(--muted); margin: -4px 0 16px; }
+
+/* ---- グループのカード ---- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+.group { margin-bottom: 12px; overflow: hidden; }
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-sunken);
+}
+.group-head label { cursor: pointer; }
+.group-head h3 { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.group-head .sub { display: block; color: var(--muted); font: 12px/16px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.group-head .titles { flex: 1; min-width: 0; }
+.items { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); padding: 4px; }
+.items.single { grid-template-columns: minmax(0, 1fr); }
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.item:hover { background: var(--hover); }
+.item input[type="checkbox"] { margin-top: 2px; }
+.item label { flex: 1; min-width: 0; cursor: pointer; }
+.item .name { display: block; }
+.item .detail {
+  display: block;
+  color: var(--subtle);
+  font: 12px/16px var(--mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: var(--radius);
+  background: var(--brand-soft);
+  color: var(--brand-fg);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+.empty-state { padding: 32px 16px; text-align: center; color: var(--muted); }
+.empty-state strong { display: block; color: var(--text); margin-bottom: 4px; }
+
+/* ---- 追加フォーム ---- */
+.add-card { margin-top: 16px; }
+.add-card summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+.add-card summary::-webkit-details-marker { display: none; }
+.add-card summary svg { width: 16px; height: 16px; color: var(--brand-fg); transition: transform .15s; }
+.add-card[open] summary svg { transform: rotate(45deg); }
+.form { display: grid; gap: 12px; padding: 0 16px 16px; }
+.form-row { display: grid; gap: 4px; }
+.form-row > span { font-size: 12px; font-weight: 600; color: var(--muted); }
+.form-row .req { color: var(--danger); margin-left: 2px; }
+.form-note { display: flex; gap: 8px; color: var(--muted); font-size: 12px; line-height: 16px; }
+.form-note svg { width: 16px; height: 16px; flex: none; color: var(--warn-text); }
+.form-error { color: var(--danger); font-size: 12px; min-height: 16px; }
+.form-actions { display: flex; gap: 8px; }
+.inline-add { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 16px 12px; border-top: 1px dashed var(--border); }
+.inline-add .field { flex: 1 1 160px; }
+.inline-add .form-error { flex-basis: 100%; }
+
+/* ---- プレビュー ---- */
+.preview { position: sticky; top: 88px; display: flex; flex-direction: column; max-height: calc(100vh - 112px); overflow: hidden; }
+.preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.preview-head h2 { font-size: 14px; font-weight: 600; }
+.preview-head p { color: var(--muted); font-size: 12px; line-height: 16px; }
+.code {
+  margin: 0;
+  padding: 12px 0;
+  overflow: auto;
+  flex: 1;
+  background: var(--surface-sunken);
+  font: 12px/18px var(--mono);
+  counter-reset: line;
+  tab-size: 2;
+}
+.code .ln { display: block; padding: 0 16px 0 0; white-space: pre; }
+.code .ln::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 40px;
+  margin-right: 12px;
+  padding-right: 8px;
+  text-align: right;
+  color: var(--subtle);
+  border-right: 1px solid var(--border);
+  user-select: none;
+}
+.code .k { color: var(--code-key); }
+.code .s { color: var(--code-string); }
+.code .c { color: var(--code-comment); font-style: italic; }
+.preview-foot { padding: 10px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; line-height: 16px; }
+@media (max-width: 1120px) {
+  .preview { position: static; max-height: none; }
+  .code { max-height: 60vh; }
+}
+
+/* ---- 通知 ---- */
+.toasts { position: fixed; right: 24px; bottom: 24px; z-index: 30; display: grid; gap: 8px; width: min(420px, calc(100vw - 32px)); }
+@media (max-width: 1120px) { .toasts { right: 16px; bottom: 16px; } }
+.toast {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-16);
+  animation: toast-in .18s ease-out;
+}
+.toast svg { width: 20px; height: 20px; flex: none; }
+.toast.ok svg { color: var(--success); }
+.toast.warn { background: var(--warn-bg); border-color: var(--warn-border); }
+.toast.warn svg { color: var(--warn-text); }
+.toast .body { flex: 1; min-width: 0; }
+.toast .title { font-weight: 600; }
+.toast ul { margin: 4px 0 0; padding-left: 18px; max-height: 160px; overflow: auto; font-size: 12px; line-height: 18px; }
+.toast .close { margin: -4px -8px 0 0; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .toast { animation: none; } .add-card summary svg { transition: none; } }
+
+.toast .action { margin-top: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="app-title">
+    <div class="app-icon" aria-hidden="true">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="15" rx="2"/><path d="M7.5 3V2h5v1"/><path d="m7 10 2 2 4-4"/></svg>
+    </div>
+    <div>
+      <h1>レシピ作成アプリ</h1>
+      <p>チェックを付けるだけで、AutoSetup.ps1 用の recipe.yaml を作れます</p>
+    </div>
+  </div>
+  <div class="app-actions">
+    <span class="selection-total" id="selection-total" aria-live="polite"></span>
+    <button type="button" class="btn" id="load-file">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10v3h12v-3"/><path d="M8 2v8"/><path d="m5 5 3-3 3 3"/></svg>
+      <span class="hide-narrow">recipe.yaml を</span>読み込む
+    </button>
+    <input type="file" id="file-input" accept=".yaml,.yml" hidden>
+    <button type="button" class="btn primary" id="download-yaml">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10v3h12v-3"/><path d="M8 2v8"/><path d="m5 7 3 3 3-3"/></svg>
+      <span class="hide-narrow">recipe.yaml を</span>保存
+    </button>
+  </div>
+</header>
+
+<div class="startbar">
+  <label for="template-select">出発点</label>
+  <select class="field" id="template-select"></select>
+  <button type="button" class="btn" id="apply-template">このテンプレートで始める</button>
+  <span class="hint">テンプレートを選ぶと、その内容どおりにチェックが付きます。</span>
+  <span class="spacer"></span>
+  <button type="button" class="btn subtle" id="clear-all">選択をすべて外す</button>
+</div>
+
+<div class="layout">
+  <main>
+    <div class="tabs" role="tablist" aria-label="項目の種類" id="tabs"></div>
+    <div id="tab-body" role="tabpanel"></div>
+  </main>
+  <aside class="card preview" aria-label="できあがる recipe.yaml">
+    <div class="preview-head">
+      <div>
+        <h2>できあがる recipe.yaml</h2>
+        <p id="preview-summary"></p>
+      </div>
+      <button type="button" class="btn small" id="copy-yaml">コピー</button>
+    </div>
+    <pre class="code" id="yaml-output" tabindex="0" aria-label="recipe.yaml の内容"></pre>
+    <p class="preview-foot">保存したファイルは、AutoSetup.ps1 と同じフォルダーに置いて使います。</p>
+  </aside>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<!-- BEGIN TEMPLATES (recipe-builder/Update-RecipeBuilder.ps1 が自動で書き換えます。手で編集しないでください) -->
+<script type="text/plain" class="recipe-template" data-name="recipe.yaml（ルートの既定）" data-path="recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+# --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers:
+  # --- rustup (ツールチェーン) ---
+  - managerName: 'rustup-toolchain'
+    checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
+    installCommand: 'rustup toolchain install {package}'
+    packages:
+      - description: 'Rust 安定版ツールチェーン'
+        name: stable
+      - description: 'Rust ナイトリー版ツールチェーン'
+        name: nightly
+  # --- rustup (コンポーネント / stable) ---
+  - managerName: 'rustup-component-stable'
+    checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
+    installCommand: 'rustup component add {package} --toolchain stable'
+    packages:
+      - description: 'コード整形（rustfmt）'
+        name: rustfmt
+      - description: '静的解析（clippy）'
+        name: clippy
+      - description: '標準ライブラリのソース'
+        name: rust-src
+      - description: 'LLVMツール群（カバレッジ等）'
+        name: llvm-tools-preview
+  # --- rustup (ターゲット追加 / cross & WASM) ---
+  - managerName: 'rustup-target'
+    checkCommand: 'rustup target list --installed | findstr /b /i {package}'
+    installCommand: 'rustup target add {package}'
+    packages:
+      - description: 'WASM（ブラウザ系）'
+        name: wasm32-unknown-unknown
+      - description: 'WASI（サーバサイドWASM）'
+        name: wasm32-wasip1
+      - description: 'Linux向けクロスビルド'
+        name: x86_64-unknown-linux-gnu
+      - description: 'macOS向けクロスビルド (Intel Mac)'
+        name: x86_64-apple-darwin
+      - description: 'macOS向けクロスビルド (Apple Silicon)'
+        name: aarch64-apple-darwin
+      - description: 'Windows向けクロスビルド (MSVC)'
+        name: x86_64-pc-windows-msvc
+      - description: 'Windows向けクロスビルド (GNU)'
+        name: x86_64-pc-windows-gnu
+      - description: 'ARMv7 Linux向けクロスビルド (Raspberry Piなど)'
+        name: armv7-unknown-linux-gnueabihf
+      - description: 'AArch64 Linux向けクロスビルド (ARMv8, Raspberry Pi 64bitなど)'
+        name: aarch64-unknown-linux-gnu
+      - description: 'Android ARMv7向けクロスビルド'
+        name: armv7-linux-androideabi
+      - description: 'Android AArch64向けクロスビルド'
+        name: aarch64-linux-android
+  # --- cargo (CLIツール / stable) ---
+  - managerName: 'cargo-stable'
+    checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
+    installCommand: 'cargo install --locked {package}'
+    packages:
+      - description: '依存追加/更新（cargo-edit）'
+        name: cargo-edit
+      - description: '脆弱性監査（RustSec）'
+        name: cargo-audit
+      - description: '依存の更新状況'
+        name: cargo-outdated
+      - description: '高速テストランナー'
+        name: cargo-nextest
+      - description: 'カバレッジ（llvm-cov統合）'
+        name: cargo-llvm-cov
+      - description: 'ファイル変更監視・再実行'
+        name: cargo-watch
+  # --- rustup (コンポーネント / nightly：Miri) ---
+  - managerName: 'rustup-component-nightly'
+    checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
+    installCommand: 'rustup component add {package} --toolchain nightly'
+    packages:
+      - description: '未定義動作検査 Miri 本体（cargo miri）'
+        name: miri
+      - description: '標準ライブラリのソース（Miri用）'
+        name: rust-src
+  # --- cargo (CLIツール / nightly専用) ---
+  - managerName: 'cargo-nightly'
+    checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
+    installCommand: 'cargo +nightly install --locked {package}'
+    packages:
+      - description: '未使用依存検出（nightly）'
+        name: cargo-udeps
+</script>
+<script type="text/plain" class="recipe-template" data-name="step1_only_basic" data-path="template-recipes/step1_only_basic/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+  # --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers: []
+</script>
+<script type="text/plain" class="recipe-template" data-name="step1_only_dev" data-path="template-recipes/step1_only_dev/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+  # --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers: []
+</script>
+<script type="text/plain" class="recipe-template" data-name="step2_Go" data-path="template-recipes/step2_Go/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+# --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers:
+    # --- go ---
+    - managerName: 'go'
+      # PATHに<leaf>があればOK（<leaf>は {package} の末尾名。@latest は除去）
+      checkCommand: "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$cmd = ('{package}'.Split('/')[-1]).Split('@')[0]; if (Get-Command $cmd -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }\""
+      installCommand: 'go install {package}'
+      packages:
+        - description: 'Go言語サーバ'
+          name: golang.org/x/tools/gopls@latest
+        - description: 'import自動整形'
+          name: golang.org/x/tools/cmd/goimports@latest
+        - description: '厳格整形（gofumpt）'
+          name: mvdan.cc/gofumpt@latest
+        - description: '静的解析（Staticcheck）'
+          name: honnef.co/go/tools/cmd/staticcheck@latest
+        - description: '脆弱性検出（公式）'
+          name: golang.org/x/vuln/cmd/govulncheck@latest
+        - description: '包括的リンター'
+          name: github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        - description: 'デバッガ（Delve）'
+          name: github.com/go-delve/delve/cmd/dlv@latest
+        - description: 'モック生成（uber/mock）'
+          name: go.uber.org/mock/mockgen@latest
+        - description: 'iota→String 生成'
+          name: golang.org/x/tools/cmd/stringer@latest
+        - description: 'テストスケルトン生成'
+          name: github.com/cweill/gotests/gotests@latest
+</script>
+<script type="text/plain" class="recipe-template" data-name="step2_Haskell" data-path="template-recipes/step2_Haskell/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+    # [GHCupのインストール] ★★★ HasKellのみ ★★★
+    - description: 'Haskell ツールチェーン (GHCup) を公式スクリプトでインストール'
+      command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
+
+# --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers:
+    # --- ghcup: Haskell コンパイラ (GHC) ---
+    - managerName: 'ghcup-ghc'
+      checkCommand: 'ghcup whereis ghc {package}'
+      installCommand: 'ghcup install ghc {package}'
+      packages:
+        - description: 'GHC 9.12 系（最新安定版）'
+          name: 9.12.2
+        #- description: 'GHC 9.10 系（LTS / 保守互換）'
+        #  name: 9.10.2
+
+    # --- ghcup: Cabal CLI ---
+    - managerName: 'ghcup-cabal'
+      checkCommand: 'cabal --version'
+      installCommand: 'ghcup install cabal latest'
+      packages:
+        - description: 'Cabal（公式ビルドシステム）'
+          name: latest
+
+    # --- ghcup: Stack CLI ---
+    - managerName: 'ghcup-stack'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''stack'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      installCommand: 'ghcup install stack latest'
+      packages:
+        - description: 'Stack（プロジェクト/ビルドツール）'
+          name: latest
+
+    # --- ghcup: Haskell Language Server ---
+    - managerName: 'ghcup-hls'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''haskell-language-server-wrapper'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      installCommand: 'ghcup install hls latest'
+      packages:
+        - description: 'Haskell Language Server（LSPサポート）'
+          name: latest
+
+    # --- cabal: グローバルCLIユーティリティ ---
+    - managerName: 'cabal-global'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''{package}'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      installCommand: 'cabal update; cabal install --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      packages:
+        - description: 'コード整形（fourmolu）'
+          name: fourmolu
+        - description: '静的解析（hlint）'
+          name: hlint
+        - description: '関数/型検索（hoogle）'
+          name: hoogle
+        - description: '未使用コード検出（weeder）'
+          name: weeder
+</script>
+<script type="text/plain" class="recipe-template" data-name="step2_npm" data-path="template-recipes/step2_npm/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+# --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers:
+    # --- npm (グローバルNode.jsパッケージ) ---
+    - managerName: 'npm'
+      checkCommand:  'npm list -g {package}'
+      installCommand: 'npm install -g {package}'
+      packages:
+        # [パッケージマネージャ補助]
+        - description: 'Corepack 経由を推奨（pnpmはグローバル導入しない）'
+          name: npm
+        # [軽量・有用ユーティリティ]
+        - description: '依存更新チェッカー（ncu）'
+          name: npm-check-updates
+        - description: 'クロスプラットフォーム削除（補助的に維持）'
+          name: rimraf
+        - description: '簡易静的サーバ（用途限定）'
+          name: http-server
+</script>
+<script type="text/plain" class="recipe-template" data-name="step2_pip" data-path="template-recipes/step2_pip/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+# --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers:
+    - managerName: 'pip'
+      checkCommand: 'pip show {package}'
+      installCommand: 'uv pip install {package} --system'
+      packages:
+        # [CLIツール群：どのプロジェクトでも使う]
+        - description: 'リンター/フォーマッタ（超高速）'
+          name: ruff
+        - description: '型チェック'
+          name: mypy
+        - description: 'テスト実行'
+          name: pytest
+        - description: 'テストカバレッジ'
+          name: coverage
+        - description: 'リッチなターミナル出力'
+          name: rich
+        # Web/DS/MLは各プロジェクトに局所導入（再現性重視）
+</script>
+<script type="text/plain" class="recipe-template" data-name="step2_Rust" data-path="template-recipes/step2_Rust/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+# --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers:
+  # --- rustup (ツールチェーン) ---
+  - managerName: 'rustup-toolchain'
+    checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
+    installCommand: 'rustup toolchain install {package}'
+    packages:
+      - description: 'Rust 安定版ツールチェーン'
+        name: stable
+      - description: 'Rust ナイトリー版ツールチェーン'
+        name: nightly
+  # --- rustup (コンポーネント / stable) ---
+  - managerName: 'rustup-component-stable'
+    checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
+    installCommand: 'rustup component add {package} --toolchain stable'
+    packages:
+      - description: 'コード整形（rustfmt）'
+        name: rustfmt
+      - description: '静的解析（clippy）'
+        name: clippy
+      - description: '標準ライブラリのソース'
+        name: rust-src
+      - description: 'LLVMツール群（カバレッジ等）'
+        name: llvm-tools-preview
+  # --- rustup (ターゲット追加 / cross & WASM) ---
+  - managerName: 'rustup-target'
+    checkCommand: 'rustup target list --installed | findstr /b /i {package}'
+    installCommand: 'rustup target add {package}'
+    packages:
+      - description: 'WASM（ブラウザ系）'
+        name: wasm32-unknown-unknown
+      - description: 'WASI（サーバサイドWASM）'
+        name: wasm32-wasip1
+      - description: 'Linux向けクロスビルド'
+        name: x86_64-unknown-linux-gnu
+      - description: 'macOS向けクロスビルド (Intel Mac)'
+        name: x86_64-apple-darwin
+      - description: 'macOS向けクロスビルド (Apple Silicon)'
+        name: aarch64-apple-darwin
+      - description: 'Windows向けクロスビルド (MSVC)'
+        name: x86_64-pc-windows-msvc
+      - description: 'Windows向けクロスビルド (GNU)'
+        name: x86_64-pc-windows-gnu
+      - description: 'ARMv7 Linux向けクロスビルド (Raspberry Piなど)'
+        name: armv7-unknown-linux-gnueabihf
+      - description: 'AArch64 Linux向けクロスビルド (ARMv8, Raspberry Pi 64bitなど)'
+        name: aarch64-unknown-linux-gnu
+      - description: 'Android ARMv7向けクロスビルド'
+        name: armv7-linux-androideabi
+      - description: 'Android AArch64向けクロスビルド'
+        name: aarch64-linux-android
+  # --- cargo (CLIツール / stable) ---
+  - managerName: 'cargo-stable'
+    checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
+    installCommand: 'cargo install --locked {package}'
+    packages:
+      - description: '依存追加/更新（cargo-edit）'
+        name: cargo-edit
+      - description: '脆弱性監査（RustSec）'
+        name: cargo-audit
+      - description: '依存の更新状況'
+        name: cargo-outdated
+      - description: '高速テストランナー'
+        name: cargo-nextest
+      - description: 'カバレッジ（llvm-cov統合）'
+        name: cargo-llvm-cov
+      - description: 'ファイル変更監視・再実行'
+        name: cargo-watch
+  # --- rustup (コンポーネント / nightly：Miri) ---
+  - managerName: 'rustup-component-nightly'
+    checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
+    installCommand: 'rustup component add {package} --toolchain nightly'
+    packages:
+      - description: '未定義動作検査 Miri 本体（cargo miri）'
+        name: miri
+      - description: '標準ライブラリのソース（Miri用）'
+        name: rust-src
+  # --- cargo (CLIツール / nightly専用) ---
+  - managerName: 'cargo-nightly'
+    checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
+    installCommand: 'cargo +nightly install --locked {package}'
+    packages:
+      - description: '未使用依存検出（nightly）'
+        name: cargo-udeps
+</script>
+<script type="text/plain" class="recipe-template" data-name="step2_VSCode" data-path="template-recipes/step2_VSCode/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
+      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+
+# --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
+      id: EclipseAdoptium.Temurin.17.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: 9P7KNL5RWT25
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'Grooveミュージック'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers:
+    - managerName: 'vscode'
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
+      installCommand: 'code --install-extension {package}'
+      packages:
+        # [UI / 表示]
+        - description: 'UIの日本語化'
+          name: ms-ceintl.vscode-language-pack-ja
+        - description: 'インデントを色付け'
+          name: oderwat.indent-rainbow
+        - description: '全角スペースをハイライト'
+          name: mosapride.zenkaku
+        - description: 'コメントを種類別に色分け'
+          name: aaron-bond.better-comments
+        - description: 'エラー/警告を行内表示'
+          name: usernamehw.errorlens
+        - description: 'EditorConfig（書式統一）'
+          name: EditorConfig.EditorConfig
+        # [ユーティリティ / Markdown]
+        - description: '印刷（コード/Markdown をブラウザ経由で印刷・PDF化）'
+          name: pdconsec.vscode-print
+        - description: 'Markdown編集サポート'
+          name: yzhang.markdown-all-in-one
+        - description: 'TODOコメントの一覧表示'
+          name: gruntfuggly.todo-tree
+        - description: 'ファイルパス入力補完'
+          name: christian-kohler.path-intellisense
+        - description: 'dotenvファイル支援'
+          name: mikestead.dotenv
+        # [コーディング支援（AI）]
+        - description: 'AIによる賢い補完'
+          name: VisualStudioExptTeam.vscodeintellicode
+        - description: 'AIコード自動生成'
+          name: GitHub.copilot
+        # [バージョン管理 / コラボ / CI]
+        - description: 'Git機能を強化'
+          name: eamodio.gitlens
+        - description: 'Gitブランチツリー可視化'
+          name: mhutchie.git-graph
+        - description: 'GitHub PRレビュー'
+          name: GitHub.vscode-pull-request-github
+        - description: 'GitHub Actions支援'
+          name: github.vscode-github-actions
+        - description: 'Live Share（共同編集）'
+          name: MS-vsliveshare.vsliveshare
+        # [リモート / コンテナ / Docker]
+        - description: 'WSL上のプロジェクトを直接編集'
+          name: ms-vscode-remote.remote-wsl
+        - description: 'Remote SSH（リモート開発）'
+          name: ms-vscode-remote.remote-ssh
+        - description: 'Dev Containers（コンテナ内開発）'
+          name: ms-vscode-remote.remote-containers
+        - description: 'Docker操作拡張'
+          name: ms-azuretools.vscode-docker
+        # [デバッグ / ビルド / カバレッジ]
+        - description: 'CMakeツール連携'
+          name: ms-vscode.cmake-tools
+        - description: 'Makefile支援'
+          name: ms-vscode.makefile-tools
+        - description: 'LLDBデバッガ（Rust/C/C++）'
+          name: vadimcn.vscode-lldb
+        - description: 'テストカバレッジ可視化'
+          name: ryanluker.vscode-coverage-gutters
+        # [言語サポート]
+        - description: 'Python言語サポート'
+          name: ms-python.python
+        - description: 'Python型解析（Pylance）'
+          name: ms-python.vscode-pylance
+        - description: 'Jupyterノートブック'
+          name: ms-toolsai.jupyter
+        - description: 'C/C++言語サポート（拡張パック）'
+          name: ms-vscode.cpptools-extension-pack
+        - description: 'Rust言語サポート（rust-analyzer）'
+          name: rust-lang.rust-analyzer
+        - description: 'Haskell言語サポート'
+          name: haskell.haskell
+        - description: 'Go言語サポート'
+          name: golang.Go
+        - description: 'C#言語サポート'
+          name: ms-dotnettools.csharp
+        - description: 'Java言語サポート'
+          name: redhat.java
+        - description: 'PowerShell言語サポート'
+          name: ms-vscode.powershell
+        - description: 'YAML言語サポート'
+          name: redhat.vscode-yaml
+        - description: 'TOMLサポート（Cargo/設定）'
+          name: tamasfe.even-better-toml
+</script>
+<!-- END TEMPLATES -->
+
+<script>
+'use strict';
+
+// ---------------------------------------------------------------------------
+// recipe.yaml の項目の決まり（.github/scripts/Test-Recipe.ps1 と同じキーにそろえている）
+// ---------------------------------------------------------------------------
+const SECTIONS = {
+  windowsSettings: {
+    key: 'command',
+    keys: ['description', 'command'],
+    detail: (item) => item.command,
+    singleColumn: true,
+    lead: 'レジストリなど、Windows の設定を変えるコマンドです。フェーズ1の最初に実行されます。',
+    fields: [
+      { name: 'description', label: '説明', placeholder: '例: エクスプローラーで隠しファイルを表示する' },
+      { name: 'command', label: 'コマンド', required: true, mono: true, placeholder: '例: reg.exe add "HKCU\\Software\\..." /v Hidden /t REG_DWORD /d 1 /f' },
+    ],
+    note: 'コマンドは、そのまま管理者権限の PowerShell で実行されます。信頼できるものだけを書いてください。',
+  },
+  wingetInstall: {
+    key: 'id',
+    keys: ['description', 'id', 'options'],
+    detail: (item) => (item.options ? `${item.id}  ${item.options}` : item.id),
+    lead: 'winget で入れるアプリです。入っているアプリは飛ばします。',
+    fields: [
+      { name: 'description', label: '説明', placeholder: '例: 定番の Web ブラウザ' },
+      { name: 'id', label: 'winget の ID', required: true, mono: true, placeholder: '例: Google.Chrome' },
+      { name: 'options', label: '追加オプション', mono: true, placeholder: '例: --override "/SILENT /NORESTART"' },
+    ],
+    note: 'ID は、PowerShell で「winget search アプリ名」を実行すると調べられます。',
+  },
+  appxRemove: {
+    key: 'name',
+    keys: ['description', 'name'],
+    detail: (item) => item.name,
+    lead: '最初から入っている、使わないアプリを削除します。見つからないアプリは飛ばします。',
+    fields: [
+      { name: 'description', label: '説明', placeholder: '例: ニュース' },
+      { name: 'name', label: 'パッケージ名（* で前後を省略できます）', required: true, mono: true, placeholder: '例: *Microsoft.BingNews*' },
+    ],
+    note: 'パッケージ名は、PowerShell で「Get-AppxPackage | Select Name」を実行すると調べられます。',
+  },
+};
+const MANAGER_KEYS = ['managerName', 'checkCommand', 'installCommand', 'packages'];
+const PACKAGE_KEYS = ['description', 'name'];
+const TABS = [
+  { id: 'windowsSettings', label: 'Windows 設定' },
+  { id: 'wingetInstall', label: 'アプリ' },
+  { id: 'appxRemove', label: '削除するアプリ' },
+  { id: 'packageManagers', label: '開発パッケージ' },
+];
+const CUSTOM_GROUP = '追加した項目';
+const LOADED_GROUP = '読み込んだレシピだけにある項目';
+// 見出しコメントのない項目の分類。recipe.yaml へは見出しコメントを書かない。
+const NO_GROUP = '分類なし';
+
+// ---------------------------------------------------------------------------
+// recipe.yaml を読むための小さな YAML パーサー
+// ネットにつながらない PC でも使えるよう外部ライブラリは使わず、recipe.yaml で使う書き方
+// （キー: 値、- のリスト、引用符、コメント）だけに対応する。対応外の書き方はエラーにする。
+// ---------------------------------------------------------------------------
+class YamlError extends Error {
+  constructor(lineNo, message) {
+    super(`${lineNo} 行目: ${message}`);
+  }
+}
+
+function parseYaml(text) {
+  const lines = [];
+  let pendingGroup = null;
+  text.replace(/^﻿/, '').split(/\r?\n/).forEach((raw, index) => {
+    const lineNo = index + 1;
+    const trimmed = raw.trim();
+    if (trimmed === '' || trimmed === '---') return;
+    if (trimmed.startsWith('#')) {
+      // 「# [エクスプローラー設定]」のような見出しコメントは、画面のグループ分けに使う。
+      const group = trimmed.match(/^#\s*\[(.+)\]\s*$/);
+      if (group) pendingGroup = group[1].trim();
+      return;
+    }
+    const leading = raw.match(/^[ \t]*/)[0];
+    if (leading.includes('\t')) throw new YamlError(lineNo, 'インデントにタブ文字は使えません。半角スペースにしてください。');
+    lines.push({ indent: leading.length, text: trimmed, lineNo, groupMarker: pendingGroup });
+    pendingGroup = null;
+  });
+
+  let pos = 0;
+  const keyPattern = /^([A-Za-z0-9_.-]+):(?:\s+(.*))?$/;
+  const isSequenceLine = (line) => line.text === '-' || line.text.startsWith('- ');
+
+  function parseNode(indent) {
+    return isSequenceLine(lines[pos]) ? parseSequence(indent) : parseMap(indent);
+  }
+
+  function parseSequence(indent) {
+    const result = [];
+    let group = null;
+    while (pos < lines.length) {
+      const line = lines[pos];
+      if (line.indent < indent || !isSequenceLine(line)) break;
+      if (line.indent > indent) throw new YamlError(line.lineNo, 'インデント（行頭の空白）の数がずれています。');
+      if (line.groupMarker) group = line.groupMarker;
+      const rest = line.text === '-' ? '' : line.text.slice(2).trimStart();
+      let item;
+      if (rest === '') {
+        pos++;
+        item = pos < lines.length && lines[pos].indent > indent ? parseNode(lines[pos].indent) : null;
+      } else if (keyPattern.test(rest)) {
+        // 「- key: value」は、「- 」の後ろの位置から始まる「キー: 値」のまとまりとして読む。
+        const innerIndent = indent + (line.text.length - rest.length);
+        lines[pos] = { ...line, indent: innerIndent, text: rest, groupMarker: null };
+        item = parseMap(innerIndent);
+      } else {
+        item = parseScalar(rest, line.lineNo);
+        pos++;
+      }
+      if (item && typeof item === 'object' && !Array.isArray(item)) {
+        Object.defineProperty(item, '__group', { value: group, enumerable: false });
+      }
+      result.push(item);
+    }
+    return result;
+  }
+
+  function parseMap(indent) {
+    const result = {};
+    while (pos < lines.length) {
+      const line = lines[pos];
+      if (line.indent < indent || isSequenceLine(line)) break;
+      if (line.indent > indent) throw new YamlError(line.lineNo, 'インデント（行頭の空白）の数がずれています。');
+      const match = line.text.match(keyPattern);
+      if (!match) throw new YamlError(line.lineNo, '「キー: 値」の形になっていません。');
+      const key = match[1];
+      const value = (match[2] || '').trim();
+      if (Object.prototype.hasOwnProperty.call(result, key)) throw new YamlError(line.lineNo, `キー「${key}」が2回出てきます。`);
+      pos++;
+      if (value === '' || value.startsWith('#')) {
+        const next = lines[pos];
+        if (next && next.indent > indent) {
+          result[key] = parseNode(next.indent);
+        } else if (next && next.indent === indent && isSequenceLine(next)) {
+          // 「key:」の直下に、同じ深さで「- 」が並ぶ書き方にも対応する（recipe.yaml の phase2 で使っている）。
+          result[key] = parseSequence(indent);
+        } else {
+          result[key] = null;
+        }
+      } else {
+        result[key] = parseScalar(value, line.lineNo);
+      }
+    }
+    return result;
+  }
+
+  if (lines.length === 0) return null;
+  const root = parseNode(lines[0].indent);
+  if (pos < lines.length) throw new YamlError(lines[pos].lineNo, 'この行の位置（インデント）が正しくありません。');
+  return root;
+}
+
+function parseScalar(source, lineNo) {
+  const ensureRestIsComment = (rest) => {
+    const trimmed = rest.trim();
+    if (trimmed !== '' && !trimmed.startsWith('#')) throw new YamlError(lineNo, '引用符を閉じた後ろに、余分な文字があります。');
+  };
+  if (source.startsWith("'")) {
+    let out = '';
+    let i = 1;
+    for (;;) {
+      if (i >= source.length) throw new YamlError(lineNo, "「'」が閉じていません。");
+      const c = source[i];
+      if (c === "'") {
+        if (source[i + 1] === "'") { out += "'"; i += 2; continue; }
+        i++;
+        break;
+      }
+      out += c;
+      i++;
+    }
+    ensureRestIsComment(source.slice(i));
+    return out;
+  }
+  if (source.startsWith('"')) {
+    const escapes = { '"': '"', '\\': '\\', '/': '/', n: '\n', t: '\t', r: '\r', '0': '\0' };
+    let out = '';
+    let i = 1;
+    for (;;) {
+      if (i >= source.length) throw new YamlError(lineNo, '「"」が閉じていません。');
+      const c = source[i];
+      if (c === '"') { i++; break; }
+      if (c === '\\') {
+        const e = source[i + 1];
+        if (!(e in escapes)) throw new YamlError(lineNo, `「\\${e || ''}」という書き方には対応していません。「\\\\」と書いてください。`);
+        out += escapes[e];
+        i += 2;
+        continue;
+      }
+      out += c;
+      i++;
+    }
+    ensureRestIsComment(source.slice(i));
+    return out;
+  }
+  if (source === '[]') return [];
+  if (source === '{}') return {};
+  if (/^[[{]/.test(source)) throw new YamlError(lineNo, '[ ] や { } でまとめる書き方には対応していません。「- 」で1行ずつ書いてください。');
+  if (/^[|>]/.test(source)) throw new YamlError(lineNo, '| や > を使う複数行の書き方には対応していません。');
+  if (/^[&*!]/.test(source) && !/^\*.*\*$/.test(source)) throw new YamlError(lineNo, '& * ! で始まる値は、引用符で囲んでください。');
+  const commentAt = source.search(/\s#/);
+  const value = (commentAt >= 0 ? source.slice(0, commentAt) : source).trim();
+  if (value === '~' || value === 'null') return null;
+  return value;
+}
+
+// ---------------------------------------------------------------------------
+// 画面の状態
+// ---------------------------------------------------------------------------
+const state = {
+  sections: { windowsSettings: [], wingetInstall: [], appxRemove: [] },
+  managers: [],
+  activeTab: 'windowsSettings',
+  filters: {},
+};
+const templates = [];
+
+const toText = (value) => (value === null || value === undefined ? '' : String(value));
+const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+const findItem = (sectionName, keyValue) => state.sections[sectionName].find((item) => item[SECTIONS[sectionName].key] === keyValue);
+const findManager = (name) => state.managers.find((manager) => manager.managerName === name);
+
+function sectionItemFrom(sectionName, source, group) {
+  const item = { group: group || CUSTOM_GROUP, checked: false, custom: false };
+  for (const key of SECTIONS[sectionName].keys) item[key] = toText(source[key]).trim();
+  return item;
+}
+
+// テンプレートやレシピの中身を、選択肢の一覧に足す（同じ項目は1つにまとめる）。
+function mergeIntoCatalog(config) {
+  for (const sectionName of Object.keys(SECTIONS)) {
+    const list = config && isPlainObject(config.phase1) ? config.phase1[sectionName] : null;
+    if (!Array.isArray(list)) continue;
+    for (const source of list) {
+      if (!isPlainObject(source)) continue;
+      const keyValue = toText(source[SECTIONS[sectionName].key]).trim();
+      if (keyValue === '' || findItem(sectionName, keyValue)) continue;
+      state.sections[sectionName].push(sectionItemFrom(sectionName, source, source.__group || NO_GROUP));
+    }
+  }
+  const managers = config && isPlainObject(config.phase2) ? config.phase2.packageManagers : null;
+  if (!Array.isArray(managers)) return;
+  for (const source of managers) {
+    if (!isPlainObject(source)) continue;
+    const name = toText(source.managerName).trim();
+    if (name === '') continue;
+    let manager = findManager(name);
+    if (!manager) {
+      manager = {
+        managerName: name,
+        checkCommand: toText(source.checkCommand).trim(),
+        installCommand: toText(source.installCommand).trim(),
+        packages: [],
+        custom: false,
+      };
+      state.managers.push(manager);
+    }
+    for (const pkg of Array.isArray(source.packages) ? source.packages : []) {
+      if (!isPlainObject(pkg)) continue;
+      const pkgName = toText(pkg.name).trim();
+      if (pkgName === '' || manager.packages.some((p) => p.name === pkgName)) continue;
+      manager.packages.push({ name: pkgName, description: toText(pkg.description).trim(), checked: false, custom: false });
+    }
+  }
+}
+
+function unknownKeys(source, allowed) {
+  return Object.keys(source).filter((key) => !allowed.includes(key));
+}
+
+// レシピを読み込み、その中身どおりにチェックを付け直す。一覧にない項目は追加する。
+function applyRecipe(config) {
+  const warnings = [];
+  if (!isPlainObject(config)) throw new Error('中身が空か、「phase1:」「phase2:」で始まる形になっていません。');
+  clearSelection();
+  for (const key of unknownKeys(config, ['phase1', 'phase2'])) warnings.push(`ファイルの一番上にある「${key}」は使われないため、読み飛ばしました。`);
+  const phase1 = isPlainObject(config.phase1) ? config.phase1 : {};
+  for (const key of unknownKeys(phase1, Object.keys(SECTIONS))) warnings.push(`phase1 の「${key}」は使われないため、読み飛ばしました。`);
+
+  for (const sectionName of Object.keys(SECTIONS)) {
+    const def = SECTIONS[sectionName];
+    const list = phase1[sectionName];
+    if (list === null || list === undefined) continue;
+    if (!Array.isArray(list)) { warnings.push(`phase1.${sectionName} がリストの形ではないため、読み飛ばしました。`); continue; }
+    list.forEach((source, index) => {
+      const where = `phase1.${sectionName} の ${index + 1} 番目`;
+      if (!isPlainObject(source)) { warnings.push(`${where} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
+      for (const key of unknownKeys(source, def.keys)) warnings.push(`${where} の「${key}」は使われないため、読み飛ばしました。`);
+      const keyValue = toText(source[def.key]).trim();
+      if (keyValue === '') { warnings.push(`${where} に「${def.key}」がないため、読み飛ばしました。`); return; }
+      let item = findItem(sectionName, keyValue);
+      if (!item) {
+        item = sectionItemFrom(sectionName, source, LOADED_GROUP);
+        item.custom = true;
+        state.sections[sectionName].push(item);
+      } else {
+        // 読み込んだレシピの説明やオプションを優先する（書き換えて使っている場合があるため）。
+        for (const key of def.keys) if (key !== def.key) item[key] = toText(source[key]).trim();
+      }
+      item.checked = true;
+    });
+  }
+
+  const phase2 = isPlainObject(config.phase2) ? config.phase2 : {};
+  for (const key of unknownKeys(phase2, ['packageManagers'])) warnings.push(`phase2 の「${key}」は使われないため、読み飛ばしました。`);
+  const managers = phase2.packageManagers;
+  if (managers !== null && managers !== undefined && !Array.isArray(managers)) {
+    warnings.push('phase2.packageManagers がリストの形ではないため、読み飛ばしました。');
+  } else if (Array.isArray(managers)) {
+    managers.forEach((source, index) => {
+      const where = `phase2.packageManagers の ${index + 1} 番目`;
+      if (!isPlainObject(source)) { warnings.push(`${where} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
+      for (const key of unknownKeys(source, MANAGER_KEYS)) warnings.push(`${where} の「${key}」は使われないため、読み飛ばしました。`);
+      const name = toText(source.managerName).trim();
+      const checkCommand = toText(source.checkCommand).trim();
+      const installCommand = toText(source.installCommand).trim();
+      if (!name || !checkCommand || !installCommand) {
+        warnings.push(`${where} に managerName・checkCommand・installCommand のどれかがないため、読み飛ばしました。`);
+        return;
+      }
+      let manager = findManager(name);
+      if (!manager) {
+        manager = { managerName: name, checkCommand, installCommand, packages: [], custom: true };
+        state.managers.push(manager);
+      } else {
+        manager.checkCommand = checkCommand;
+        manager.installCommand = installCommand;
+      }
+      const packages = source.packages;
+      if (packages !== null && packages !== undefined && !Array.isArray(packages)) {
+        warnings.push(`${where} の packages がリストの形ではないため、読み飛ばしました。`);
+        return;
+      }
+      (packages || []).forEach((pkg, pkgIndex) => {
+        const pkgWhere = `${where} の packages の ${pkgIndex + 1} 番目`;
+        if (!isPlainObject(pkg)) { warnings.push(`${pkgWhere} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
+        for (const key of unknownKeys(pkg, PACKAGE_KEYS)) warnings.push(`${pkgWhere} の「${key}」は使われないため、読み飛ばしました。`);
+        const pkgName = toText(pkg.name).trim();
+        if (!pkgName) { warnings.push(`${pkgWhere} に「name」がないため、読み飛ばしました。`); return; }
+        let target = manager.packages.find((p) => p.name === pkgName);
+        if (!target) {
+          target = { name: pkgName, description: '', checked: false, custom: true };
+          manager.packages.push(target);
+        }
+        target.description = toText(pkg.description).trim();
+        target.checked = true;
+      });
+    });
+  }
+  return warnings;
+}
+
+function clearSelection() {
+  for (const list of Object.values(state.sections)) for (const item of list) item.checked = false;
+  for (const manager of state.managers) for (const pkg of manager.packages) pkg.checked = false;
+}
+
+function selectedCount(tabId) {
+  if (tabId === 'packageManagers') return state.managers.reduce((sum, m) => sum + m.packages.filter((p) => p.checked).length, 0);
+  return state.sections[tabId].filter((item) => item.checked).length;
+}
+function totalCount(tabId) {
+  if (tabId === 'packageManagers') return state.managers.reduce((sum, m) => sum + m.packages.length, 0);
+  return state.sections[tabId].length;
+}
+const selectedTotal = () => TABS.reduce((sum, tab) => sum + selectedCount(tab.id), 0);
+
+// ---------------------------------------------------------------------------
+// recipe.yaml を書き出す
+// ---------------------------------------------------------------------------
+// 単一引用符で囲むと、\ や " をそのまま書ける（reg.exe のパスやオプションに多い）。
+const quote = (value) => `'${String(value).replace(/'/g, "''")}'`;
+
+function buildYaml() {
+  const out = [
+    '# ================================================================',
+    '# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル',
+    '# レシピ作成アプリ (recipe-builder/recipe-builder.html) で作成しました。',
+    '# ================================================================',
+    '# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。',
+    'phase1:',
+  ];
+  for (const sectionName of Object.keys(SECTIONS)) {
+    const def = SECTIONS[sectionName];
+    const items = state.sections[sectionName].filter((item) => item.checked);
+    if (items.length === 0) { out.push(`  ${sectionName}: []`); continue; }
+    out.push(`  ${sectionName}:`);
+    let lastGroup = null;
+    for (const item of items) {
+      if (item.group !== lastGroup) {
+        if (item.group !== NO_GROUP) out.push(`    # [${item.group}]`);
+        lastGroup = item.group;
+      }
+      const keys = def.keys.filter((key) => item[key] !== '');
+      keys.forEach((key, index) => out.push(`${index === 0 ? '    - ' : '      '}${key}: ${quote(item[key])}`));
+    }
+  }
+  out.push('', 'phase2:');
+  const managers = state.managers.filter((manager) => manager.packages.some((pkg) => pkg.checked));
+  if (managers.length === 0) {
+    out.push('  packageManagers: []');
+  } else {
+    out.push('  packageManagers:');
+    for (const manager of managers) {
+      out.push(`    - managerName: ${quote(manager.managerName)}`);
+      out.push(`      checkCommand: ${quote(manager.checkCommand)}`);
+      out.push(`      installCommand: ${quote(manager.installCommand)}`);
+      out.push('      packages:');
+      for (const pkg of manager.packages.filter((p) => p.checked)) {
+        if (pkg.description) {
+          out.push(`        - description: ${quote(pkg.description)}`);
+          out.push(`          name: ${quote(pkg.name)}`);
+        } else {
+          out.push(`        - name: ${quote(pkg.name)}`);
+        }
+      }
+    }
+  }
+  return out.join('\n') + '\n';
+}
+
+// ---------------------------------------------------------------------------
+// 画面部品
+// ---------------------------------------------------------------------------
+function h(tag, attrs, ...children) {
+  const el = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs || {})) {
+    if (value === false || value === null || value === undefined) continue;
+    if (key.startsWith('on')) el.addEventListener(key.slice(2), value);
+    else if (key === 'className') el.className = value;
+    else if (key === 'checked') el.checked = value;
+    else if (key === 'value') el.value = value;
+    else el.setAttribute(key, value === true ? '' : value);
+  }
+  for (const child of children.flat()) {
+    if (child === null || child === undefined || child === false) continue;
+    el.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
+  return el;
+}
+const $ = (id) => document.getElementById(id);
+
+const ICONS = {
+  search: '<path d="m13.5 13.5-3-3"/><circle cx="7" cy="7" r="4.5"/>',
+  plus: '<path d="M8 3v10M3 8h10"/>',
+  ok: '<circle cx="10" cy="10" r="7.5"/><path d="m6.5 10 2.5 2.5 4.5-5"/>',
+  warn: '<path d="M10 3 2.5 16.5h15z"/><path d="M10 8v4M10 14.5v.01"/>',
+  close: '<path d="m4 4 8 8M12 4l-8 8"/>',
+  shield: '<path d="M8 1.5 3 3.5v4c0 3 2.2 5.6 5 7 2.8-1.4 5-4 5-7v-4z"/>',
+};
+function icon(name, size) {
+  const viewBox = size === 20 ? '0 0 20 20' : '0 0 16 16';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', viewBox);
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '1.5');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = ICONS[name];
+  return svg;
+}
+
+// 親のチェックボックスを、子の選択状態（すべて／一部／なし）に合わせる。
+function syncParent(box, children) {
+  const checked = children.filter((c) => c.checked).length;
+  box.checked = children.length > 0 && checked === children.length;
+  box.indeterminate = checked > 0 && checked < children.length;
+  box.disabled = children.length === 0;
+  return checked;
+}
+
+function emptyState(title, text) {
+  return h('div', { className: 'card empty-state' }, h('strong', null, title), text);
+}
+
+function searchBox(onInput) {
+  return h('div', { className: 'search' },
+    icon('search'),
+    h('input', {
+      type: 'search',
+      className: 'field',
+      placeholder: '名前・ID・コマンドで絞り込み',
+      'aria-label': '絞り込み',
+      value: state.filters[state.activeTab] || '',
+      oninput: (event) => { state.filters[state.activeTab] = event.target.value; onInput(); },
+    }));
+}
+
+function matchesFilter(text, filter) {
+  return filter === '' || text.toLowerCase().includes(filter.toLowerCase());
+}
+
+function validateFields(fields, values) {
+  for (const field of fields) {
+    const value = values[field.name];
+    if (field.required && value === '') return `「${field.label}」を入力してください。`;
+    if (/[\r\n]/.test(value)) return '改行は入れられません。';
+  }
+  return '';
+}
+
+function formRow(field, input) {
+  return h('label', { className: 'form-row' },
+    h('span', null, field.label, field.required ? h('span', { className: 'req', 'aria-hidden': 'true' }, '*') : h('span', { className: 'sr-only' }, '（任意）')),
+    input);
+}
+
+// ---------------------------------------------------------------------------
+// タブとプレビュー
+// ---------------------------------------------------------------------------
+const tabButtons = {};
+
+function buildTabs() {
+  const list = $('tabs');
+  for (const tab of TABS) {
+    const pill = h('span', { className: 'pill' });
+    const button = h('button', {
+      type: 'button',
+      role: 'tab',
+      className: 'tab',
+      id: `tab-${tab.id}`,
+      'data-tab': tab.id,
+      'aria-controls': 'tab-body',
+      onclick: () => selectTab(tab.id),
+      onkeydown: (event) => {
+        // タブの並びは左右キーで移動できるようにする（WAI-ARIA のタブの操作方法）。
+        const index = TABS.findIndex((t) => t.id === tab.id);
+        let next = null;
+        if (event.key === 'ArrowRight') next = TABS[(index + 1) % TABS.length];
+        if (event.key === 'ArrowLeft') next = TABS[(index - 1 + TABS.length) % TABS.length];
+        if (event.key === 'Home') next = TABS[0];
+        if (event.key === 'End') next = TABS[TABS.length - 1];
+        if (!next) return;
+        event.preventDefault();
+        selectTab(next.id);
+        tabButtons[next.id].button.focus();
+      },
+    }, tab.label, pill);
+    tabButtons[tab.id] = { button, pill };
+    list.append(button);
+  }
+}
+
+function selectTab(tabId) {
+  state.activeTab = tabId;
+  renderTabBody();
+  // 狭い画面ではタブが横にはみ出すため、選んだタブが見える位置まで動かす。
+  tabButtons[tabId].button.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
+function updateTabs() {
+  for (const tab of TABS) {
+    const { button, pill } = tabButtons[tab.id];
+    const selected = state.activeTab === tab.id;
+    button.setAttribute('aria-selected', String(selected));
+    button.tabIndex = selected ? 0 : -1;
+    pill.textContent = `${selectedCount(tab.id)}/${totalCount(tab.id)}`;
+    pill.classList.toggle('on', selectedCount(tab.id) > 0);
+  }
+  $('tab-body').setAttribute('aria-labelledby', `tab-${state.activeTab}`);
+}
+
+function renderYaml(text) {
+  const pre = $('yaml-output');
+  const rows = text.replace(/\n$/, '').split('\n').map((line) => {
+    const row = h('span', { className: 'ln' });
+    const comment = line.match(/^(\s*)(#.*)$/);
+    const pair = line.match(/^(\s*)(- )?([A-Za-z0-9_]+)(:)(\s*)(.*)$/);
+    if (comment) {
+      row.append(comment[1], h('span', { className: 'c' }, comment[2]));
+    } else if (pair) {
+      row.append(pair[1], pair[2] || '', h('span', { className: 'k' }, pair[3]), pair[4], pair[5]);
+      if (pair[6]) row.append(pair[6] === '[]' ? pair[6] : h('span', { className: 's' }, pair[6]));
+    } else {
+      row.append(line);
+    }
+    return row;
+  });
+  pre.replaceChildren(...rows);
+}
+
+function updateSummary() {
+  updateTabs();
+  const total = selectedTotal();
+  $('selection-total').replaceChildren(h('strong', null, String(total)), ' 項目を選択中');
+  $('preview-summary').textContent = TABS.map((tab) => `${tab.label} ${selectedCount(tab.id)}`).join('・');
+  renderYaml(buildYaml());
+}
+
+// ---------------------------------------------------------------------------
+// Windows 設定・アプリ・削除するアプリ のタブ
+// ---------------------------------------------------------------------------
+function renderSectionTab(sectionName) {
+  const def = SECTIONS[sectionName];
+  const listHost = h('div');
+  const visibleItems = () => {
+    const filter = (state.filters[sectionName] || '').trim();
+    return state.sections[sectionName].filter((item) => matchesFilter(`${item.description} ${def.detail(item)} ${item.group}`, filter));
+  };
+  const setVisible = (checked) => { for (const item of visibleItems()) item.checked = checked; renderList(); updateSummary(); };
+
+  function renderList() {
+    const items = visibleItems();
+    if (items.length === 0) {
+      listHost.replaceChildren(emptyState('当てはまる項目がありません', '絞り込みの言葉を変えるか、下から項目を追加してください。'));
+      return;
+    }
+    const groups = new Map();
+    for (const item of items) {
+      if (!groups.has(item.group)) groups.set(item.group, []);
+      groups.get(item.group).push(item);
+    }
+    listHost.replaceChildren(...[...groups].map(([group, groupItems], groupIndex) => {
+      const boxes = [];
+      const count = h('span', { className: 'pill' });
+      const parent = h('input', {
+        type: 'checkbox',
+        onchange: (event) => {
+          // 一部だけ選ばれているときに押したら、すべて選ぶ（多くのデザインシステムと同じ動き）。
+          for (const item of groupItems) item.checked = event.target.checked;
+          boxes.forEach((box, i) => { box.checked = groupItems[i].checked; });
+          sync();
+          updateSummary();
+        },
+      });
+      const sync = () => {
+        const n = syncParent(parent, groupItems);
+        count.textContent = `${n}/${groupItems.length}`;
+        count.classList.toggle('on', n > 0);
+      };
+      const rows = groupItems.map((item) => {
+        const id = `item-${sectionName}-${state.sections[sectionName].indexOf(item)}`;
+        const box = h('input', { type: 'checkbox', id, checked: item.checked, onchange: (event) => { item.checked = event.target.checked; sync(); updateSummary(); } });
+        boxes.push(box);
+        const title = item.description || def.detail(item);
+        return h('div', { className: 'item' },
+          box,
+          h('label', { for: id, title: def.detail(item) },
+            h('span', { className: 'name' }, title, item.custom ? h('span', { className: 'tag' }, '追加') : null),
+            h('span', { className: 'detail' }, def.detail(item))),
+          item.custom ? h('button', {
+            type: 'button',
+            className: 'btn small subtle danger',
+            'aria-label': `${title} を一覧から消す`,
+            onclick: () => {
+              state.sections[sectionName].splice(state.sections[sectionName].indexOf(item), 1);
+              renderList();
+              updateSummary();
+            },
+          }, '消す') : null);
+      });
+      const headId = `group-${sectionName}-${groupIndex}`;
+      parent.id = headId;
+      parent.setAttribute('aria-label', `${group} をすべて選ぶ`);
+      sync();
+      return h('section', { className: 'card group' },
+        h('div', { className: 'group-head' },
+          parent,
+          h('h3', null, h('label', { for: headId }, group)),
+          count),
+        h('div', { className: `items${def.singleColumn ? ' single' : ''}` }, rows));
+    }));
+  }
+
+  const error = h('p', { className: 'form-error', role: 'alert' });
+  const inputs = {};
+  const form = h('form', {
+    className: 'form',
+    novalidate: true,
+    onsubmit: (event) => {
+      event.preventDefault();
+      const values = {};
+      for (const field of def.fields) values[field.name] = inputs[field.name].value.trim();
+      const problem = validateFields(def.fields, values);
+      if (problem) { error.textContent = problem; return; }
+      if (findItem(sectionName, values[def.key])) { error.textContent = '同じ項目が、すでに一覧にあります。'; return; }
+      const item = sectionItemFrom(sectionName, values, CUSTOM_GROUP);
+      item.custom = true;
+      item.checked = true;
+      state.sections[sectionName].push(item);
+      for (const field of def.fields) inputs[field.name].value = '';
+      error.textContent = '';
+      renderList();
+      updateSummary();
+      toast('ok', '一覧に追加して、チェックを付けました。');
+      inputs[def.fields[0].name].focus();
+    },
+  },
+  def.fields.map((field) => {
+    inputs[field.name] = h('input', { type: 'text', className: `field${field.mono ? ' mono' : ''}`, placeholder: field.placeholder, 'aria-required': field.required ? 'true' : null });
+    return formRow(field, inputs[field.name]);
+  }),
+  h('p', { className: 'form-note' }, icon('shield'), def.note),
+  error,
+  h('div', { className: 'form-actions' }, h('button', { type: 'submit', className: 'btn primary' }, '追加する')));
+
+  renderList();
+  return [
+    h('p', { className: 'tab-lead' }, def.lead),
+    h('div', { className: 'list-tools' },
+      searchBox(renderList),
+      h('button', { type: 'button', className: 'btn', onclick: () => setVisible(true) }, '表示中をすべて選ぶ'),
+      h('button', { type: 'button', className: 'btn subtle', onclick: () => setVisible(false) }, 'すべて外す')),
+    listHost,
+    h('details', { className: 'card add-card' }, h('summary', null, icon('plus'), '一覧にない項目を追加する'), form),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// 開発パッケージのタブ
+// ---------------------------------------------------------------------------
+function renderManagersTab() {
+  const listHost = h('div');
+
+  function renderList() {
+    const filter = (state.filters.packageManagers || '').trim();
+    const cards = [];
+    state.managers.forEach((manager, managerIndex) => {
+      const managerMatches = matchesFilter(`${manager.managerName} ${manager.checkCommand} ${manager.installCommand}`, filter);
+      const packages = manager.packages.filter((pkg) => managerMatches || matchesFilter(`${pkg.name} ${pkg.description}`, filter));
+      if (!managerMatches && packages.length === 0) return;
+
+      const boxes = [];
+      const count = h('span', { className: 'pill' });
+      const headId = `manager-${managerIndex}`;
+      const parent = h('input', {
+        type: 'checkbox',
+        id: headId,
+        'aria-label': `${manager.managerName} のパッケージをすべて選ぶ`,
+        onchange: (event) => {
+          for (const pkg of manager.packages) pkg.checked = event.target.checked;
+          boxes.forEach(({ box, pkg }) => { box.checked = pkg.checked; });
+          sync();
+          updateSummary();
+        },
+      });
+      const sync = () => {
+        const n = syncParent(parent, manager.packages);
+        count.textContent = `${n}/${manager.packages.length}`;
+        count.classList.toggle('on', n > 0);
+      };
+
+      const rows = packages.map((pkg) => {
+        const id = `pkg-${managerIndex}-${manager.packages.indexOf(pkg)}`;
+        const box = h('input', { type: 'checkbox', id, checked: pkg.checked, onchange: (event) => { pkg.checked = event.target.checked; sync(); updateSummary(); } });
+        boxes.push({ box, pkg });
+        return h('div', { className: 'item' },
+          box,
+          h('label', { for: id, title: pkg.name },
+            h('span', { className: 'name' }, pkg.description || pkg.name, pkg.custom ? h('span', { className: 'tag' }, '追加') : null),
+            h('span', { className: 'detail' }, pkg.name)),
+          pkg.custom ? h('button', {
+            type: 'button',
+            className: 'btn small subtle danger',
+            'aria-label': `${pkg.name} を一覧から消す`,
+            onclick: () => { manager.packages.splice(manager.packages.indexOf(pkg), 1); renderList(); updateSummary(); },
+          }, '消す') : null);
+      });
+
+      const pkgName = h('input', { type: 'text', className: 'field mono', placeholder: 'パッケージ名', 'aria-label': `${manager.managerName} に追加するパッケージ名` });
+      const pkgDesc = h('input', { type: 'text', className: 'field', placeholder: '説明（任意）', 'aria-label': `${manager.managerName} に追加するパッケージの説明` });
+      const pkgError = h('p', { className: 'form-error', role: 'alert' });
+      sync();
+
+      cards.push(h('section', { className: 'card group' },
+        h('div', { className: 'group-head' },
+          parent,
+          h('div', { className: 'titles' },
+            h('h3', null, h('label', { for: headId }, manager.managerName), manager.custom ? h('span', { className: 'tag' }, '追加') : null),
+            h('span', { className: 'sub', title: manager.installCommand }, manager.installCommand)),
+          count,
+          manager.custom ? h('button', {
+            type: 'button',
+            className: 'btn small subtle danger',
+            'aria-label': `${manager.managerName} を一覧から消す`,
+            onclick: () => { state.managers.splice(state.managers.indexOf(manager), 1); renderList(); updateSummary(); },
+          }, '消す') : null),
+        rows.length ? h('div', { className: 'items' }, rows) : h('p', { className: 'empty-state' }, 'パッケージがありません。下から追加してください。'),
+        h('form', {
+          className: 'inline-add',
+          novalidate: true,
+          onsubmit: (event) => {
+            event.preventDefault();
+            const values = { name: pkgName.value.trim(), description: pkgDesc.value.trim() };
+            const problem = validateFields([{ name: 'name', label: 'パッケージ名', required: true }, { name: 'description', label: '説明' }], values);
+            if (problem) { pkgError.textContent = problem; return; }
+            if (manager.packages.some((p) => p.name === values.name)) { pkgError.textContent = '同じパッケージが、すでにあります。'; return; }
+            manager.packages.push({ ...values, checked: true, custom: true });
+            renderList();
+            updateSummary();
+            toast('ok', `${manager.managerName} に ${values.name} を追加しました。`);
+          },
+        }, pkgName, pkgDesc, h('button', { type: 'submit', className: 'btn' }, icon('plus'), 'パッケージを追加'), pkgError)));
+    });
+    listHost.replaceChildren(...(cards.length ? cards : [emptyState('当てはまる項目がありません', '絞り込みの言葉を変えてください。')]));
+  }
+
+  const managerFields = [
+    { name: 'managerName', label: '名前', required: true, placeholder: '例: npm' },
+    { name: 'checkCommand', label: '入っているか確かめるコマンド（{package} がパッケージ名に置き換わります）', required: true, mono: true, placeholder: '例: npm list -g {package} --depth=0' },
+    { name: 'installCommand', label: '入れるコマンド', required: true, mono: true, placeholder: '例: npm install -g {package}' },
+  ];
+  const inputs = {};
+  const error = h('p', { className: 'form-error', role: 'alert' });
+  const form = h('form', {
+    className: 'form',
+    novalidate: true,
+    onsubmit: (event) => {
+      event.preventDefault();
+      const values = {};
+      for (const field of managerFields) values[field.name] = inputs[field.name].value.trim();
+      let problem = validateFields(managerFields, values);
+      if (!problem && (!values.checkCommand.includes('{package}') || !values.installCommand.includes('{package}'))) {
+        problem = '確かめるコマンドと入れるコマンドには、どちらも {package} を入れてください。';
+      }
+      if (!problem && findManager(values.managerName)) problem = '同じ名前が、すでにあります。';
+      if (problem) { error.textContent = problem; return; }
+      state.managers.push({ ...values, packages: [], custom: true });
+      for (const field of managerFields) inputs[field.name].value = '';
+      error.textContent = '';
+      renderList();
+      updateSummary();
+      toast('ok', `${values.managerName} を追加しました。続けて、パッケージを追加してください。`);
+    },
+  },
+  managerFields.map((field) => {
+    inputs[field.name] = h('input', { type: 'text', className: `field${field.mono ? ' mono' : ''}`, placeholder: field.placeholder, 'aria-required': 'true' });
+    return formRow(field, inputs[field.name]);
+  }),
+  h('p', { className: 'form-note' }, icon('shield'), 'パッケージを1つ以上選んだものだけが recipe.yaml に入ります。コマンドは、そのまま PowerShell で実行されます。'),
+  error,
+  h('div', { className: 'form-actions' }, h('button', { type: 'submit', className: 'btn primary' }, '追加する')));
+
+  renderList();
+  return [
+    h('p', { className: 'tab-lead' }, '再起動後のフェーズ2で、npm や pip などを使って入れる開発用パッケージです。'),
+    h('div', { className: 'list-tools' }, searchBox(renderList)),
+    listHost,
+    h('details', { className: 'card add-card' }, h('summary', null, icon('plus'), 'パッケージマネージャーを追加する'), form),
+  ];
+}
+
+function renderTabBody() {
+  $('tab-body').dataset.tab = state.activeTab;
+  $('tab-body').replaceChildren(...(state.activeTab === 'packageManagers' ? renderManagersTab() : renderSectionTab(state.activeTab)));
+  updateSummary();
+}
+
+// ---------------------------------------------------------------------------
+// 通知と「元に戻す」
+// ---------------------------------------------------------------------------
+// action を渡すと、通知の中にボタンを出す（例: 元に戻す）。
+function toast(kind, title, details, action) {
+  const box = h('div', { className: `toast ${kind}`, role: kind === 'warn' ? 'alert' : 'status' },
+    icon(kind === 'ok' ? 'ok' : 'warn', 20),
+    h('div', { className: 'body' },
+      h('p', { className: 'title' }, title),
+      details && details.length ? h('ul', null, details.map((d) => h('li', null, d))) : null,
+      action ? h('button', { type: 'button', className: 'btn small action', onclick: () => { box.remove(); action.run(); } }, action.label) : null),
+    h('button', { type: 'button', className: 'btn small subtle close', 'aria-label': '通知を閉じる', onclick: () => box.remove() }, icon('close')));
+  $('toasts').append(box);
+  // 問題の一覧がある通知は読み終わるまで残し、ただの完了通知だけ自動で消す。
+  // 「元に戻す」が付いた通知は、押す時間を残すため長めに表示する。
+  if (kind === 'ok') setTimeout(() => box.remove(), action ? 10000 : 4000);
+}
+
+// 確認画面で操作を止める代わりに、置き換える前の状態を覚えておき、通知から戻せるようにする。
+function takeSnapshot() {
+  return selectedTotal() === 0 ? null : JSON.stringify({ sections: state.sections, managers: state.managers });
+}
+function undoAction(snapshot) {
+  if (!snapshot) return undefined;
+  return {
+    label: '元に戻す',
+    run: () => {
+      const saved = JSON.parse(snapshot);
+      state.sections = saved.sections;
+      state.managers = saved.managers;
+      renderTabBody();
+      toast('ok', '前の選択に戻しました。');
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// ボタンの動き
+// ---------------------------------------------------------------------------
+$('apply-template').addEventListener('click', () => {
+  const template = templates[Number($('template-select').value)];
+  if (!template) return;
+  const undo = undoAction(takeSnapshot());
+  const warnings = applyRecipe(template.config);
+  renderTabBody();
+  if (warnings.length) toast('warn', `テンプレート「${template.name}」に、確認が必要な点があります。`, warnings, undo);
+  else toast('ok', `テンプレート「${template.name}」の内容でチェックを付けました。`, null, undo);
+});
+
+$('load-file').addEventListener('click', () => $('file-input').click());
+$('file-input').addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let config;
+    try {
+      config = parseYaml(String(reader.result));
+      if (!isPlainObject(config)) throw new Error('中身が空か、「phase1:」「phase2:」で始まる形になっていません。');
+    } catch (error) {
+      toast('warn', `「${file.name}」を読み込めませんでした。`, [error.message]);
+      return;
+    }
+    const undo = undoAction(takeSnapshot());
+    const warnings = applyRecipe(config);
+    renderTabBody();
+    if (warnings.length) toast('warn', `「${file.name}」を読み込みました。次の点を確認してください。`, warnings, undo);
+    else toast('ok', `「${file.name}」を読み込みました。`, null, undo);
+  };
+  reader.onerror = () => toast('warn', `「${file.name}」を読み込めませんでした。`);
+  reader.readAsText(file, 'utf-8');
+});
+
+$('clear-all').addEventListener('click', () => {
+  const undo = undoAction(takeSnapshot());
+  if (!undo) return;
+  clearSelection();
+  renderTabBody();
+  toast('ok', 'すべてのタブのチェックを外しました。', null, undo);
+});
+
+$('copy-yaml').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(buildYaml());
+    toast('ok', 'recipe.yaml の内容をコピーしました。');
+  } catch {
+    // file:// で開いたときなど、クリップボードが使えないブラウザーがあるため、選択状態にして手でコピーしてもらう。
+    const range = document.createRange();
+    range.selectNodeContents($('yaml-output'));
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    toast('warn', '自動でコピーできなかったため、内容を選択しました。Ctrl + C でコピーしてください。');
+  }
+});
+
+$('download-yaml').addEventListener('click', () => {
+  if (selectedTotal() === 0) {
+    toast('warn', 'まだ何も選ばれていません。', ['項目にチェックを付けるか、テンプレートから始めてください。']);
+    return;
+  }
+  const blob = new Blob([buildYaml()], { type: 'text/yaml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = h('a', { href: url, download: 'recipe.yaml' });
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('ok', 'recipe.yaml を保存しました。AutoSetup.ps1 と同じフォルダーに置いて使ってください。');
+});
+
+// ---------------------------------------------------------------------------
+// 起動
+// ---------------------------------------------------------------------------
+(function start() {
+  const templateErrors = [];
+  for (const el of document.querySelectorAll('script.recipe-template')) {
+    try {
+      const config = parseYaml(el.textContent);
+      templates.push({ name: el.dataset.name, config });
+      mergeIntoCatalog(config);
+    } catch (error) {
+      templateErrors.push(`${el.dataset.path}: ${error.message}`);
+    }
+  }
+  $('template-select').replaceChildren(...templates.map((template, index) => h('option', { value: String(index) }, template.name)));
+  if (templates.length > 0) applyRecipe(templates[0].config);
+  buildTabs();
+  renderTabBody();
+  if (templates.length === 0) {
+    toast('warn', 'テンプレートが埋め込まれていません。recipe-builder/Update-RecipeBuilder.ps1 を実行してください。', templateErrors);
+  } else if (templateErrors.length > 0) {
+    toast('warn', '読み込めなかったテンプレートがあります。', templateErrors);
+  }
+})();
+</script>
+</body>
+</html>

@@ -40,6 +40,8 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 | `AutoSetup.ps1` | `recipe.yaml` に基づき、アプリのインストール、システム設定、開発環境の構築を2フェーズ（再起動を挟む）に分けて実行します。 |
 | `recipe.yaml` | **カスタマイズの中心。** インストールするアプリ、システム設定、開発パッケージなどを、コメント付きで分かりやすく定義します。 |
 | `template-recipes/` | `recipe.yaml` のテンプレート集。代表的な構成例をフォルダ単位で保持し、必要に応じてコピーして利用できます。 |
+| `recipe-builder/recipe-builder.html` | レシピ作成アプリ。ブラウザーで開き、チェックを付けて `recipe.yaml` を作れます。ネット接続は不要です。 |
+| `recipe-builder/Update-RecipeBuilder.ps1` | `recipe.yaml` と `template-recipes/` の中身を、レシピ作成アプリに埋め込み直します。 |
 | `キッティング手順.txt` | 自動化スクリプトを使用する際の、手動作業を含めた全体的な作業フローのメモです。 |
 | `AutoSetup未対応の設定手順チートシート/` | スクリプトによる自動化範囲外の、各種手動設定に関する手順書が格納されています。（例: Hyper-V、WSL2のセットアップなど） |
 | `.github/workflows/lint.yml` | GitHub Actions の自動チェック。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェックを行います。 |
@@ -48,6 +50,21 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 ## カスタマイズ
 
 セットアップ内容は `recipe.yaml` を編集することで自由にカスタマイズできます。不要な項目は行頭に `#` を付けてコメントアウトしてください。
+
+### レシピ作成アプリ
+
+YAML を手で書かずに `recipe.yaml` を作りたい場合は、`recipe-builder/recipe-builder.html` をダブルクリックしてブラウザーで開きます。
+
+- 「Windows 設定」「アプリ」「削除するアプリ」「開発パッケージ」のタブで、入れたい項目にチェックを付けます。
+- テンプレートから始めることも、「recipe.yaml を読み込む」で手元の `recipe.yaml` を読み込んで続きを編集することもできます。
+- 一覧にない項目は、各タブの「一覧にない項目を追加する」から追加できます。
+- 「recipe.yaml を保存」で保存した `recipe.yaml` を、`AutoSetup.ps1` と同じフォルダーに置いて使います。
+
+`recipe.yaml` や `template-recipes/` を変更したときは、次のコマンドでアプリの一覧を更新してください。
+
+```powershell
+.\recipe-builder\Update-RecipeBuilder.ps1
+```
 
 ## 実行場所ごとの注意点
 
@@ -185,6 +202,8 @@ Define your settings in **`recipe.yaml`** and simply run **`Start-Admin.bat`** w
 | `AutoSetup.ps1` | Executes app installation, system tweaks, and development environment setup in two phases (with a reboot in between) based on `recipe.yaml`. |
 | `recipe.yaml` | **Customization hub.** Defines apps to install, system settings, development packages, and more with explanatory comments. |
 | `template-recipes/` | Template collection for `recipe.yaml`. Stores representative examples arranged by folder so you can copy and adapt them. |
+| `recipe-builder/recipe-builder.html` | Recipe builder app. Open it in a browser and create `recipe.yaml` by ticking checkboxes. No internet connection is needed. |
+| `recipe-builder/Update-RecipeBuilder.ps1` | Re-embeds the contents of `recipe.yaml` and `template-recipes/` into the recipe builder app. |
 | `キッティング手順.txt` | Notes covering the full operational flow, including manual steps when using the automation scripts. |
 | `AutoSetup未対応の設定手順チートシート/` | Guides for manual tasks outside the automation scope (e.g., Hyper-V, WSL2 setup). |
 | `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7, coding style with PSScriptAnalyzer, and the format of `recipe.yaml`. |
@@ -193,6 +212,21 @@ Define your settings in **`recipe.yaml`** and simply run **`Start-Admin.bat`** w
 ## Customization
 
 You can freely customize the setup by editing `recipe.yaml`. Comment out any unnecessary entries with `#`.
+
+### Recipe Builder App
+
+If you want to create `recipe.yaml` without writing YAML by hand, double-click `recipe-builder/recipe-builder.html` to open it in a browser.
+
+- Tick the items you want on the "Windows 設定" (Windows settings), "アプリ" (apps), "削除するアプリ" (apps to remove), and "開発パッケージ" (development packages) tabs.
+- You can start from a template, or load an existing `recipe.yaml` with "recipe.yaml を読み込む" (load recipe.yaml) and continue editing it.
+- Items that are not in the list can be added from "一覧にない項目を追加する" (add an item that is not in the list) on each tab.
+- Save `recipe.yaml` with "recipe.yaml を保存" (save recipe.yaml) and place it in the same folder as `AutoSetup.ps1`.
+
+When you change `recipe.yaml` or `template-recipes/`, run the following command to update the lists in the app.
+
+```powershell
+.\recipe-builder\Update-RecipeBuilder.ps1
+```
 
 ## Location-Specific Considerations
 
