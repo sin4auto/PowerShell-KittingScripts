@@ -36,7 +36,7 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 | ファイル名 | 役割 |
 |---|---|
 | `Start-Admin.bat` | **起点となるファイル。** 管理者権限を確認し、対話形式で実行するスクリプトを選択させます。 |
-| `AutoWindowsUpdate.ps1` | Windows Updateを全自動で実行します。更新がなくなるまで、更新の確認・インストール・再起動を繰り返します。 |
+| `AutoWindowsUpdate.ps1` | Windows Updateを全自動で実行します。更新がなくなるまで、更新の確認・インストール・再起動を繰り返します。失敗し続ける更新で止まらなくなるのを防ぐため、10周で中断します。 |
 | `AutoSetup.ps1` | `recipe.yaml` に基づき、アプリのインストール、システム設定、開発環境の構築を2フェーズ（再起動を挟む）に分けて実行します。 |
 | `recipe.yaml` | **カスタマイズの中心。** インストールするアプリ、システム設定、開発パッケージなどを、コメント付きで分かりやすく定義します。 |
 | `template-recipes/` | `recipe.yaml` のテンプレート集。代表的な構成例をフォルダ単位で保持し、必要に応じてコピーして利用できます。 |
@@ -179,7 +179,7 @@ Define your settings in **`recipe.yaml`** and simply run **`Start-Admin.bat`** w
 | File Name | Role |
 |---|---|
 | `Start-Admin.bat` | **Entry point.** Confirms administrative privileges and lets you pick scripts interactively. |
-| `AutoWindowsUpdate.ps1` | Runs Windows Update end-to-end. Repeats checking, installing, and rebooting until nothing remains. |
+| `AutoWindowsUpdate.ps1` | Runs Windows Update end-to-end. Repeats checking, installing, and rebooting until nothing remains. Stops after 10 rounds so that an update that keeps failing cannot cause an endless loop. |
 | `AutoSetup.ps1` | Executes app installation, system tweaks, and development environment setup in two phases (with a reboot in between) based on `recipe.yaml`. |
 | `recipe.yaml` | **Customization hub.** Defines apps to install, system settings, development packages, and more with explanatory comments. |
 | `template-recipes/` | Template collection for `recipe.yaml`. Stores representative examples arranged by folder so you can copy and adapt them. |
