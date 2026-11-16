@@ -36,33 +36,29 @@ $TaskName = "AutoWindowsUpdateTask"
 $MaxRounds = 10
 # 呼び出し元（Start-Admin.bat など）が失敗に気づけるよう、異常終了したら 1 に変えて最後に返す。
 $exitCode = 0
+# 下の catch と finally は、途中で中断しても動くため、どこで中断しても参照できるよう先に用意しておく。
+$LogFile = $null
+# PowerShellには「記録中かどうか」を知る標準の変数がないため、開始できたかを自分で覚えておく。
+$transcriptStarted = $false
 
 # =================================================================
 # メイン処理ブロック
 # =================================================================
 # スクリプト全体をtryブロックで囲み、予期せぬエラーを包括的に捕捉する。
+# 中断するときは exit ではなく throw を使い、終了コード・タスク削除・ログ停止を下の catch と finally にまとめる。
 try {
     # --- フェーズ0: 初期化処理 ---
-    # スクリプトの実行基盤を準備する。
-    try {
-        # スクリプトが.ps1ファイルとして保存・実行されているかを確認する。
-        if ($null -eq $PSScriptRoot) {
-            # ファイルではない場合、パスが取得できず後続処理が失敗するため、エラーを発生させる。
-            throw "スクリプトを.ps1ファイルとして保存して実行してください。"
-        }
-        # スクリプトの安定した動作のため、カレントディレクトリをスクリプト自身の場所に設定する。
-        Set-Location -Path $PSScriptRoot
-    } catch {
-        # 上記の初期化処理に失敗した場合、エラーを表示してスクリプトを終了する。
-        Write-Error $_.Exception.Message
-        Start-Sleep -Seconds 10
-        exit 1
+    # スクリプトが.ps1ファイルとして保存・実行されているかを確認する。
+    # PowerShell 5.1 ではファイル以外から実行すると $PSScriptRoot が空文字になるため、$null だけでなく空文字も調べる。
+    if ([string]::IsNullOrEmpty($PSScriptRoot)) {
+        # ファイルではない場合、パスが取得できず後続処理が失敗するため、エラーを発生させる。
+        throw "スクリプトを.ps1ファイルとして保存して実行してください。"
     }
+    # スクリプトの安定した動作のため、カレントディレクトリをスクリプト自身の場所に設定する。
+    Set-Location -Path $PSScriptRoot
     # 実行ログを記録するファイルパスを定義する。
     $LogFile = Join-Path $PSScriptRoot "AutoWindowsUpdate.log"
     # ログ記録（トランスクリプト）を開始する。-Appendで既存ファイルに追記する。
-    # PowerShellには「記録中かどうか」を知る標準の変数がないため、開始できたかを自分で覚えておく。
-    $transcriptStarted = $false
     try {
         Start-Transcript -Path $LogFile -Append -ErrorAction Stop
         $transcriptStarted = $true
@@ -74,14 +70,35 @@ try {
     # スクリプトの実行に必要な管理者権限があるかを確認する。
     # 下のタスク削除にも管理者権限が要るため、それより先に確かめる。
     if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        # 管理者権限がない場合は、警告を表示して処理を中断する。
-        Write-Warning "管理者権限がありません。管理者としてPowerShellを再実行してください。"
-        Start-Sleep -Seconds 10
-        exit 1
+        # 管理者権限がない場合は、処理を中断する。
+        throw "管理者権限がありません。管理者としてPowerShellを再実行してください。"
     }
     # 過去の実行で残存している可能性のある自動実行タスクを、安全のために削除する。
     Write-Host "-> 既存の自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
+
+    # --- 依存モジュールのセットアップ ---
+    # 1回のスクリプト実行の中では一度読み込めば足りるため、周回のループに入る前に1回だけ行う。
+    Write-Host "----------------------------------------------------"
+    Write-Host "[準備] 依存モジュール(PSWindowsUpdate)のセットアップ" -ForegroundColor Cyan
+    # 'PSWindowsUpdate'モジュールがインストール済みかを確認する。
+    if (Get-Module -ListAvailable -Name PSWindowsUpdate) {
+        Write-Host "-> 依存モジュールはインストール済み。" -ForegroundColor Green
+    } else {
+        # 未インストールの場合、依存関係にあるNuGetプロバイダーを準備する。
+        Write-Host "-> 依存モジュールをインストールします..." -ForegroundColor Yellow
+        # 失敗したまま進むと「インストール完了」と誤って表示されるため、失敗したらここで中断する。
+        try {
+            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction Stop
+            # 'PSWindowsUpdate'モジュールを全ユーザー向けにインストールする。
+            Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers -ErrorAction Stop
+        } catch {
+            throw "依存モジュール(PSWindowsUpdate)のインストールに失敗しました。インターネット接続を確認してください: $($_.Exception.Message)"
+        }
+        Write-Host "-> インストール完了。" -ForegroundColor Green
+    }
+    # モジュールを現在のセッションにインポートして利用可能な状態にする。
+    Import-Module PSWindowsUpdate -Force -ErrorAction Stop
 
     # --- フェーズ2: Windows Update メインループ ---
     # 前の周で失敗した更新。一時的な失敗は次の周で直ることがあるため、1回目の失敗では止めずに覚えておく。
@@ -94,28 +111,6 @@ try {
         }
         Write-Host "===================================================="
         Write-Host "周回 $Round / $MaxRounds" -ForegroundColor Cyan
-
-        # --- [0/5] 依存モジュールのセットアップ ---
-        Write-Host "----------------------------------------------------"
-        Write-Host "[0/5] 依存モジュール(PSWindowsUpdate)のセットアップ" -ForegroundColor Cyan
-        # 'PSWindowsUpdate'モジュールがインストール済みかを確認する。
-        if (Get-Module -ListAvailable -Name PSWindowsUpdate) {
-            Write-Host "-> 依存モジュールはインストール済み。" -ForegroundColor Green
-        } else {
-            # 未インストールの場合、依存関係にあるNuGetプロバイダーを準備する。
-            Write-Host "-> 依存モジュールをインストールします..." -ForegroundColor Yellow
-            # 失敗したまま進むと「インストール完了」と誤って表示されるため、失敗したらここで中断する。
-            try {
-                Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction Stop
-                # 'PSWindowsUpdate'モジュールを全ユーザー向けにインストールする。
-                Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers -ErrorAction Stop
-            } catch {
-                throw "依存モジュール(PSWindowsUpdate)のインストールに失敗しました。インターネット接続を確認してください: $($_.Exception.Message)"
-            }
-            Write-Host "-> インストール完了。" -ForegroundColor Green
-        }
-        # モジュールを現在のセッションにインポートして利用可能な状態にする。
-        Import-Module PSWindowsUpdate -Force -ErrorAction Stop
 
         # --- [1/5] 更新プログラムのスキャン ---
         Write-Host "----------------------------------------------------"
@@ -207,7 +202,12 @@ try {
     # スクリプト全体のtryブロック内で発生した、捕捉可能な全てのエラーをここで処理する。
     $exitCode = 1
     Write-Host "`nFATAL: エラーが発生しました。 $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "処理を中断します。詳細はログファイルを参照してください: $LogFile" -ForegroundColor Red
+    if ($transcriptStarted) {
+        Write-Host "処理を中断します。詳細はログファイルを参照してください: $LogFile" -ForegroundColor Red
+    } else {
+        # ログを記録する前に中断した場合は、存在しないログを案内しないようにする。
+        Write-Host "処理を中断します。" -ForegroundColor Red
+    }
     # 処理が異常終了したため、意図しない再実行を防ぐために自動実行タスクをクリーンアップする。
     Write-Host "-> 自動実行タスクをクリーンアップします..."
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
