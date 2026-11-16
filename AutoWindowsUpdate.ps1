@@ -70,18 +70,18 @@ try {
         # ログ記録が開始できない場合でも、処理は続行する。
         Write-Warning "トランスクリプトの開始に失敗。ログは記録されません。Error: $($_.Exception.Message)"
     }
-    # 過去の実行で残存している可能性のある自動実行タスクを、安全のために削除する。
-    Write-Host "-> 既存の自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
-    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
-
     # --- フェーズ1: 実行前チェック ---
     # スクリプトの実行に必要な管理者権限があるかを確認する。
+    # 下のタスク削除にも管理者権限が要るため、それより先に確かめる。
     if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         # 管理者権限がない場合は、警告を表示して処理を中断する。
         Write-Warning "管理者権限がありません。管理者としてPowerShellを再実行してください。"
         Start-Sleep -Seconds 10
         exit 1
     }
+    # 過去の実行で残存している可能性のある自動実行タスクを、安全のために削除する。
+    Write-Host "-> 既存の自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
+    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
 
     # --- フェーズ2: Windows Update メインループ ---
     # 前の周で失敗した更新。一時的な失敗は次の周で直ることがあるため、1回目の失敗では止めずに覚えておく。

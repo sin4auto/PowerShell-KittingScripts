@@ -83,8 +83,17 @@ $logFilePath = Join-Path $PSScriptRoot $logFileName
 # フェーズ1とフェーズ2の実行記録を一つのファイルにまとめる。
 Start-Transcript -Path $logFilePath -Append
 #=============================================================================
-# ■ 実行前準備 (設定ファイルの読み込みと環境チェック)
+# ■ 実行前準備 (環境チェックと設定ファイルの読み込み)
 #=============================================================================
+# --- 管理者権限の確認 ---
+# 権限がないまま進むと、モジュールの導入まで済ませてから途中で失敗するため、最初に確かめる。
+# フェーズ2もタスクから最高の権限で起動されるので、同じ確認で通る。手動で権限なしのまま実行したときに気づけるよう、両フェーズで確かめる。
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Warning "エラー: 管理者権限が必要です。PowerShellを右クリックして「管理者として実行」してください。"
+    Read-Host "Enterキーを押して終了します。"
+    Stop-Transcript
+    exit 1
+}
 # --- YAML解析モジュールの準備 ---
 try {
     # 設定ファイル(YAML形式)を読み込むために必要な'powershell-yaml'モジュールが
@@ -134,18 +143,6 @@ catch {
     Read-Host "Enterキーを押して終了します。"
     Stop-Transcript
     exit 1
-}
-# --- 管理者権限の確認 ---
-# フェーズ2の実行時($setupPhaseが'2')は、この権限チェックをスキップする。
-if ($setupPhase -ne '2') {
-    # スクリプトが管理者権限で実行されているかを確認する。
-    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        # 管理者権限がない場合、警告メッセージを表示してスクリプトを終了する。
-        Write-Warning "エラー: 管理者権限が必要です。PowerShellを右クリックして「管理者として実行」してください。"
-        Read-Host "Enterキーを押して終了します。"
-        Stop-Transcript
-        exit 1
-    }
 }
 #=============================================================================
 # ■ メインロジック (フェーズ分岐)
