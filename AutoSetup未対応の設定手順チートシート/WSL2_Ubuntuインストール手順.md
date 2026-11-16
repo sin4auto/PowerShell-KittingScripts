@@ -2,6 +2,11 @@
 
 このガイドは、Windows 11にWSL2 (Windows Subsystem for Linux 2) をインストールし、開発環境を構築するための手順をまとめたものです。
 
+> **関連する手順書**
+> - **初めて WSL2 を入れる場合**：このガイドを上から順に進めてください。
+> - **開発ツールをまとめて自動で入れたい場合 / WSL を作り直す場合**：[WSL環境 再構築手順（man.md）](WSL環境の初期設定スクリプト等/man.md) を参照してください。`setup-wsl.sh` などのスクリプトで、Git・Node.js・Python・uv などを一括で導入できます。
+> - **GitHub への接続設定**：[Windows11でのgithub初期設定手順](Windows11でのgithub初期設定手順.md) を参照してください。
+
 ---
 
 ## Part 1：インストールと初期設定（必須）
@@ -89,9 +94,22 @@ WSL内にGitをインストールし、Windows側の認証情報を利用してG
 sudo apt install git
 ```
 
-#### 認証情報の設定（推奨）
+> `setup-wsl.sh` を実行した場合は、Git はすでに入っています（既定ブランチ名 `main` の設定も済んでいます）。
 
-WindowsにGit for Windowsがインストールされている場合、その認証情報管理システム（Credential Manager）をWSLから利用できます。これにより、GitHubなどへアクセスする際のパスワード入力を省略できます。
+#### GitHub への接続方法
+
+GitHub への接続方法は、次の 2 通りがあります。**基本は A（SSH）** です。Windows 側と同じ方法でそろえられるためです。
+
+**A. SSH の鍵を使う（推奨）**
+
+[Windows11でのgithub初期設定手順](Windows11でのgithub初期設定手順.md) の「1. Gitの基本設定」と「2. SSH認証の設定」を、**WSL のターミナルで**同じように行います（Git Bash 用のコマンドがそのまま使えます）。
+
+- 鍵は WSL 側の `~/.ssh` に作られます。Windows 側の鍵とは別のものなので、GitHub にも**別の鍵として**登録します
+- `clip` の代わりに `cat ~/.ssh/id_ed25519.pub` で表示した内容をコピーして登録します
+
+**B. Windows の認証情報を使う（HTTPS）**
+
+WindowsにGit for Windowsがインストールされている場合、その認証情報管理システム（Credential Manager）をWSLから利用できます。これにより、HTTPS の URL で GitHub などへアクセスする際のパスワード入力を省略できます。
 
 ```bash
 git config --global credential.helper "/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe"
