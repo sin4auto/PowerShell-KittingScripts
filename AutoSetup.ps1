@@ -110,7 +110,9 @@ try {
 }
 catch {
     # モジュールのインストールまたはインポートに失敗した場合、エラーメッセージを表示してスクリプトを停止する。
-    Write-Error "YAMLモジュールの準備に失敗しました。管理者権限で `Install-Module -Name powershell-yaml` を手動で実行してください。"
+    # 原因が分かるよう、元のエラーの内容も表示する。導入先は上と同じ「今のユーザー」にそろえて案内する。
+    Write-Error "YAMLモジュールの準備に失敗しました: $($_.Exception.Message)"
+    Write-Error "インターネット接続を確認し、PowerShellで「Install-Module -Name powershell-yaml -Scope CurrentUser」を手動で実行してください。"
     Read-Host "Enterキーを押して終了します。"
     Stop-Transcript
     exit 1
