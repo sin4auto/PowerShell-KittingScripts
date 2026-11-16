@@ -145,6 +145,8 @@ if ($setupPhase -ne '2') {
             Write-Host "-> $($setting.description)..."
             # 実行すべきコマンドが定義されていることを確認する。
             if (-not ([string]::IsNullOrEmpty($setting.command))) {
+                # コマンドが見つからない場合に前の終了コードを成功と取り違えないよう、「未判定」に戻す。
+                $global:LASTEXITCODE = $null
                 # 設定ファイルから読み取ったコマンド文字列を実行する。
                 Invoke-Expression -Command $setting.command
                 # 直前に実行した外部コマンドが正常に終了したかを確認する（終了コード0が成功）。
@@ -326,6 +328,9 @@ if ($setupPhase -eq '2') {
                 Write-Host "パッケージ [$($packageName)] の状態を確認しています..."
                 # 設定ファイルの'checkCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
                 $checkCommand = $manager.checkCommand -replace '\{package\}', $packageName
+                # コマンド自体が見つからないと終了コードが更新されず、前の処理の「0」が残って
+                # インストール済みと誤判定するため、実行前に「未判定」に戻しておく。
+                $global:LASTEXITCODE = $null
                 # 生成した確認コマンドを実行する。
                 Invoke-Expression -Command $checkCommand
                 # 確認コマンドの終了コードが0でない場合、パッケージは未インストールと判断してインストールを実行する。
@@ -333,6 +338,8 @@ if ($setupPhase -eq '2') {
                     Write-Host "-> [$($packageName)] をインストールします..."
                     # 設定ファイルの'installCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
                     $installCommand = $manager.installCommand -replace '\{package\}', $packageName
+                    # 確認コマンドと同じ理由で、前の終了コードを成功と取り違えないようにする。
+                    $global:LASTEXITCODE = $null
                     # 生成したインストールコマンドを実行する。
                     Invoke-Expression -Command $installCommand
                     # インストールが成功したか（終了コード0）を確認する。
