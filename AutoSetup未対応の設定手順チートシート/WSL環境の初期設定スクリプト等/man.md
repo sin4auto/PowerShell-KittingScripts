@@ -107,6 +107,7 @@ curl -fsSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts
 cd ~/PowerShell-KittingScripts
 bash "AutoSetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-Rust-Go-Haskell.sh"
 bash "AutoSetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-codex.sh"
+bash "AutoSetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-claude_code.sh"
 ```
 
 ### 方法B: curl で直接実行（`curl.txt` ベース）
@@ -115,7 +116,10 @@ bash "AutoSetup未対応の設定手順チートシート/WSL環境の初期設�
 cd ~
 curl -fsSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/AutoSetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-Rust-Go-Haskell.sh" | bash
 curl -fsSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/AutoSetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-codex.sh" | bash
+curl -fsSL "https://raw.githubusercontent.com/sin4auto/PowerShell-KittingScripts/main/AutoSetup未対応の設定手順チートシート/WSL環境の初期設定スクリプト等/setup-claude_code.sh" | bash
 ```
+
+`setup-claude_code.sh` は Claude Code を公式のネイティブインストーラーで入れます（Node.js は不要）。完了後は WSL ターミナルで `claude` を実行し、サインインします。
 
 ## 7. 動作確認
 
@@ -131,6 +135,7 @@ npm -v
 uv --version
 git --version
 shellcheck --version
+claude --version   # setup-claude_code.sh を実行した場合
 ```
 
 ## 8. よく使う復旧コマンド
