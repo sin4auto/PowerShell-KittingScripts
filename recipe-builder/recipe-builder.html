@@ -231,15 +231,15 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
 /* ---- 本体の2列 ---- */
 .layout {
   display: grid;
-  /* 長いコマンドを折り返さずに読めるよう、プレビューを広めに取る。一覧は 480px より狭くしない。 */
-  grid-template-columns: minmax(480px, 1fr) minmax(560px, 2.5fr);
+  /* 長いコマンドを折り返さずに読めるよう、プレビューを広めに取る。一覧は、4つのタブが切れずに並ぶ 660px より狭くしない。 */
+  grid-template-columns: minmax(660px, 1fr) minmax(560px, 2.5fr);
   gap: 24px;
   padding: 24px;
   max-width: 2400px;
   margin: 0 auto;
   align-items: start;
 }
-@media (max-width: 1120px) {
+@media (max-width: 1300px) {
   .layout { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; }
   .appbar, .startbar { padding-left: 16px; padding-right: 16px; }
 }
@@ -451,14 +451,14 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
 .code .s { color: var(--code-string); }
 .code .c { color: var(--code-comment); font-style: italic; }
 .preview-foot { padding: 10px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; line-height: 16px; }
-@media (max-width: 1120px) {
+@media (max-width: 1300px) {
   .preview { position: static; max-height: none; }
   .code { max-height: 60vh; }
 }
 
 /* ---- 通知 ---- */
 .toasts { position: fixed; right: 24px; bottom: 24px; z-index: 30; display: grid; gap: 8px; width: min(420px, calc(100vw - 32px)); }
-@media (max-width: 1120px) { .toasts { right: 16px; bottom: 16px; } }
+@media (max-width: 1300px) { .toasts { right: 16px; bottom: 16px; } }
 .toast {
   display: flex;
   gap: 12px;
