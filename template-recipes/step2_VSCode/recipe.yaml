@@ -108,6 +108,8 @@ phase1:
     - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.9
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
