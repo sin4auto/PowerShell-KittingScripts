@@ -42,7 +42,8 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 | `template-recipes/` | `recipe.yaml` のテンプレート集。代表的な構成例をフォルダ単位で保持し、必要に応じてコピーして利用できます。 |
 | `キッティング手順.txt` | 自動化スクリプトを使用する際の、手動作業を含めた全体的な作業フローのメモです。 |
 | `AutoSetup未対応の設定手順チートシート/` | スクリプトによる自動化範囲外の、各種手動設定に関する手順書が格納されています。（例: Hyper-V、WSL2のセットアップなど） |
-| `.github/workflows/lint.yml` | GitHub Actions の自動チェック。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェックと PSScriptAnalyzer による書き方チェックを行います。 |
+| `.github/workflows/lint.yml` | GitHub Actions の自動チェック。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェックを行います。 |
+| `.github/scripts/Test-Recipe.ps1` | `recipe.yaml` と `template-recipes/` の書式チェック。書き間違えたキーや必須キーの抜けを見つけます。手元でも `powershell-yaml` を入れた PowerShell で実行できます。 |
 
 ## カスタマイズ
 
@@ -186,7 +187,8 @@ Define your settings in **`recipe.yaml`** and simply run **`Start-Admin.bat`** w
 | `template-recipes/` | Template collection for `recipe.yaml`. Stores representative examples arranged by folder so you can copy and adapt them. |
 | `キッティング手順.txt` | Notes covering the full operational flow, including manual steps when using the automation scripts. |
 | `AutoSetup未対応の設定手順チートシート/` | Guides for manual tasks outside the automation scope (e.g., Hyper-V, WSL2 setup). |
-| `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7 and coding style with PSScriptAnalyzer. |
+| `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7, coding style with PSScriptAnalyzer, and the format of `recipe.yaml`. |
+| `.github/scripts/Test-Recipe.ps1` | Format check for `recipe.yaml` and `template-recipes/`. Finds misspelled keys and missing required keys. You can also run it locally in PowerShell with `powershell-yaml` installed. |
 
 ## Customization
 

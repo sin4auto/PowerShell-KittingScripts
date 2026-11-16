@@ -42,6 +42,19 @@ jobs:
           }
           if ($failed) { exit 1 }
 
+  recipe:
+    name: Recipe format
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install powershell-yaml
+        shell: pwsh
+        # AutoSetup.ps1 と同じ YAML 読み込みモジュールを使い、実行時と同じ読み方で確かめる。
+        run: Install-Module -Name powershell-yaml -RequiredVersion 0.4.12 -Scope CurrentUser -Force
+      - name: Check recipe.yaml and templates
+        shell: pwsh
+        run: ./.github/scripts/Test-Recipe.ps1
+
   analyze:
     name: PSScriptAnalyzer
     runs-on: windows-latest
