@@ -2789,11 +2789,19 @@ function mergeIntoCatalog(config) {
   for (const sectionName of Object.keys(SECTIONS)) {
     const list = config && isPlainObject(config.phase1) ? config.phase1[sectionName] : null;
     if (!Array.isArray(list)) continue;
+    // 書き出す順番は一覧の順番になるため、新しい項目は末尾ではなく、そのテンプレートで1つ前にある項目の直後に入れる。
+    // こうしないと、テンプレートにしかない項目の実行順が、読み込んだときと変わってしまう。
+    let previous = null;
     for (const source of list) {
       if (!isPlainObject(source)) continue;
       const keyValue = toText(source[SECTIONS[sectionName].key]).trim();
-      if (keyValue === '' || findItem(sectionName, keyValue)) continue;
-      state.sections[sectionName].push(sectionItemFrom(sectionName, source, source.__group || NO_GROUP));
+      if (keyValue === '') continue;
+      const existing = findItem(sectionName, keyValue);
+      if (existing) { previous = existing; continue; }
+      const item = sectionItemFrom(sectionName, source, source.__group || NO_GROUP);
+      const items = state.sections[sectionName];
+      items.splice(previous ? items.indexOf(previous) + 1 : items.length, 0, item);
+      previous = item;
     }
   }
   const managers = config && isPlainObject(config.phase2) ? config.phase2.packageManagers : null;
