@@ -3452,30 +3452,35 @@ function sectionItemFrom(sectionName, source, group) {
   for (const key of SECTIONS[sectionName].keys) item[key] = toText(source[key]).trim();
   return item;
 }
+const newManager = (managerName, checkCommand, installCommand, custom) => ({ managerName, checkCommand, installCommand, packages: [], custom });
+const newPackage = (name, description, checked, custom) => ({ name, description, checked, custom });
+
+// 書き出す順番は一覧の順番になるため、テンプレートの項目は、そのテンプレートで1つ前にある項目の直後に入れる。
+// 末尾に足すと、テンプレートにしかない項目の実行順が、読み込んだときと変わってしまう。
+function insertAfter(list, previous, item) {
+  list.splice(previous ? list.indexOf(previous) + 1 : list.length, 0, item);
+}
 
 // テンプレートやレシピの中身を、選択肢の一覧に足す（同じ項目は1つにまとめる）。
 function mergeIntoCatalog(config) {
   for (const sectionName of Object.keys(SECTIONS)) {
     const list = config && isPlainObject(config.phase1) ? config.phase1[sectionName] : null;
     if (!Array.isArray(list)) continue;
-    // 書き出す順番は一覧の順番になるため、新しい項目は末尾ではなく、そのテンプレートで1つ前にある項目の直後に入れる。
-    // こうしないと、テンプレートにしかない項目の実行順が、読み込んだときと変わってしまう。
     let previous = null;
     for (const source of list) {
       if (!isPlainObject(source)) continue;
       const keyValue = toText(source[SECTIONS[sectionName].key]).trim();
       if (keyValue === '') continue;
-      const existing = findItem(sectionName, keyValue);
-      if (existing) { previous = existing; continue; }
-      const item = sectionItemFrom(sectionName, source, source.__group || NO_GROUP);
-      const items = state.sections[sectionName];
-      items.splice(previous ? items.indexOf(previous) + 1 : items.length, 0, item);
+      let item = findItem(sectionName, keyValue);
+      if (!item) {
+        item = sectionItemFrom(sectionName, source, source.__group || NO_GROUP);
+        insertAfter(state.sections[sectionName], previous, item);
+      }
       previous = item;
     }
   }
   const managers = config && isPlainObject(config.phase2) ? config.phase2.packageManagers : null;
   if (!Array.isArray(managers)) return;
-  // Windows 設定などと同じく、新しいパッケージマネージャーは、そのテンプレートで1つ前にあるものの直後に入れる。
   let previousManager = null;
   for (const source of managers) {
     if (!isPlainObject(source)) continue;
@@ -3483,21 +3488,15 @@ function mergeIntoCatalog(config) {
     if (name === '') continue;
     let manager = findManager(name);
     if (!manager) {
-      manager = {
-        managerName: name,
-        checkCommand: toText(source.checkCommand).trim(),
-        installCommand: toText(source.installCommand).trim(),
-        packages: [],
-        custom: false,
-      };
-      state.managers.splice(previousManager ? state.managers.indexOf(previousManager) + 1 : state.managers.length, 0, manager);
+      manager = newManager(name, toText(source.checkCommand).trim(), toText(source.installCommand).trim(), false);
+      insertAfter(state.managers, previousManager, manager);
     }
     previousManager = manager;
     for (const pkg of Array.isArray(source.packages) ? source.packages : []) {
       if (!isPlainObject(pkg)) continue;
       const pkgName = toText(pkg.name).trim();
       if (pkgName === '' || manager.packages.some((p) => p.name === pkgName)) continue;
-      manager.packages.push({ name: pkgName, description: toText(pkg.description).trim(), checked: false, custom: false });
+      manager.packages.push(newPackage(pkgName, toText(pkg.description).trim(), false, false));
     }
   }
 }
@@ -3558,7 +3557,7 @@ function applyRecipe(config) {
       }
       let manager = findManager(name);
       if (!manager) {
-        manager = { managerName: name, checkCommand, installCommand, packages: [], custom: true };
+        manager = newManager(name, checkCommand, installCommand, true);
         state.managers.push(manager);
       } else {
         manager.checkCommand = checkCommand;
@@ -3577,7 +3576,7 @@ function applyRecipe(config) {
         if (!pkgName) { warnings.push(`${pkgWhere} に「name」がないため、読み飛ばしました。`); return; }
         let target = manager.packages.find((p) => p.name === pkgName);
         if (!target) {
-          target = { name: pkgName, description: '', checked: false, custom: true };
+          target = newPackage(pkgName, '', false, true);
           manager.packages.push(target);
         }
         target.description = toText(pkg.description).trim();
@@ -3701,13 +3700,46 @@ function icon(name, size) {
   return svg;
 }
 
-// 親のチェックボックスを、子の選択状態（すべて／一部／なし）に合わせる。
-function syncParent(box, children) {
-  const checked = children.filter((c) => c.checked).length;
-  box.checked = children.length > 0 && checked === children.length;
-  box.indeterminate = checked > 0 && checked < children.length;
-  box.disabled = children.length === 0;
-  return checked;
+// グループ見出しの「すべて選ぶ」チェックボックスと、選択数の表示。
+// 押すと children をすべて選ぶ／外し、onToggle で行のチェックボックスを合わせる。
+// 行のチェックを変えたときは、返した sync を呼んで、見出しの状態（すべて／一部／なし）と選択数を合わせる。
+function groupToggle(children, onToggle, attrs) {
+  const count = h('span', { className: 'pill' });
+  const parent = h('input', {
+    ...attrs,
+    type: 'checkbox',
+    onchange: (event) => {
+      // 一部だけ選ばれているときに押したら、すべて選ぶ（多くのデザインシステムと同じ動き）。
+      for (const child of children) child.checked = event.target.checked;
+      onToggle();
+      sync();
+      updateSummary();
+    },
+  });
+  const sync = () => {
+    const checked = children.filter((c) => c.checked).length;
+    parent.checked = children.length > 0 && checked === children.length;
+    parent.indeterminate = checked > 0 && checked < children.length;
+    parent.disabled = children.length === 0;
+    count.textContent = `${checked}/${children.length}`;
+    count.classList.toggle('on', checked > 0);
+  };
+  sync();
+  return { parent, count, sync };
+}
+
+// 自分で追加した項目だけに出す「消す」ボタン。list から item を取り除き、画面を描き直す。
+function removeButton(label, list, item, rerender) {
+  return h('button', {
+    type: 'button',
+    className: 'btn small subtle danger',
+    'aria-label': `${label} を一覧から消す`,
+    onclick: () => {
+      list.splice(list.indexOf(item), 1);
+      rerender();
+      updateSummary();
+    },
+  }, '消す');
 }
 
 // 「画面を見る」ボタンと、押すと項目の下に広がる画像。画像は開いたときに初めて読み込む。
@@ -3893,22 +3925,11 @@ function renderSectionTab(sectionName) {
     }
     listHost.replaceChildren(...[...groups].map(([group, groupItems], groupIndex) => {
       const boxes = [];
-      const count = h('span', { className: 'pill' });
-      const parent = h('input', {
-        type: 'checkbox',
-        onchange: (event) => {
-          // 一部だけ選ばれているときに押したら、すべて選ぶ（多くのデザインシステムと同じ動き）。
-          for (const item of groupItems) item.checked = event.target.checked;
-          boxes.forEach((box, i) => { box.checked = groupItems[i].checked; });
-          sync();
-          updateSummary();
-        },
-      });
-      const sync = () => {
-        const n = syncParent(parent, groupItems);
-        count.textContent = `${n}/${groupItems.length}`;
-        count.classList.toggle('on', n > 0);
-      };
+      const headId = `group-${sectionName}-${groupIndex}`;
+      const { parent, count, sync } = groupToggle(
+        groupItems,
+        () => boxes.forEach((box, i) => { box.checked = groupItems[i].checked; }),
+        { id: headId, 'aria-label': `${group} をすべて選ぶ` });
       const rows = groupItems.map((item) => {
         const id = `item-${sectionName}-${state.sections[sectionName].indexOf(item)}`;
         const box = h('input', { type: 'checkbox', id, checked: item.checked, onchange: (event) => { item.checked = event.target.checked; sync(); updateSummary(); } });
@@ -3923,21 +3944,8 @@ function renderSectionTab(sectionName) {
             h('span', { className: 'detail' }, def.detail(item))),
           preview ? preview.button : null,
           preview ? preview.figure : null,
-          item.custom ? h('button', {
-            type: 'button',
-            className: 'btn small subtle danger',
-            'aria-label': `${title} を一覧から消す`,
-            onclick: () => {
-              state.sections[sectionName].splice(state.sections[sectionName].indexOf(item), 1);
-              renderList();
-              updateSummary();
-            },
-          }, '消す') : null);
+          item.custom ? removeButton(title, state.sections[sectionName], item, renderList) : null);
       });
-      const headId = `group-${sectionName}-${groupIndex}`;
-      parent.id = headId;
-      parent.setAttribute('aria-label', `${group} をすべて選ぶ`);
-      sync();
       return h('section', { className: 'card group' },
         h('div', { className: 'group-head' },
           parent,
@@ -4006,24 +4014,11 @@ function renderManagersTab() {
       if (!managerMatches && packages.length === 0) return;
 
       const boxes = [];
-      const count = h('span', { className: 'pill' });
       const headId = `manager-${managerIndex}`;
-      const parent = h('input', {
-        type: 'checkbox',
-        id: headId,
-        'aria-label': `${manager.managerName} のパッケージをすべて選ぶ`,
-        onchange: (event) => {
-          for (const pkg of manager.packages) pkg.checked = event.target.checked;
-          boxes.forEach(({ box, pkg }) => { box.checked = pkg.checked; });
-          sync();
-          updateSummary();
-        },
-      });
-      const sync = () => {
-        const n = syncParent(parent, manager.packages);
-        count.textContent = `${n}/${manager.packages.length}`;
-        count.classList.toggle('on', n > 0);
-      };
+      const { parent, count, sync } = groupToggle(
+        manager.packages,
+        () => boxes.forEach(({ box, pkg }) => { box.checked = pkg.checked; }),
+        { id: headId, 'aria-label': `${manager.managerName} のパッケージをすべて選ぶ` });
 
       const rows = packages.map((pkg) => {
         const id = `pkg-${managerIndex}-${manager.packages.indexOf(pkg)}`;
@@ -4034,18 +4029,12 @@ function renderManagersTab() {
           h('label', { for: id, title: pkg.name },
             h('span', { className: 'name' }, pkg.description || pkg.name, pkg.custom ? h('span', { className: 'tag' }, '追加') : null),
             h('span', { className: 'detail' }, pkg.name)),
-          pkg.custom ? h('button', {
-            type: 'button',
-            className: 'btn small subtle danger',
-            'aria-label': `${pkg.name} を一覧から消す`,
-            onclick: () => { manager.packages.splice(manager.packages.indexOf(pkg), 1); renderList(); updateSummary(); },
-          }, '消す') : null);
+          pkg.custom ? removeButton(pkg.name, manager.packages, pkg, renderList) : null);
       });
 
       const pkgName = h('input', { type: 'text', className: 'field mono', placeholder: 'パッケージ名', 'aria-label': `${manager.managerName} に追加するパッケージ名` });
       const pkgDesc = h('input', { type: 'text', className: 'field', placeholder: '説明（任意）', 'aria-label': `${manager.managerName} に追加するパッケージの説明` });
       const pkgError = h('p', { className: 'form-error', role: 'alert' });
-      sync();
 
       cards.push(h('section', { className: 'card group' },
         h('div', { className: 'group-head' },
@@ -4054,12 +4043,7 @@ function renderManagersTab() {
             h('h3', null, h('label', { for: headId }, manager.managerName), manager.custom ? h('span', { className: 'tag' }, '追加') : null),
             h('span', { className: 'sub', title: manager.installCommand }, manager.installCommand)),
           count,
-          manager.custom ? h('button', {
-            type: 'button',
-            className: 'btn small subtle danger',
-            'aria-label': `${manager.managerName} を一覧から消す`,
-            onclick: () => { state.managers.splice(state.managers.indexOf(manager), 1); renderList(); updateSummary(); },
-          }, '消す') : null),
+          manager.custom ? removeButton(manager.managerName, state.managers, manager, renderList) : null),
         rows.length ? h('div', { className: 'items' }, rows) : h('p', { className: 'empty-state' }, 'パッケージがありません。下から追加してください。'),
         h('form', {
           className: 'inline-add',
@@ -4070,7 +4054,7 @@ function renderManagersTab() {
             const problem = validateFields([{ name: 'name', label: 'パッケージ名', required: true }, { name: 'description', label: '説明' }], values);
             if (problem) { pkgError.textContent = problem; return; }
             if (manager.packages.some((p) => p.name === values.name)) { pkgError.textContent = '同じパッケージが、すでにあります。'; return; }
-            manager.packages.push({ ...values, checked: true, custom: true });
+            manager.packages.push(newPackage(values.name, values.description, true, true));
             renderList();
             updateSummary();
             toast('ok', `${manager.managerName} に ${values.name} を追加しました。`);
@@ -4100,7 +4084,7 @@ function renderManagersTab() {
       }
       if (!problem && findManager(values.managerName)) problem = '同じ名前が、すでにあります。';
       if (problem) { error.textContent = problem; return; }
-      state.managers.push({ ...values, packages: [], custom: true });
+      state.managers.push(newManager(values.managerName, values.checkCommand, values.installCommand, true));
       for (const field of managerFields) inputs[field.name].value = '';
       error.textContent = '';
       renderList();
