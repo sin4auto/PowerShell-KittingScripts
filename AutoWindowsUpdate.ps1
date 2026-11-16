@@ -6,8 +6,11 @@
     更新プログラムの確認、ダウンロード、インストール、自動再起動までを、更新がなくなるまで繰り返します。
     PSWindowsUpdateモジュールの自動セットアップ、再起動後の処理継続のためのタスク登録、ログ記録機能を含みます。
 
+.PARAMETER Round
+    何周目の更新処理かを表します。再起動後の自動実行でスクリプト自身が渡すため、手動で指定する必要はありません。
+
 .EXAMPLE
-    .\AutoWindowsUpdate_v3.ps1
+    .\AutoWindowsUpdate.ps1
     管理者権限のPowerShellでスクリプトを実行します。
 
 .NOTES
@@ -18,11 +21,19 @@
     Copyright (c) 2025 sin4auto
 #>
 
+param(
+    # 再起動をまたいで周回数を引き継ぐため、タスク登録時に次の周回数を渡す。
+    [int]$Round = 1
+)
+
 # =================================================================
 # 定数定義
 # =================================================================
 # 再起動後の自動実行で利用するタスクスケジューラのタスク名を定義する。
 $TaskName = "AutoWindowsUpdateTask"
+# 失敗し続ける更新があると「インストール → 再起動」が永遠に続くため、周回数に上限を設ける。
+# 新しいPCでも通常は数周で終わるので、余裕を持たせた値にしている。
+$MaxRounds = 10
 
 # =================================================================
 # メイン処理ブロック
@@ -70,6 +81,13 @@ try {
     # --- フェーズ2: Windows Update メインループ ---
     # 更新がなくなるまで一連の処理を繰り返すための無限ループ。
     while ($true) {
+        if ($Round -gt $MaxRounds) {
+            # 上限到達は「同じ更新が失敗し続けている」可能性が高いので、異常終了として利用者に確認を求める。
+            throw "更新処理が上限の $MaxRounds 周に達したため中断しました。失敗し続けている更新がないか、[設定] > [Windows Update] の更新履歴を確認してください。"
+        }
+        Write-Host "===================================================="
+        Write-Host "周回 $Round / $MaxRounds" -ForegroundColor Cyan
+
         # --- [0/5] 依存モジュールのセットアップ ---
         Write-Host "----------------------------------------------------"
         Write-Host "[0/5] 依存モジュール(PSWindowsUpdate)のセットアップ" -ForegroundColor Cyan
@@ -112,7 +130,7 @@ try {
         # タスクスケジューラの登録処理でエラーが発生した場合に備える。
         try {
             # タスクとして実行するアクション（このスクリプト自身）を定義する。
-            $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`""
+            $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -Round $($Round + 1)"
             # タスクを実行するトリガー（ユーザーのログオン時）を定義する。
             $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
             # スクリプトを実行している現在のユーザーのIDを確実に取得する。
@@ -147,6 +165,7 @@ try {
         # 次のスキャンに移る前に短い待機時間を設ける。
         Write-Host "-> 5秒後に次のスキャンを開始します..."
         Start-Sleep -Seconds 5
+        $Round++
         # continueキーワードでwhileループの先頭に戻り、再度更新スキャンから処理を始める。
         continue
     }
