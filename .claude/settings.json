@@ -1,13 +1,48 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "deny": [
+      "Bash(*-File *AutoSetup.ps1*)",
+      "Bash(*-File *AutoWindowsUpdate.ps1*)",
+      "Bash(./AutoSetup.ps1*)",
+      "Bash(./AutoWindowsUpdate.ps1*)",
+      "Bash(./Start-Admin.bat*)",
+      "Bash(*cmd* /c *Start-Admin.bat*)",
+      "Bash(*powershell* *Restart-Computer*)",
+      "Bash(*pwsh* *Restart-Computer*)",
+      "Bash(*powershell* *Stop-Computer*)",
+      "Bash(*pwsh* *Stop-Computer*)",
+      "Bash(shutdown *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+
+      "PowerShell(*-File *AutoSetup.ps1*)",
+      "PowerShell(*-File *AutoWindowsUpdate.ps1*)",
+      "PowerShell(*.\\AutoSetup.ps1*)",
+      "PowerShell(*.\\AutoWindowsUpdate.ps1*)",
+      "PowerShell(*./AutoSetup.ps1*)",
+      "PowerShell(*./AutoWindowsUpdate.ps1*)",
+      "PowerShell(*.\\Start-Admin.bat*)",
+      "PowerShell(*./Start-Admin.bat*)",
+      "PowerShell(*cmd* /c *Start-Admin.bat*)",
+      "PowerShell(Start-Process *Start-Admin.bat*)",
+      "PowerShell(Restart-Computer *)",
+      "PowerShell(Stop-Computer *)",
+      "PowerShell(shutdown *)",
+      "PowerShell(git push --force*)",
+      "PowerShell(git push -f*)",
+      "PowerShell(git push * --force*)",
+      "PowerShell(git push * -f*)"
+    ]
   },
   "enabledMcpjsonServers": [
-    "context7",
-    "openaiDeveloperDocs"
+    "context7"
   ],
   "disabledMcpjsonServers": [
+    "openaiDeveloperDocs",
     "github",
     "playwright",
     "linear"
