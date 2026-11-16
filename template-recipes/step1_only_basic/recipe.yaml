@@ -66,19 +66,20 @@ phase1:
 
   # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
-    - description: '最新版のPowerShell'
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
       id: Microsoft.PowerShell
-    - description: '定番のWebブラウザ'
+    - description: 'Google Chrome（定番の Web ブラウザ）'
       id: Google.Chrome
-    - description: '高機能なファイル圧縮解凍ソフト'
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
       id: 7zip.7zip
-    - description: '多機能メディアプレイヤー'
+    - description: 'VLC（多機能なメディアプレイヤー）'
       id: VideoLAN.VLC
-    - description: 'Windowsを便利にする公式ツール群'
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'オンライン会議ツール'
+    - description: 'Zoom（オンライン会議ツール）'
       id: Zoom.Zoom
-    - description: 'PDF閲覧ソフト'
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
       options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
 

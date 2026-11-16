@@ -68,80 +68,82 @@ phase1:
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
-    - description: '最新版のPowerShell'
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
       id: Microsoft.PowerShell
-    - description: '定番のWebブラウザ'
+    - description: 'Google Chrome（定番の Web ブラウザ）'
       id: Google.Chrome
-    - description: '高機能なファイル圧縮解凍ソフト'
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
       id: 7zip.7zip
-    - description: '多機能メディアプレイヤー'
+    - description: 'VLC（多機能なメディアプレイヤー）'
       id: VideoLAN.VLC
-    - description: 'Windowsを便利にする公式ツール群'
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'オンライン会議ツール'
+    - description: 'Zoom（オンライン会議ツール）'
       id: Zoom.Zoom
-    - description: 'バージョン管理システム'
-      id: Git.Git
-    - description: 'JavaScript実行環境 (長期安定版)'
-      id: OpenJS.NodeJS.LTS
-    - description: 'プログラミング言語 Python'
-      id: Python.Python.3.13
-    - description: '高速なPythonパッケージインストーラー'
-      id: astral-sh.uv
-    - description: '高機能コードエディタ'
-      id: Microsoft.VisualStudioCode
-      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
-    - description: 'PDF閲覧ソフト'
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
       options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
-    # [Terminal & Containers & Secrets]
-    - description: 'Windows Terminal（モダンなターミナル。タブ/ペイン/UTF-8/PowerShell/WSL連携に最適）'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.13（プログラミング言語）'
+      id: Python.Python.3.13
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
       id: Microsoft.WindowsTerminal
-    - description: 'Docker Desktop（コンテナ実行環境。WSL2統合・Kubernetesオプション・Compose同梱）'
+    - description: 'Docker Desktop（コンテナの実行環境）'
       id: Docker.DockerDesktop
-    # [Build Toolchain]
-    - description: 'CMake（クロスプラットフォームのビルド生成ツール。C/C++の事実上標準）'
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
       id: Kitware.CMake
-    - description: 'Ninja（超高速ビルドツール。CMakeのジェネレータとして利用推奨）'
+    - description: 'Ninja（高速なビルドツール）'
       id: Ninja-build.Ninja
-    - description: 'LLVM/Clang（モダンC/C++/LLVMツールチェーン。clang/clang-cl/llvm-ar等を含む）'
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
       id: LLVM.LLVM
-    - description: 'Visual Studio 2022 Build Tools（MSVC/Windows SDK等のビルド環境。IDEなしの軽量セット）'
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
       id: Microsoft.VisualStudio.2022.BuildTools
-    # [Runtimes / SDKs]
-    - description: 'Rust ツールチェーン（rustupで安定版/ベータ/ナイトリーやコンポーネントを切替管理）'
+    # [言語・SDK]
+    - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
-    - description: 'Go（Go言語ツールチェーン。`go` コマンドによるビルド/テスト/取得）'
+    - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin版のLTS JDK。ビルド/実行用の汎用Java環境）'
+    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
       id: EclipseAdoptium.Temurin.17.JDK
-    # [CLI Essentials]
-    - description: 'ripgrep（超高速のgrep代替。`.gitignore`尊重・正規表現対応）'
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
-    - description: 'fd（扱いやすいfind代替。並列検索・パターン/拡張子フィルタ）'
+    - description: 'fd（使いやすい find の代わり）'
       id: sharkdp.fd
-    - description: 'fzf（インタラクティブなファジー検索。CLIやエディタから呼び出し可能）'
+    - description: 'fzf（あいまい検索ツール）'
       id: junegunn.fzf
-    - description: 'bat（シンタックスハイライト付きcat代替。行番号/プレビューが便利）'
+    - description: 'bat（色付きで表示できる cat の代わり）'
       id: sharkdp.bat
-    - description: 'eza（見やすいls代替。アイコン/ツリー/権限表示が強化）'
+    - description: 'eza（見やすい ls の代わり）'
       id: eza-community.eza
-    - description: 'jq（JSON処理CLI。フィルタ/整形/抽出に最適）'
+    - description: 'jq（JSON を加工するツール）'
       id: jqlang.jq
-    # [Dev Tools]
-    - description: 'WinMerge（GUI差分・マージツール。ファイル/フォルダ比較、3-wayマージ）'
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
       id: WinMerge.WinMerge
-    - description: 'Insomnia（APIクライアント。REST/GraphQL・環境変数・テストに強い）'
+    - description: 'Insomnia（API の動作確認ツール）'
       id: Insomnia.Insomnia
-    # [System Utils]
-    - description: 'Everything（超高速ファイル名検索。NTFSインデックスで即時ヒット）'
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
       id: voidtools.Everything
-    - description: 'ShareX（スクリーンショット/録画。自動アップロードやワークフローが豊富）'
+    - description: 'ShareX（スクリーンショットと画面録画）'
       id: ShareX.ShareX
-    # [Diagnostics / Internals]
-    - description: 'Sysinternals Suite（Windows内部解析ツール群。ProcMon/ProcExp/Autoruns等）'
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
       id: 9P7KNL5RWT25
-    - description: 'Wireshark（ネットワークパケット解析。pcap/TLS/ディスプレイフィルタ対応）'
+    - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
   # --- Appx (不要なプリインストールアプリの削除) ---
