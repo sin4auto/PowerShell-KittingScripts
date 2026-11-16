@@ -178,7 +178,14 @@ if ($setupPhase -ne '2') {
     if ($config.phase1.wingetInstall) {
         Write-Host "--- 2. アプリケーションのインストールを開始します ---`n" -ForegroundColor Green
         # wingetのソースリポジトリをリセットし、潜在的な問題を解消する。
+        # winget 自体が見つからない場合に前の終了コードを成功と取り違えないよう、「未判定」に戻す。
+        $global:LASTEXITCODE = $null
         winget source reset --force
+        if ($LASTEXITCODE -ne 0) {
+            # ソースが壊れたままだと後のインストールがまとめて失敗するため、その原因として分かるように残す。
+            Write-Warning "-> wingetのソースのリセットに失敗しました。終了コード: $LASTEXITCODE"
+            $script:failedItems.Add("Winget Source Reset")
+        }
         # 設定ファイルに記述された各アプリケーションを一つずつループ処理する。
         foreach ($wingetApp in $config.phase1.wingetInstall) {
             Write-Host "アプリ [$($wingetApp.id)] の状態を確認しています..."
