@@ -1,0 +1,67 @@
+# PowerShell スクリプトを「実行せずに」確かめる自動チェック。
+# キッティング用スクリプトは実行すると再起動やアプリの入れ替えが起きるため、構文と書き方だけを見る。
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    # 実際の実行環境は Windows PowerShell 5.1 だが、7 で書き方が壊れていないかも合わせて見る。
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]
+    name: Syntax (${{ matrix.shell }})
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Parse all .ps1 files
+        run: |
+          $failed = $false
+          foreach ($file in Get-ChildItem -Path . -Recurse -Filter *.ps1) {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              foreach ($parseError in $errors) {
+                Write-Host "::error file=$($file.Name),line=$($parseError.Extent.StartLineNumber)::$($parseError.Message)"
+              }
+            }
+            else {
+              Write-Host "OK: $($file.Name)"
+            }
+          }
+          if ($failed) { exit 1 }
+
+  analyze:
+    name: PSScriptAnalyzer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        # 版を固定し、ツールの更新でルールが増えて突然失敗するのを防ぐ。
+        run: Install-Module -Name PSScriptAnalyzer -RequiredVersion 1.25.0 -Scope CurrentUser -Force
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        # 警告（Write-Host や Invoke-Expression の使用など）は、このツールでは意図した使い方のため表示だけにする。
+        # 失敗扱いにするのは Error のみ。
+        run: |
+          $results = @(Invoke-ScriptAnalyzer -Path . -Recurse)
+          $results | Sort-Object Severity, ScriptName, Line |
+            Format-Table Severity, RuleName, ScriptName, Line, Message -AutoSize -Wrap |
+            Out-String -Width 300 | Write-Host
+          $errorResults = @($results | Where-Object Severity -eq 'Error')
+          foreach ($result in $errorResults) {
+            Write-Host "::error file=$($result.ScriptName),line=$($result.Line)::$($result.RuleName): $($result.Message)"
+          }
+          if ($errorResults.Count -gt 0) { exit 1 }
