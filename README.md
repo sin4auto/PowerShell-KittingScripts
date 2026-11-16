@@ -103,7 +103,7 @@ YAML を手で書かずに `recipe.yaml` を作りたい場合は、`recipe-buil
 
 - `packageManagers`: 複数のパッケージマネージャーをリスト形式で定義します。
   - `managerName`: ログに表示される管理ツールの名前です（例: 'npm', 'pip'）。
-  - `checkCommand`: パッケージがインストール済みか確認するためのコマンドです。`{package}` というプレースホルダーがパッケージ名に置換されます。
+  - `checkCommand`: パッケージがインストール済みか確認するためのコマンドです。`{package}` というプレースホルダーがパッケージ名に置換されます。終了コードが 0 以外になるか、エラーが出たときは「未インストール」とみなします（`Get-Command` などの PowerShell コマンドもそのまま使えます）。
   - `installCommand`: パッケージをインストールするためのコマンドです。`{package}` が置換されます。
   - `packages`: このマネージャーでインストールするパッケージのリストです。
 
@@ -271,7 +271,7 @@ Defines developer-oriented package installation executed after the reboot.
 
 - `packageManagers`: List multiple package managers as objects.
   - `managerName`: Label shown in logs (e.g., 'npm', 'pip').
-  - `checkCommand`: Command used to verify whether a package is installed. `{package}` is substituted with the package name.
+  - `checkCommand`: Command used to verify whether a package is installed. `{package}` is substituted with the package name. A non-zero exit code or an error means "not installed" (PowerShell cmdlets such as `Get-Command` work as-is).
   - `installCommand`: Command used to install a package. `{package}` is replaced accordingly.
   - `packages`: Array of packages to install with that manager.
 

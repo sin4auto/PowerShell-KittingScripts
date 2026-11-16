@@ -41,6 +41,30 @@ $TaskName = "AutoSetupPhase2Task"
 # 再起動で画面の表示が消えてもフェーズ1の失敗を見逃さないよう、フェーズ2の結果まとめに引き継ぐためのファイル。
 $phase1FailuresPath = Join-Path $PSScriptRoot "AutoSetup-phase1-failures.log"
 #=============================================================================
+# ■ 関数定義
+#=============================================================================
+# recipe.yaml のコマンドを実行し、失敗した理由を返す（成功したときは $null）。
+# 外部コマンドは終了コードで、cmdlet は終了コードを残さないため例外で判定する。
+# どちらか一方だけで判定すると、cmdlet の成功を失敗と取り違えたり、例外でスクリプト全体が止まったりする。
+function Invoke-RecipeCommand {
+    param([string]$Command)
+    # コマンドが見つからないときは終了コードが更新されず、前の処理の「0」が残って成功と誤判定するため、「未判定」に戻す。
+    $global:LASTEXITCODE = $null
+    # この関数の中だけで有効。エラーを例外に変えて、下の catch で受け取る。
+    $ErrorActionPreference = 'Stop'
+    try {
+        # 出力を画面へ送る。戻り値に混ざると、失敗の理由と区別できなくなるため。
+        Invoke-Expression -Command $Command | Out-Host
+    }
+    catch {
+        return "コマンドの実行に失敗しました: $($_.Exception.Message)"
+    }
+    if (($null -ne $LASTEXITCODE) -and ($LASTEXITCODE -ne 0)) {
+        return "コマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
+    }
+    return $null
+}
+#=============================================================================
 # ■ 文字エンコーディングの設定
 #=============================================================================
 # wingetなどの外部コマンドが出力する日本語が文字化けするのを防ぐため、
@@ -151,28 +175,9 @@ if ($setupPhase -ne '2') {
             Write-Host "-> $($setting.description)..."
             # 実行すべきコマンドが定義されていることを確認する。
             if (-not ([string]::IsNullOrEmpty($setting.command))) {
-                # 外部コマンドが動かなかったことを見分けられるよう、終了コードを「未判定」に戻す。
-                $global:LASTEXITCODE = $null
-                # PowerShell のコマンド（cmdlet）は終了コードを残さないため、エラーを例外として受け取って判定する。
-                $commandError = $null
-                $previousErrorActionPreference = $ErrorActionPreference
-                $ErrorActionPreference = 'Stop'
-                try {
-                    Invoke-Expression -Command $setting.command
-                }
-                catch {
-                    $commandError = $_.Exception.Message
-                }
-                finally {
-                    $ErrorActionPreference = $previousErrorActionPreference
-                }
-                # 終了コードが残っていなければ cmdlet だけが動いたので、エラーの有無だけで判定する。
-                if ($commandError) {
-                    Write-Warning "-> コマンドの実行に失敗しました: $commandError"
-                    $script:failedItems.Add("設定変更失敗: $($setting.description)")
-                }
-                elseif (($null -ne $LASTEXITCODE) -and ($LASTEXITCODE -ne 0)) {
-                    Write-Warning "-> コマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
+                $failureReason = Invoke-RecipeCommand -Command $setting.command
+                if ($failureReason) {
+                    Write-Warning "-> $failureReason"
                     $script:failedItems.Add("設定変更失敗: $($setting.description)")
                 }
             }
@@ -371,29 +376,19 @@ if ($setupPhase -eq '2') {
                 Write-Host "パッケージ [$($packageName)] の状態を確認しています..."
                 # 設定ファイルの'checkCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
                 $checkCommand = $manager.checkCommand -replace '\{package\}', $packageName
-                # コマンド自体が見つからないと終了コードが更新されず、前の処理の「0」が残って
-                # インストール済みと誤判定するため、実行前に「未判定」に戻しておく。
-                $global:LASTEXITCODE = $null
-                # 生成した確認コマンドを実行する。
-                Invoke-Expression -Command $checkCommand
-                # 確認コマンドの終了コードが0でない場合、パッケージは未インストールと判断してインストールを実行する。
-                if ($LASTEXITCODE -ne 0) {
+                # 確認コマンドの失敗は「未インストール」という意味なので、警告にはせずインストールへ進む。
+                if (Invoke-RecipeCommand -Command $checkCommand) {
                     Write-Host "-> [$($packageName)] をインストールします..."
                     # 設定ファイルの'installCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
                     $installCommand = $manager.installCommand -replace '\{package\}', $packageName
-                    # 確認コマンドと同じ理由で、前の終了コードを成功と取り違えないようにする。
-                    $global:LASTEXITCODE = $null
-                    # 生成したインストールコマンドを実行する。
-                    Invoke-Expression -Command $installCommand
-                    # インストールが成功したか（終了コード0）を確認する。
-                    if ($LASTEXITCODE -eq 0) {
+                    $failureReason = Invoke-RecipeCommand -Command $installCommand
+                    if (-not $failureReason) {
                         Write-Host "-> [$($packageName)] のインストールに成功しました。`n" -ForegroundColor Green
                     }
                     else {
                         # インストールに失敗した場合、どの処理で失敗したかを記録する。
-                        $errorMessage = "パッケージ処理失敗: $($manager.managerName) - $packageName"
-                        Write-Warning "-> インストールコマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
-                        $script:failedItems.Add($errorMessage)
+                        Write-Warning "-> $failureReason"
+                        $script:failedItems.Add("パッケージ処理失敗: $($manager.managerName) - $packageName")
                     }
                 }
                 else {
