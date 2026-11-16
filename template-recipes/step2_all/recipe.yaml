@@ -1,0 +1,528 @@
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windowsシステム設定 (レジストリ変更) ---
+  windowsSettings:
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [エクスプローラー設定]
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーで登録されている拡張子を常に表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'アドレスバーに常に完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [自動再生設定]
+    - description: '全てのメディアとデバイスで自動再生機能を有効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・プライバシー設定]
+    - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス設定の完了を促す通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: 'OSの診断データを必須なものに限定する'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
+    # [検索・プライバシー設定]
+    - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスの「検索ハイライト」を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
+    # [セキュリティ・電源設定]
+    - description: 'コア分離 - メモリ整合性を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
+    - description: '高速スタートアップを無効化'
+      command: "powercfg.exe /h off"
+    - description: 'AC電源接続中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: 'バッテリー駆動中にPCがスリープしないように設定'
+      command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
+    # [開発環境の準備]
+    - description: 'Haskell ツールチェーン (GHCup) を公式スクリプトでインストール'
+      command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
+
+  # --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザ）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディアプレイヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom Workplace（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'GitHub Desktop（GitHub をマウスで操作できる Git の画面）'
+      id: GitHub.GitHubDesktop
+    - description: 'GitHub CLI（GitHub をコマンドで操作する gh）'
+      id: GitHub.cli
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.2022.BuildTools
+    # [言語・SDK]
+    - description: 'Visual C++ 再頒布可能パッケージ（多くのアプリが動くのに必要な部品）'
+      id: Microsoft.VCRedist.2015+.x64
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.10
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'Insomnia（API の動作確認ツール）'
+      id: Insomnia.Insomnia
+    - description: 'Notepad++（軽くて高機能なテキストエディタ）'
+      id: Notepad++.Notepad++
+    # [AI ツール]
+    - description: 'Claude（Anthropic の AI アシスタント）'
+      id: Anthropic.Claude
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+    # [診断・解析]
+    - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
+      id: Microsoft.Sysinternals.Suite
+    - description: 'Wireshark（ネットワークのパケット解析）'
+      id: WiresharkFoundation.Wireshark
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'AIアシスタント'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヘルプ'
+      name: "*Microsoft.GetHelp*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバックHub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote (ストアアプリ版)'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メール/カレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People (連絡先)'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+
+phase2:
+  packageManagers:
+    # --- rustup (ツールチェーン) ---
+    - managerName: 'rustup-toolchain'
+      checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
+      installCommand: 'rustup toolchain install {package}'
+      packages:
+        - description: 'Rust 安定版ツールチェーン'
+          name: stable
+        - description: 'Rust ナイトリー版ツールチェーン'
+          name: nightly
+    # --- rustup (コンポーネント / stable) ---
+    - managerName: 'rustup-component-stable'
+      checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
+      installCommand: 'rustup component add {package} --toolchain stable'
+      packages:
+        - description: 'コード整形（rustfmt）'
+          name: rustfmt
+        - description: '静的解析（clippy）'
+          name: clippy
+        - description: '標準ライブラリのソース'
+          name: rust-src
+        - description: 'LLVMツール群（カバレッジ等）'
+          name: llvm-tools-preview
+    # --- rustup (ターゲット追加 / cross & WASM) ---
+    - managerName: 'rustup-target'
+      checkCommand: 'rustup target list --installed | findstr /b /i {package}'
+      installCommand: 'rustup target add {package}'
+      packages:
+        - description: 'WASM（ブラウザ系）'
+          name: wasm32-unknown-unknown
+        - description: 'WASI（サーバサイドWASM）'
+          name: wasm32-wasip1
+        - description: 'Linux向けクロスビルド'
+          name: x86_64-unknown-linux-gnu
+        - description: 'macOS向けクロスビルド (Intel Mac)'
+          name: x86_64-apple-darwin
+        - description: 'macOS向けクロスビルド (Apple Silicon)'
+          name: aarch64-apple-darwin
+        - description: 'Windows向けクロスビルド (MSVC)'
+          name: x86_64-pc-windows-msvc
+        - description: 'Windows向けクロスビルド (GNU)'
+          name: x86_64-pc-windows-gnu
+        - description: 'ARMv7 Linux向けクロスビルド (Raspberry Piなど)'
+          name: armv7-unknown-linux-gnueabihf
+        - description: 'AArch64 Linux向けクロスビルド (ARMv8, Raspberry Pi 64bitなど)'
+          name: aarch64-unknown-linux-gnu
+        - description: 'Android ARMv7向けクロスビルド'
+          name: armv7-linux-androideabi
+        - description: 'Android AArch64向けクロスビルド'
+          name: aarch64-linux-android
+    # --- cargo (CLIツール / stable) ---
+    - managerName: 'cargo-stable'
+      checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
+      installCommand: 'cargo install --locked {package}'
+      packages:
+        - description: '依存追加/更新（cargo-edit）'
+          name: cargo-edit
+        - description: '脆弱性監査（RustSec）'
+          name: cargo-audit
+        - description: '依存の更新状況'
+          name: cargo-outdated
+        - description: '高速テストランナー'
+          name: cargo-nextest
+        - description: 'カバレッジ（llvm-cov統合）'
+          name: cargo-llvm-cov
+        - description: 'ファイル変更監視・再実行'
+          name: cargo-watch
+    # --- rustup (コンポーネント / nightly：Miri) ---
+    - managerName: 'rustup-component-nightly'
+      checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
+      installCommand: 'rustup component add {package} --toolchain nightly'
+      packages:
+        - description: '未定義動作検査 Miri 本体（cargo miri）'
+          name: miri
+        - description: '標準ライブラリのソース（Miri用）'
+          name: rust-src
+    # --- cargo (CLIツール / nightly専用) ---
+    - managerName: 'cargo-nightly'
+      checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
+      installCommand: 'cargo +nightly install --locked {package}'
+      packages:
+        - description: '未使用依存検出（nightly）'
+          name: cargo-udeps
+
+    # --- npm (グローバルNode.jsパッケージ) ---
+    - managerName: 'npm'
+      checkCommand:  'npm list -g {package}'
+      installCommand: 'npm install -g {package}'
+      packages:
+        # [パッケージマネージャ補助]
+        - description: 'Corepack 経由を推奨（pnpmはグローバル導入しない）'
+          name: npm
+        # [軽量・有用ユーティリティ]
+        - description: '依存更新チェッカー（ncu）'
+          name: npm-check-updates
+        - description: 'クロスプラットフォーム削除（補助的に維持）'
+          name: rimraf
+        - description: '簡易静的サーバ（用途限定）'
+          name: http-server
+
+    - managerName: 'pip'
+      checkCommand: 'pip show {package}'
+      installCommand: 'uv pip install {package} --system'
+      packages:
+        # [CLIツール群：どのプロジェクトでも使う]
+        - description: 'リンター/フォーマッタ（超高速）'
+          name: ruff
+        - description: '型チェック'
+          name: mypy
+        - description: 'テスト実行'
+          name: pytest
+        - description: 'テストカバレッジ'
+          name: coverage
+        - description: 'リッチなターミナル出力'
+          name: rich
+        # Web/DS/MLは各プロジェクトに局所導入（再現性重視）
+
+    # --- go ---
+    - managerName: 'go'
+      # PATHに<leaf>があればOK（<leaf>は {package} の末尾名。@latest は除去）
+      checkCommand: "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$cmd = ('{package}'.Split('/')[-1]).Split('@')[0]; if (Get-Command $cmd -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }\""
+      installCommand: 'go install {package}'
+      packages:
+        - description: 'Go言語サーバ'
+          name: golang.org/x/tools/gopls@latest
+        - description: 'import自動整形'
+          name: golang.org/x/tools/cmd/goimports@latest
+        - description: '厳格整形（gofumpt）'
+          name: mvdan.cc/gofumpt@latest
+        - description: '静的解析（Staticcheck）'
+          name: honnef.co/go/tools/cmd/staticcheck@latest
+        - description: '脆弱性検出（公式）'
+          name: golang.org/x/vuln/cmd/govulncheck@latest
+        - description: '包括的リンター'
+          name: github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        - description: 'デバッガ（Delve）'
+          name: github.com/go-delve/delve/cmd/dlv@latest
+        - description: 'モック生成（uber/mock）'
+          name: go.uber.org/mock/mockgen@latest
+        - description: 'iota→String 生成'
+          name: golang.org/x/tools/cmd/stringer@latest
+        - description: 'テストスケルトン生成'
+          name: github.com/cweill/gotests/gotests@latest
+
+    # --- ghcup: Haskell コンパイラ (GHC) ---
+    - managerName: 'ghcup-ghc'
+      checkCommand: 'ghcup whereis ghc {package}'
+      installCommand: 'ghcup install ghc {package}'
+      packages:
+        - description: 'GHC 9.12 系（最新安定版）'
+          name: 9.12.2
+        #- description: 'GHC 9.10 系（LTS / 保守互換）'
+        #  name: 9.10.2
+
+    # --- ghcup: Cabal CLI ---
+    - managerName: 'ghcup-cabal'
+      checkCommand: 'cabal --version'
+      installCommand: 'ghcup install cabal latest'
+      packages:
+        - description: 'Cabal（公式ビルドシステム）'
+          name: latest
+
+    # --- ghcup: Stack CLI ---
+    - managerName: 'ghcup-stack'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''stack'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      installCommand: 'ghcup install stack latest'
+      packages:
+        - description: 'Stack（プロジェクト/ビルドツール）'
+          name: latest
+
+    # --- ghcup: Haskell Language Server ---
+    - managerName: 'ghcup-hls'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''haskell-language-server-wrapper'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      installCommand: 'ghcup install hls latest'
+      packages:
+        - description: 'Haskell Language Server（LSPサポート）'
+          name: latest
+
+    # --- cabal: グローバルCLIユーティリティ ---
+    - managerName: 'cabal-global'
+      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''{package}'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      installCommand: 'cabal update; cabal install --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      packages:
+        - description: 'コード整形（fourmolu）'
+          name: fourmolu
+        - description: '静的解析（hlint）'
+          name: hlint
+        - description: '関数/型検索（hoogle）'
+          name: hoogle
+        - description: '未使用コード検出（weeder）'
+          name: weeder
+
+    - managerName: 'vscode'
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
+      installCommand: 'code --install-extension {package}'
+      packages:
+        # [UI / 表示]
+        - description: 'UIの日本語化'
+          name: ms-ceintl.vscode-language-pack-ja
+        - description: 'インデントを色付け'
+          name: oderwat.indent-rainbow
+        - description: '全角スペースをハイライト'
+          name: mosapride.zenkaku
+        - description: 'コメントを種類別に色分け'
+          name: aaron-bond.better-comments
+        - description: 'エラー/警告を行内表示'
+          name: usernamehw.errorlens
+        - description: 'EditorConfig（書式統一）'
+          name: EditorConfig.EditorConfig
+        # [ユーティリティ / Markdown]
+        - description: '印刷（コード/Markdown をブラウザ経由で印刷・PDF化）'
+          name: pdconsec.vscode-print
+        - description: 'Markdown編集サポート'
+          name: yzhang.markdown-all-in-one
+        - description: 'TODOコメントの一覧表示'
+          name: gruntfuggly.todo-tree
+        - description: 'ファイルパス入力補完'
+          name: christian-kohler.path-intellisense
+        - description: 'dotenvファイル支援'
+          name: mikestead.dotenv
+        # [コーディング支援（AI）]
+        - description: 'AIによる賢い補完'
+          name: VisualStudioExptTeam.vscodeintellicode
+        - description: 'AIコード自動生成'
+          name: GitHub.copilot
+        # [バージョン管理 / コラボ / CI]
+        - description: 'Git機能を強化'
+          name: eamodio.gitlens
+        - description: 'Gitブランチツリー可視化'
+          name: mhutchie.git-graph
+        - description: 'GitHub PRレビュー'
+          name: GitHub.vscode-pull-request-github
+        - description: 'GitHub Actions支援'
+          name: github.vscode-github-actions
+        - description: 'Live Share（共同編集）'
+          name: MS-vsliveshare.vsliveshare
+        # [リモート / コンテナ / Docker]
+        - description: 'WSL上のプロジェクトを直接編集'
+          name: ms-vscode-remote.remote-wsl
+        - description: 'Remote SSH（リモート開発）'
+          name: ms-vscode-remote.remote-ssh
+        - description: 'Dev Containers（コンテナ内開発）'
+          name: ms-vscode-remote.remote-containers
+        - description: 'Docker操作拡張'
+          name: ms-azuretools.vscode-docker
+        # [デバッグ / ビルド / カバレッジ]
+        - description: 'CMakeツール連携'
+          name: ms-vscode.cmake-tools
+        - description: 'Makefile支援'
+          name: ms-vscode.makefile-tools
+        - description: 'LLDBデバッガ（Rust/C/C++）'
+          name: vadimcn.vscode-lldb
+        - description: 'テストカバレッジ可視化'
+          name: ryanluker.vscode-coverage-gutters
+        # [言語サポート]
+        - description: 'Python言語サポート'
+          name: ms-python.python
+        - description: 'Python型解析（Pylance）'
+          name: ms-python.vscode-pylance
+        - description: 'Jupyterノートブック'
+          name: ms-toolsai.jupyter
+        - description: 'C/C++言語サポート（拡張パック）'
+          name: ms-vscode.cpptools-extension-pack
+        - description: 'Rust言語サポート（rust-analyzer）'
+          name: rust-lang.rust-analyzer
+        - description: 'Haskell言語サポート'
+          name: haskell.haskell
+        - description: 'Go言語サポート'
+          name: golang.Go
+        - description: 'C#言語サポート'
+          name: ms-dotnettools.csharp
+        - description: 'Java言語サポート'
+          name: redhat.java
+        - description: 'PowerShell言語サポート'
+          name: ms-vscode.powershell
+        - description: 'YAML言語サポート'
+          name: redhat.vscode-yaml
+        - description: 'TOMLサポート（Cargo/設定）'
+          name: tamasfe.even-better-toml

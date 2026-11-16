@@ -143,7 +143,7 @@ phase2:
 
 ## テンプレートレシピの活用
 
-`template-recipes/` ディレクトリには、フェーズや目的別に分かれたサンプル `recipe.yaml` が格納されています。`step1_only_basic/` のようにフェーズ1のみを含む最小構成から、`step1_only_dev/` のような本格的な開発者向け環境、 `step2_VSCode/`や`step2_Rust/` のように開発言語・ツール別の拡張セットまで揃っています。環境構築のたたき台がほしい場合は、近い構成のテンプレートをリポジトリ直下にコピーし、自分の要件に合わせて調整してから `AutoSetup.ps1` を実行してください。
+`template-recipes/` ディレクトリには、フェーズや目的別に分かれたサンプル `recipe.yaml` が格納されています。`step1_only_basic/` のようにフェーズ1のみを含む最小構成から、`step1_only_dev/` のような本格的な開発者向け環境、 `step2_VSCode/`や`step2_Rust/` のように開発言語・ツール別の拡張セット、それらをすべてまとめた全部入りの `step2_all/` まで揃っています。環境構築のたたき台がほしい場合は、近い構成のテンプレートをリポジトリ直下にコピーし、自分の要件に合わせて調整してから `AutoSetup.ps1` を実行してください。
 
 ## Winget Configurationとの違い
 
@@ -311,7 +311,7 @@ phase2:
 
 ## Using Template Recipes
 
-The `template-recipes/` directory contains sample `recipe.yaml` files grouped by phase and purpose. They range from minimal configurations such as `step1_only_basic/`, to developer-focused setups like `step1_only_dev/`, and language/tool-specific add-ons like `step2_VSCode/` or `step2_Rust/`. Copy the template closest to your desired environment to the repository root, adjust it to your needs, and then run `AutoSetup.ps1`.
+The `template-recipes/` directory contains sample `recipe.yaml` files grouped by phase and purpose. They range from minimal configurations such as `step1_only_basic/`, to developer-focused setups like `step1_only_dev/`, language/tool-specific add-ons like `step2_VSCode/` or `step2_Rust/`, and the all-in-one `step2_all/` that combines all of them. Copy the template closest to your desired environment to the repository root, adjust it to your needs, and then run `AutoSetup.ps1`.
 
 ## How This Differs from Winget Configuration
 
