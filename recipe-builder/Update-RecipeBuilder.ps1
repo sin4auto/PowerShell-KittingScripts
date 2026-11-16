@@ -15,17 +15,27 @@ $htmlPath = Join-Path $PSScriptRoot 'recipe-builder.html'
 $beginMarker = '<!-- BEGIN TEMPLATES'
 $endMarker = '<!-- END TEMPLATES -->'
 
-# ルートの recipe.yaml を先頭にし、アプリを開いたときの初期状態にする。
-$sources = @([pscustomobject]@{ Name = 'recipe.yaml（ルートの既定）'; Path = 'recipe.yaml' })
-$sources += @(Get-ChildItem -Path (Join-Path $repoRoot 'template-recipes') -Directory | Sort-Object Name | Where-Object {
+$utf8 = [System.Text.UTF8Encoding]::new($false)
+function Read-RecipeText {
+    param([string]$RelativePath)
+    [System.IO.File]::ReadAllText((Join-Path $repoRoot $RelativePath), $utf8).TrimStart([char]0xFEFF) -replace "`r`n", "`n"
+}
+
+$sources = @(Get-ChildItem -Path (Join-Path $repoRoot 'template-recipes') -Directory | Sort-Object Name | Where-Object {
         Test-Path (Join-Path $_.FullName 'recipe.yaml')
     } | ForEach-Object {
-        [pscustomobject]@{ Name = $_.Name; Path = "template-recipes/$($_.Name)/recipe.yaml" }
+        $path = "template-recipes/$($_.Name)/recipe.yaml"
+        [pscustomobject]@{ Name = $_.Name; Path = $path; Text = (Read-RecipeText $path) }
     })
+# ルートの recipe.yaml は、どれかのテンプレートと同じ中身なら埋め込まない。
+# 同じ中身が選択肢に2つ並ぶと、どちらを選べばよいか迷わせるため。中身が違うときだけ先頭に足す。
+$rootText = Read-RecipeText 'recipe.yaml'
+if (-not ($sources | Where-Object { $_.Text -ceq $rootText })) {
+    $sources = @([pscustomobject]@{ Name = 'recipe.yaml（ルートの既定）'; Path = 'recipe.yaml'; Text = $rootText }) + $sources
+}
 
-$utf8 = [System.Text.UTF8Encoding]::new($false)
 $blocks = foreach ($source in $sources) {
-    $text = [System.IO.File]::ReadAllText((Join-Path $repoRoot $source.Path), $utf8).TrimStart([char]0xFEFF) -replace "`r`n", "`n"
+    $text = $source.Text
     # script 要素の中でも「</script」と「<!--」だけは HTML として解釈され、埋め込みが途中で切れてしまうため止める。
     if ($text -match '(?i)</script|<!--') {
         throw "$($source.Path) に '</script' または '<!--' が含まれているため、埋め込めません。"
