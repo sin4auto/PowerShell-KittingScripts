@@ -38,6 +38,8 @@ param(
 $script:failedItems = [System.Collections.Generic.List[string]]::new()
 # 再起動後の自動実行で利用するタスクスケジューラのタスク名を定義する。
 $TaskName = "AutoSetupPhase2Task"
+# 再起動で画面の表示が消えてもフェーズ1の失敗を見逃さないよう、フェーズ2の結果まとめに引き継ぐためのファイル。
+$phase1FailuresPath = Join-Path $PSScriptRoot "AutoSetup-phase1-failures.log"
 #=============================================================================
 # ■ 文字エンコーディングの設定
 #=============================================================================
@@ -136,6 +138,10 @@ if ($setupPhase -ne '2') {
     # 過去の実行で残存している可能性のある自動実行タスクを、安全のために削除する。
     Write-Host "-> 既存の自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
+    # 前回の実行で残った失敗一覧を、今回の結果と混ぜないよう削除する。
+    if (Test-Path $phase1FailuresPath) {
+        Remove-Item -Path $phase1FailuresPath
+    }
     # --- Windowsのシステム設定変更 ---
     # recipe.yamlに'phase1.windowsSettings'セクションが存在する場合にのみ実行する。
     if ($config.phase1.windowsSettings) {
@@ -277,6 +283,12 @@ if ($setupPhase -ne '2') {
             Write-Warning "- $failedItem"
         }
         Write-Host "==============================================="
+        try {
+            Set-Content -Path $phase1FailuresPath -Value $script:failedItems -Encoding UTF8 -ErrorAction Stop
+        }
+        catch {
+            Write-Warning "フェーズ1の失敗一覧を保存できませんでした。フェーズ2の結果まとめには表示されません: $($_.Exception.Message)"
+        }
     }
     Write-Host "  フェーズ1のすべての処理が完了しました！" -ForegroundColor Green
     Write-Host "===============================================`n"
@@ -310,6 +322,12 @@ if ($setupPhase -eq '2') {
     # フェーズ2が開始されたため、このタスクは不要。次の実行に備えて削除する。
     Write-Host "-> 自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
+    # フェーズ1の失敗を、最後の結果まとめに一緒に表示する。
+    if (Test-Path $phase1FailuresPath) {
+        foreach ($phase1Failure in (Get-Content -Path $phase1FailuresPath -Encoding UTF8)) {
+            $script:failedItems.Add("フェーズ1 - $phase1Failure")
+        }
+    }
     # ネットワーク接続の確立などを待つため、少し待機する。
     Write-Host "10秒後に自動でパッケージのインストールが開始されます。" -ForegroundColor Yellow
     Start-Sleep -Seconds 10
@@ -374,6 +392,10 @@ if ($setupPhase -eq '2') {
     }
     Write-Host "  すべてのセットアップ処理が完了しました！" -ForegroundColor Green
     Write-Host "==============================================="
+    # 結果まとめに表示し終えたので削除する。途中で止まった場合は、次にフェーズ2を手動実行したときに再表示される。
+    if (Test-Path $phase1FailuresPath) {
+        Remove-Item -Path $phase1FailuresPath
+    }
     # 実行結果をユーザーが確認できるよう、キー入力があるまでウィンドウを閉じずに待機する。
     Read-Host "Enterキーを押して、このウィンドウを閉じてください。"
     # ログ記録を正常に終了させる。
