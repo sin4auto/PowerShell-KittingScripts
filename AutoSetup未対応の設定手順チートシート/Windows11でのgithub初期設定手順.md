@@ -14,6 +14,23 @@ git config --global user.name "あなたの名前"
 git config --global user.email "your-email@example.com"
 ```
 
+### メールアドレスを非公開にする（推奨）
+コミットに記録したメールアドレスは、GitHub に push すると誰でも見られる状態になります。公開したくない場合は、GitHub が用意している **noreply アドレス**（公開しても問題のない代わりのアドレス）を使います。
+
+1. GitHub の **Settings > Emails**（https://github.com/settings/emails）を開く
+2. **Keep my email addresses private** にチェックを入れる
+3. 同じ画面に表示される `数字+ユーザー名@users.noreply.github.com` の形のアドレスを控える
+4. そのアドレスを Git に設定する
+```bash
+git config --global user.email "数字+ユーザー名@users.noreply.github.com"
+```
+
+> 同じ画面の **Block command line pushes that expose my email** を有効にしている場合、非公開のメールアドレスで作ったコミットを push すると `GH007: Your push would publish a private email address` というエラーで拒否されます。  
+> その場合は、上の設定をしたうえで、まだ push していないコミットの作成者を次のコマンドで書き換えてから、もう一度 push します（直前の1コミットのみ）。
+> ```bash
+> git commit --amend --no-edit --reset-author
+> ```
+
 ### 設定の確認
 ```bash
 git config --global --list
@@ -53,7 +70,7 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 ```
 
-PowerShellで利用する場合:
+PowerShellで利用する場合（最初の2行は **管理者の PowerShell** で実行）:
 ```powershell
 Get-Service ssh-agent | Set-Service -StartupType Automatic
 Start-Service ssh-agent
@@ -258,9 +275,12 @@ git config --global mergetool.vscode.cmd 'code --wait $MERGED'
 
 ### プッシュ設定
 ```bash
-# 現在のブランチのみをプッシュ（安全）
+# 現在のブランチを、リモートの同じ名前のブランチへプッシュする
+# （初回でも -u を付けずに push できる。ただし確認なしで新しいリモートブランチが作られる点に注意）
 git config --global push.default current
 ```
+
+> Git の既定値は `simple` です。追跡先（upstream）を設定したブランチだけを push するため、こちらのほうが意図しない push は起きにくくなります。迷ったら設定を変えずに既定値のまま使ってください。
 
 ## 8. 初心者向けワークフロー例
 
