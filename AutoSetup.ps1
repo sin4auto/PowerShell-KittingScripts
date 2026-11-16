@@ -243,6 +243,7 @@ if ($setupPhase -ne '2') {
     Write-Host "--- インストール済みアプリ全体の更新が完了しました ---`n" -ForegroundColor Green
     # --- フェーズ2の自動実行設定と再起動 ---
     Write-Host "--- 5. 再起動後にフェーズ2を自動実行するよう設定します ---`n" -ForegroundColor Green
+    $taskRegistered = $false
     try {
         # タスクとして実行するアクション（このスクリプト自身を引数付きで呼び出す）を定義する。
         $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -setupPhase 2"
@@ -255,6 +256,7 @@ if ($setupPhase -ne '2') {
         # 上記で定義したアクション、トリガー、プリンシパルを組み合わせてタスクをOSに登録する。
         Register-ScheduledTask -TaskName $TaskName -Action $taskAction -Trigger $taskTrigger -Principal $taskPrincipal -Force -ErrorAction Stop
         Write-Host "-> タスクスケジューラに '$TaskName' を登録しました。" -ForegroundColor Green
+        $taskRegistered = $true
     }
     catch {
         # タスクの登録に失敗した場合、致命的なエラーとして報告する。
@@ -274,6 +276,15 @@ if ($setupPhase -ne '2') {
     }
     Write-Host "  フェーズ1のすべての処理が完了しました！" -ForegroundColor Green
     Write-Host "===============================================`n"
+    if (-not $taskRegistered) {
+        # 自動実行がないまま再起動すると、フェーズ2が始まらないことに利用者が気づけないため、ここで止めて手順を示す。
+        Write-Warning "フェーズ2の自動実行を設定できなかったため、自動再起動は行いません。"
+        Write-Warning "手動でPCを再起動したあと、管理者のPowerShellで次のコマンドを実行してフェーズ2を開始してください:"
+        Write-Warning "  & `"$PSCommandPath`" -setupPhase 2"
+        Read-Host "Enterキーを押して終了します。"
+        Stop-Transcript
+        exit
+    }
     Write-Host "設定を完全に適用するため、システムを再起動します。" -ForegroundColor Yellow
     # ユーザーがメッセージを読むための待機時間を設ける。
     Write-Host "10秒後に自動で再起動が開始されます。中断したい場合はこのウィンドウを閉じてください。" -ForegroundColor Yellow
