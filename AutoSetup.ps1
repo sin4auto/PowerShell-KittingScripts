@@ -151,17 +151,29 @@ if ($setupPhase -ne '2') {
             Write-Host "-> $($setting.description)..."
             # 実行すべきコマンドが定義されていることを確認する。
             if (-not ([string]::IsNullOrEmpty($setting.command))) {
-                # コマンドが見つからない場合に前の終了コードを成功と取り違えないよう、「未判定」に戻す。
+                # 外部コマンドが動かなかったことを見分けられるよう、終了コードを「未判定」に戻す。
                 $global:LASTEXITCODE = $null
-                # 設定ファイルから読み取ったコマンド文字列を実行する。
-                Invoke-Expression -Command $setting.command
-                # 直前に実行した外部コマンドが正常に終了したかを確認する（終了コード0が成功）。
-                if ($LASTEXITCODE -ne 0) {
-                    # 失敗した場合、どの処理で失敗したかを示すエラーメッセージを作成する。
-                    $errorMessage = "設定変更失敗: $($setting.description)"
+                # PowerShell のコマンド（cmdlet）は終了コードを残さないため、エラーを例外として受け取って判定する。
+                $commandError = $null
+                $previousErrorActionPreference = $ErrorActionPreference
+                $ErrorActionPreference = 'Stop'
+                try {
+                    Invoke-Expression -Command $setting.command
+                }
+                catch {
+                    $commandError = $_.Exception.Message
+                }
+                finally {
+                    $ErrorActionPreference = $previousErrorActionPreference
+                }
+                # 終了コードが残っていなければ cmdlet だけが動いたので、エラーの有無だけで判定する。
+                if ($commandError) {
+                    Write-Warning "-> コマンドの実行に失敗しました: $commandError"
+                    $script:failedItems.Add("設定変更失敗: $($setting.description)")
+                }
+                elseif (($null -ne $LASTEXITCODE) -and ($LASTEXITCODE -ne 0)) {
                     Write-Warning "-> コマンドの実行に失敗しました。終了コード: $LASTEXITCODE"
-                    # 失敗リストにエラーメッセージを追加する。
-                    $script:failedItems.Add($errorMessage)
+                    $script:failedItems.Add("設定変更失敗: $($setting.description)")
                 }
             }
             else {
@@ -189,6 +201,8 @@ if ($setupPhase -ne '2') {
         # 設定ファイルに記述された各アプリケーションを一つずつループ処理する。
         foreach ($wingetApp in $config.phase1.wingetInstall) {
             Write-Host "アプリ [$($wingetApp.id)] の状態を確認しています..."
+            # 前のアプリの結果「0」が残っていると、未インストールでも導入済みと誤判定するため、「未判定」に戻す。
+            $global:LASTEXITCODE = $null
             # 'winget list'を使い、対象のアプリが既にインストール済みかを確認する。
             winget list --id $wingetApp.id -e --accept-source-agreements --disable-interactivity
             # インストール済みでなければインストールを実行する
@@ -250,6 +264,8 @@ if ($setupPhase -ne '2') {
     }
     # --- インストール済みアプリ全体を更新 ---
     Write-Host "--- 4. インストール済みアプリ全体を更新します ---`n" -ForegroundColor Green
+    # winget 自体が見つからない場合に前の終了コードを成功と取り違えないよう、「未判定」に戻す。
+    $global:LASTEXITCODE = $null
     # wingetで管理されている全てのパッケージを最新バージョンに一括で更新する。
     winget upgrade --all --silent --accept-package-agreements --accept-source-agreements
     # 更新プロセスで何らかの問題が発生したかを確認する。
