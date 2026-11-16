@@ -79,7 +79,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -89,8 +89,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -112,13 +112,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -144,7 +144,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -175,7 +175,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"

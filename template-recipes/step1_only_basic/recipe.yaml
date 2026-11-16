@@ -77,7 +77,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -110,7 +110,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
