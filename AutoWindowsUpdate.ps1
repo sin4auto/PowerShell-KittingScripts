@@ -59,8 +59,11 @@ try {
     # 実行ログを記録するファイルパスを定義する。
     $LogFile = Join-Path $PSScriptRoot "AutoWindowsUpdate.log"
     # ログ記録（トランスクリプト）を開始する。-Appendで既存ファイルに追記する。
+    # PowerShellには「記録中かどうか」を知る標準の変数がないため、開始できたかを自分で覚えておく。
+    $transcriptStarted = $false
     try {
-        Start-Transcript -Path $LogFile -Append
+        Start-Transcript -Path $LogFile -Append -ErrorAction Stop
+        $transcriptStarted = $true
     } catch {
         # ログ記録が開始できない場合でも、処理は続行する。
         Write-Warning "トランスクリプトの開始に失敗。ログは記録されません。Error: $($_.Exception.Message)"
@@ -149,7 +152,7 @@ try {
         Write-Host "`n[4/5] 更新のダウンロードとインストールを開始..." -ForegroundColor Cyan
         Write-Host "-> この処理は長時間かかる場合があります。必要に応じて自動的に再起動します。" -ForegroundColor Yellow
         # OSが再起動する直前のログが失われるのを防ぐため、一度ログを停止し、即座に追記モードで再開する。
-        if ($global:Transcript) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
+        if ($transcriptStarted) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
         # 見つかった全ての更新プログラムを承諾し、インストールを実行する。-AutoRebootにより、必要に応じて自動で再起動される。
         Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose
         # 再起動コマンドが実行された後のための短い待機時間。
@@ -191,7 +194,7 @@ try {
     # --- フェーズ5: 最終処理 ---
     # 処理が正常に終了しても、エラーで中断しても、必ずこのブロックが最後に実行される。
     # ログ記録（トランスクリプト）が実行中の場合、確実に停止させてファイルを閉じる。
-    if ($global:Transcript) {
+    if ($transcriptStarted) {
         Stop-Transcript
     }
 }
