@@ -561,8 +561,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -581,6 +583,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -592,6 +600,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -599,12 +609,43 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -619,7 +660,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -629,8 +670,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -652,13 +693,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -684,7 +725,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -715,7 +756,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
@@ -830,8 +871,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -850,6 +893,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -861,6 +910,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -868,12 +919,43 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
   # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -888,7 +970,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -921,7 +1003,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
@@ -963,8 +1045,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -983,6 +1067,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -994,6 +1084,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -1001,12 +1093,43 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
   # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -1021,7 +1144,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -1031,8 +1154,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -1054,13 +1177,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -1086,7 +1209,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -1117,7 +1240,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
@@ -1159,8 +1282,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -1179,6 +1304,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -1190,6 +1321,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -1197,12 +1330,43 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -1217,7 +1381,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -1227,8 +1391,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -1250,13 +1414,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -1282,7 +1446,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -1313,7 +1477,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
@@ -1371,8 +1535,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -1391,6 +1557,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -1402,6 +1574,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -1409,6 +1583,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
@@ -1418,6 +1594,35 @@ phase1:
     # [GHCupのインストール] ★★★ HasKellのみ ★★★
     - description: 'Haskell ツールチェーン (GHCup) を公式スクリプトでインストール'
       command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -1432,7 +1637,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -1442,8 +1647,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -1465,13 +1670,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -1497,7 +1702,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -1528,7 +1733,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
@@ -1607,8 +1812,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -1627,6 +1834,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -1638,6 +1851,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -1645,12 +1860,43 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -1665,7 +1911,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -1675,8 +1921,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -1698,13 +1944,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -1730,7 +1976,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -1761,7 +2007,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
@@ -1808,8 +2054,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -1828,6 +2076,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -1839,6 +2093,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -1846,12 +2102,43 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -1866,7 +2153,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -1876,8 +2163,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -1899,13 +2186,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -1931,7 +2218,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -1962,7 +2249,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
@@ -2010,8 +2297,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -2030,6 +2319,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -2041,6 +2336,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -2048,12 +2345,43 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -2068,7 +2396,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -2078,8 +2406,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -2101,13 +2429,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -2133,7 +2461,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -2164,7 +2492,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
@@ -2278,8 +2606,10 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'Windows 11の右クリックメニューを従来の形式に戻す'
-      command: 'reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
     # [自動再生設定]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -2298,6 +2628,12 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
     - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
     # [検索・プライバシー設定]
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
@@ -2309,6 +2645,8 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     # [セキュリティ・電源設定]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
@@ -2316,12 +2654,43 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - ローカルセキュリティ機関 (LSA) 保護を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
       command: "powercfg.exe /h off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
+    # [タスクバー・スタートメニュー]
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    # [広告・おすすめの停止]
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [操作・便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -2336,7 +2705,7 @@ phase1:
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
-    - description: 'Zoom（オンライン会議ツール）'
+    - description: 'Zoom Workplace（オンライン会議ツール）'
       id: Zoom.Zoom
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
@@ -2346,8 +2715,8 @@ phase1:
       id: Git.Git
     - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
       id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.13（プログラミング言語）'
-      id: Python.Python.3.13
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
     - description: 'Visual Studio Code（高機能なコードエディタ）'
@@ -2369,13 +2738,13 @@ phase1:
       id: Microsoft.VisualStudio.2022.BuildTools
     # [言語・SDK]
     - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.9
+      id: Microsoft.DotNet.SDK.10
     - description: 'rustup（Rust の導入・切り替えツール）'
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
-    - description: 'OpenJDK 17（Temurin 版の Java 開発キット）'
-      id: EclipseAdoptium.Temurin.17.JDK
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
     - description: 'ripgrep（高速な grep の代わり）'
       id: BurntSushi.ripgrep.MSVC
@@ -2401,7 +2770,7 @@ phase1:
       id: ShareX.ShareX
     # [診断・解析]
     - description: 'Sysinternals Suite（Windows の内部を調べるツール群）'
-      id: 9P7KNL5RWT25
+      id: Microsoft.Sysinternals.Suite
     - description: 'Wireshark（ネットワークのパケット解析）'
       id: WiresharkFoundation.Wireshark
 
@@ -2432,7 +2801,7 @@ phase1:
     - description: 'People (連絡先)'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
-    - description: 'Grooveミュージック'
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
