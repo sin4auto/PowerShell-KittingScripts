@@ -2956,6 +2956,8 @@ const CUSTOM_GROUP = '追加した項目';
 const LOADED_GROUP = '読み込んだレシピだけにある項目';
 // 見出しコメントのない項目の分類。recipe.yaml へは見出しコメントを書かない。
 const NO_GROUP = '分類なし';
+// アプリを開いたときに選ばれるテンプレート。
+const DEFAULT_TEMPLATE = 'step1_only_basic';
 
 // Windows 設定の項目ごとに、変わる場所が写った画面の画像（images フォルダー）を対応付ける。
 // コマンドの中のレジストリ値の名前で見分ける。画像は撮影した PC の状態を写した例。
@@ -3955,7 +3957,12 @@ $('download-yaml').addEventListener('click', () => {
     }
   }
   $('template-select').replaceChildren(...templates.map((template, index) => h('option', { value: String(index) }, template.name)));
-  if (templates.length > 0) applyRecipe(templates[0].config);
+  // 開いたときは、いちばん少ない基本のテンプレートから始め、必要なものを足していく形にする。見つからなければ先頭を使う。
+  const defaultIndex = Math.max(0, templates.findIndex((template) => template.name === DEFAULT_TEMPLATE));
+  if (templates.length > 0) {
+    $('template-select').value = String(defaultIndex);
+    applyRecipe(templates[defaultIndex].config);
+  }
   buildTabs();
   renderTabBody();
   if (templates.length === 0) {
