@@ -100,13 +100,18 @@ try {
         } else {
             # 未インストールの場合、依存関係にあるNuGetプロバイダーを準備する。
             Write-Host "-> 依存モジュールをインストールします..." -ForegroundColor Yellow
-            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue
-            # 'PSWindowsUpdate'モジュールを全ユーザー向けにインストールする。
-            Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers
+            # 失敗したまま進むと「インストール完了」と誤って表示されるため、失敗したらここで中断する。
+            try {
+                Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction Stop
+                # 'PSWindowsUpdate'モジュールを全ユーザー向けにインストールする。
+                Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers -ErrorAction Stop
+            } catch {
+                throw "依存モジュール(PSWindowsUpdate)のインストールに失敗しました。インターネット接続を確認してください: $($_.Exception.Message)"
+            }
             Write-Host "-> インストール完了。" -ForegroundColor Green
         }
         # モジュールを現在のセッションにインポートして利用可能な状態にする。
-        Import-Module PSWindowsUpdate -Force
+        Import-Module PSWindowsUpdate -Force -ErrorAction Stop
 
         # --- [1/5] 更新プログラムのスキャン ---
         Write-Host "----------------------------------------------------"
