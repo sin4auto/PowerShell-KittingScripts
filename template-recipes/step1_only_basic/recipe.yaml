@@ -10,6 +10,9 @@
 phase1:
   # --- Windowsシステム設定 (レジストリ変更) ---
   windowsSettings:
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
     # [エクスプローラー設定]
     - description: 'エクスプローラーで隠しファイルを表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
@@ -96,9 +99,6 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
     - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
       command: 'Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction SilentlyContinue; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
-    # [Windows Update]
-    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
-      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
     # [操作・便利機能]
     - description: 'クリップボードの履歴（Windows + V）を有効にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
