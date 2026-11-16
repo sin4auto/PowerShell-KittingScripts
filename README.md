@@ -56,6 +56,10 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 
 YAML を手で書かずに `recipe.yaml` を作りたい場合は、`recipe-builder/recipe-builder.html` をダブルクリックしてブラウザーで開きます。
 
+<p align="center">
+<img src="./images/recipe-builder-screenshot.png" alt="レシピ作成アプリの画面。左で項目にチェックを付け、右にできあがる recipe.yaml が表示される" width="90%">
+</p>
+
 - 「Windows 設定」「アプリ」「削除するアプリ」「開発パッケージ」のタブで、入れたい項目にチェックを付けます。
 - テンプレートから始めることも、「recipe.yaml を読み込む」で手元の `recipe.yaml` を読み込んで続きを編集することもできます。
 - 一覧にない項目は、各タブの「一覧にない項目を追加する」から追加できます。
@@ -219,6 +223,10 @@ You can freely customize the setup by editing `recipe.yaml`. Comment out any unn
 ### Recipe Builder App
 
 If you want to create `recipe.yaml` without writing YAML by hand, double-click `recipe-builder/recipe-builder.html` to open it in a browser.
+
+<p align="center">
+<img src="./images/recipe-builder-screenshot.png" alt="Recipe builder app: tick items on the left and the resulting recipe.yaml appears on the right" width="90%">
+</p>
 
 - Tick the items you want on the "Windows 設定" (Windows settings), "アプリ" (apps), "削除するアプリ" (apps to remove), and "開発パッケージ" (development packages) tabs.
 - You can start from a template, or load an existing `recipe.yaml` with "recipe.yaml を読み込む" (load recipe.yaml) and continue editing it.
