@@ -72,23 +72,6 @@ YAML を手で書かずに `recipe.yaml` を作りたい場合は、`recipe-buil
 .\recipe-builder\Update-RecipeBuilder.ps1
 ```
 
-## 実行場所ごとの注意点
-
-### ローカル固定ディスク（例: `C:` / `D:`）
-- 最も安全です。再起動後もパスが安定して参照できます。
-
-### USBメモリ／外付けストレージ
-- 基本的に安全ですが、再起動やログオン後も同じドライブレターでマウントされ続ける必要があります。
-- 取り外しやレター変更が発生するとフェーズ2や再開処理が開始できません。失敗した場合はドライブを接続し直し、手動で再実行してください。
-
-### Active Directory管理のファイルサーバー共有
-- UNCパス上でも実行できますが、共有への書き込み権限と安定した接続が必須です。
-- ログオン時に自動再接続されない環境ではタスクスケジューラがスクリプトを見つけられず失敗します。必要に応じてローカルにコピーしてから実行してください。
-
-### NAS共有
-- 基本的な制約はファイルサーバー共有と同じです。
-- NASのスリープや再接続遅延によりタスクが失敗することがあります。長時間処理が続く場合はローカルディスクでの実行を検討してください。
-
 ### フェーズ1 (`phase1`)
 
 再起動前に実行される基本的なシステムセットアップを定義します。
@@ -140,6 +123,23 @@ phase2:
         - description: 'dotenvファイル支援'
           name: mikestead.dotenv
 ```
+
+## 実行場所ごとの注意点
+
+### ローカル固定ディスク（例: `C:` / `D:`）
+- 最も安全です。再起動後もパスが安定して参照できます。
+
+### USBメモリ／外付けストレージ
+- 基本的に安全ですが、再起動やログオン後も同じドライブレターでマウントされ続ける必要があります。
+- 取り外しやレター変更が発生するとフェーズ2や再開処理が開始できません。失敗した場合はドライブを接続し直し、手動で再実行してください。
+
+### Active Directory管理のファイルサーバー共有
+- UNCパス上でも実行できますが、共有への書き込み権限と安定した接続が必須です。
+- ログオン時に自動再接続されない環境ではタスクスケジューラがスクリプトを見つけられず失敗します。必要に応じてローカルにコピーしてから実行してください。
+
+### NAS共有
+- 基本的な制約はファイルサーバー共有と同じです。
+- NASのスリープや再接続遅延によりタスクが失敗することがあります。長時間処理が続く場合はローカルディスクでの実行を検討してください。
 
 ## テンプレートレシピの活用
 
@@ -240,23 +240,6 @@ When you change `recipe.yaml` or `template-recipes/`, run the following command 
 .\recipe-builder\Update-RecipeBuilder.ps1
 ```
 
-## Location-Specific Considerations
-
-### Local fixed drives (e.g., `C:` / `D:`)
-- Safest option. Paths remain stable after reboots.
-
-### USB drives / external storage
-- Generally safe, but the volume must stay mounted under the same drive letter after reboots or logons.
-- If the drive is removed or the letter changes, phase 2 or resume processing cannot start. Reattach the drive and rerun manually if a failure occurs.
-
-### Active Directory-managed file shares
-- Works over UNC paths, but requires write permissions and a stable connection.
-- In environments where the share does not reconnect automatically on logon, Task Scheduler cannot find the scripts. Copy them locally first if needed.
-
-### NAS shares
-- Follow constraints similar to file shares.
-- NAS sleep or reconnection delays may cause tasks to fail. When running long processes, consider executing from a local disk.
-
 ### Phase 1 (`phase1`)
 
 Defines the fundamental system setup that runs before the reboot.
@@ -308,6 +291,23 @@ phase2:
         - description: 'dotenv support'
           name: mikestead.dotenv
 ```
+
+## Location-Specific Considerations
+
+### Local fixed drives (e.g., `C:` / `D:`)
+- Safest option. Paths remain stable after reboots.
+
+### USB drives / external storage
+- Generally safe, but the volume must stay mounted under the same drive letter after reboots or logons.
+- If the drive is removed or the letter changes, phase 2 or resume processing cannot start. Reattach the drive and rerun manually if a failure occurs.
+
+### Active Directory-managed file shares
+- Works over UNC paths, but requires write permissions and a stable connection.
+- In environments where the share does not reconnect automatically on logon, Task Scheduler cannot find the scripts. Copy them locally first if needed.
+
+### NAS shares
+- Follow constraints similar to file shares.
+- NAS sleep or reconnection delays may cause tasks to fail. When running long processes, consider executing from a local disk.
 
 ## Using Template Recipes
 
