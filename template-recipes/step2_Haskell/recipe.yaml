@@ -74,9 +74,6 @@ phase1:
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-dc 0"
-    # [GHCupのインストール] ★★★ HasKellのみ ★★★
-    - description: 'Haskell ツールチェーン (GHCup) を公式スクリプトでインストール'
-      command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
     # [タスクバー・スタートメニュー]
     - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
@@ -106,6 +103,9 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
     - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
       command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
+    # [開発環境の準備]
+    - description: 'Haskell ツールチェーン (GHCup) を公式スクリプトでインストール'
+      command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
