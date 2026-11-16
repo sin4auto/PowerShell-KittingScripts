@@ -48,16 +48,26 @@ goto menu
 :RunUpdate
 echo "AutoWindowsUpdate" を実行します...
 powershell.exe -ExecutionPolicy Bypass -File "%~dp0AutoWindowsUpdate.ps1"
+if errorlevel 1 goto Failed
 goto Finish
 
 :RunSetup
 echo "AutoSetup" を実行します...
 powershell.exe -ExecutionPolicy Bypass -File "%~dp0AutoSetup.ps1"
+if errorlevel 1 goto Failed
 goto Finish
 
 :Finish
 echo.
 echo 処理が完了しました。
+pause
+goto End
+
+:Failed
+echo.
+echo ======================================================================
+echo  処理中にエラーがありました。画面の表示とログファイルを確認してください。
+echo ======================================================================
 pause
 goto End
 

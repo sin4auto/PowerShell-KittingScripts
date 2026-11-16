@@ -34,6 +34,8 @@ $TaskName = "AutoWindowsUpdateTask"
 # 失敗し続ける更新があると「インストール → 再起動」が永遠に続くため、周回数に上限を設ける。
 # 新しいPCでも通常は数周で終わるので、余裕を持たせた値にしている。
 $MaxRounds = 10
+# 呼び出し元（Start-Admin.bat など）が失敗に気づけるよう、異常終了したら 1 に変えて最後に返す。
+$exitCode = 0
 
 # =================================================================
 # メイン処理ブロック
@@ -54,7 +56,7 @@ try {
         # 上記の初期化処理に失敗した場合、エラーを表示してスクリプトを終了する。
         Write-Error $_.Exception.Message
         Start-Sleep -Seconds 10
-        exit
+        exit 1
     }
     # 実行ログを記録するファイルパスを定義する。
     $LogFile = Join-Path $PSScriptRoot "AutoWindowsUpdate.log"
@@ -78,7 +80,7 @@ try {
         # 管理者権限がない場合は、警告を表示して処理を中断する。
         Write-Warning "管理者権限がありません。管理者としてPowerShellを再実行してください。"
         Start-Sleep -Seconds 10
-        exit
+        exit 1
     }
 
     # --- フェーズ2: Windows Update メインループ ---
@@ -203,6 +205,7 @@ try {
 } catch {
     # --- フェーズ4: 例外処理 ---
     # スクリプト全体のtryブロック内で発生した、捕捉可能な全てのエラーをここで処理する。
+    $exitCode = 1
     Write-Host "`nFATAL: エラーが発生しました。 $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "処理を中断します。詳細はログファイルを参照してください: $LogFile" -ForegroundColor Red
     # 処理が異常終了したため、意図しない再実行を防ぐために自動実行タスクをクリーンアップする。
@@ -219,3 +222,4 @@ try {
         Stop-Transcript
     }
 }
+exit $exitCode

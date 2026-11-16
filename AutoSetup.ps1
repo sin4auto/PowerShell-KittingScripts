@@ -80,7 +80,7 @@ catch {
     Write-Error "YAMLモジュールの準備に失敗しました。管理者権限で `Install-Module -Name powershell-yaml` を手動で実行してください。"
     Read-Host "Enterキーを押して終了します。"
     Stop-Transcript
-    exit
+    exit 1
 }
 # --- 設定ファイルの読み込み ---
 try {
@@ -109,7 +109,7 @@ catch {
     }
     Read-Host "Enterキーを押して終了します。"
     Stop-Transcript
-    exit
+    exit 1
 }
 # --- 管理者権限の確認 ---
 # フェーズ2の実行時($setupPhaseが'2')は、この権限チェックをスキップする。
@@ -120,7 +120,7 @@ if ($setupPhase -ne '2') {
         Write-Warning "エラー: 管理者権限が必要です。PowerShellを右クリックして「管理者として実行」してください。"
         Read-Host "Enterキーを押して終了します。"
         Stop-Transcript
-        exit
+        exit 1
     }
 }
 #=============================================================================
@@ -306,7 +306,7 @@ if ($setupPhase -ne '2') {
         Write-Warning "  & `"$PSCommandPath`" -setupPhase 2"
         Read-Host "Enterキーを押して終了します。"
         Stop-Transcript
-        exit
+        exit 1
     }
     Write-Host "設定を完全に適用するため、システムを再起動します。" -ForegroundColor Yellow
     # ユーザーがメッセージを読むための待機時間を設ける。
@@ -407,6 +407,9 @@ if ($setupPhase -eq '2') {
     Read-Host "Enterキーを押して、このウィンドウを閉じてください。"
     # ログ記録を正常に終了させる。
     Stop-Transcript
-    # スクリプトを正常に終了する。
-    exit
+    # 呼び出し元（タスクスケジューラの実行結果など）からも失敗が分かるよう、失敗があれば 1 を返す。
+    if ($script:failedItems.Count -gt 0) {
+        exit 1
+    }
+    exit 0
 }
