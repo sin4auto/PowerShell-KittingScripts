@@ -82,6 +82,8 @@ try {
     }
 
     # --- フェーズ2: Windows Update メインループ ---
+    # 前の周で失敗した更新。一時的な失敗は次の周で直ることがあるため、1回目の失敗では止めずに覚えておく。
+    $previousFailedTitles = @()
     # 更新がなくなるまで一連の処理を繰り返すための無限ループ。
     while ($true) {
         if ($Round -gt $MaxRounds) {
@@ -159,10 +161,24 @@ try {
         # OSが再起動する直前のログが失われるのを防ぐため、一度ログを停止し、即座に追記モードで再開する。
         if ($transcriptStarted) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
         # 見つかった全ての更新プログラムを承諾し、インストールを実行する。-AutoRebootにより、必要に応じて自動で再起動される。
-        Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose
+        # 失敗を確かめるため結果を受け取る。Tee-Object で画面への表示も残す。
+        $installResults = $null
+        Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose | Tee-Object -Variable installResults
         # 再起動コマンドが実行された後のための短い待機時間。
         Write-Host "-> 20秒間待機します..."
         Start-Sleep -Seconds 20
+
+        # ここに来るのは再起動しなかった場合だけなので、この周の失敗をここで確かめる。
+        # 確かめないと、失敗し続ける更新に10周の上限まで気づけない。
+        $failedTitles = @($installResults | Where-Object { $_.Result -eq 'Failed' } | ForEach-Object { $_.Title } | Select-Object -Unique)
+        $repeatedFailedTitles = @($failedTitles | Where-Object { $previousFailedTitles -contains $_ })
+        if ($repeatedFailedTitles.Count -gt 0) {
+            throw "次の更新が2周続けてインストールに失敗しました: $($repeatedFailedTitles -join ' / ')。[設定] > [Windows Update] > [更新の履歴] でエラーコードを確認してください。"
+        }
+        if ($failedTitles.Count -gt 0) {
+            Write-Warning "次の更新のインストールに失敗しました。次の周でもう一度だけ試します: $($failedTitles -join ' / ')"
+        }
+        $previousFailedTitles = $failedTitles
 
         # --- [5/5] 再起動が不要だった場合の処理 ---
         # このステップに到達した場合、-AutoRebootが再起動をトリガーしなかったことを意味する。
