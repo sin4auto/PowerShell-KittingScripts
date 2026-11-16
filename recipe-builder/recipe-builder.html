@@ -3265,6 +3265,8 @@ function mergeIntoCatalog(config) {
   }
   const managers = config && isPlainObject(config.phase2) ? config.phase2.packageManagers : null;
   if (!Array.isArray(managers)) return;
+  // Windows 設定などと同じく、新しいパッケージマネージャーは、そのテンプレートで1つ前にあるものの直後に入れる。
+  let previousManager = null;
   for (const source of managers) {
     if (!isPlainObject(source)) continue;
     const name = toText(source.managerName).trim();
@@ -3278,8 +3280,9 @@ function mergeIntoCatalog(config) {
         packages: [],
         custom: false,
       };
-      state.managers.push(manager);
+      state.managers.splice(previousManager ? state.managers.indexOf(previousManager) + 1 : state.managers.length, 0, manager);
     }
+    previousManager = manager;
     for (const pkg of Array.isArray(source.packages) ? source.packages : []) {
       if (!isPlainObject(pkg)) continue;
       const pkgName = toText(pkg.name).trim();
