@@ -329,6 +329,7 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
 .items.single { grid-template-columns: minmax(0, 1fr); }
 .item {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 10px;
   padding: 8px 12px;
@@ -347,6 +348,29 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* ---- 画面の画像 ---- */
+.shot-toggle { flex: none; }
+.shot { flex-basis: 100%; margin: 4px 0 4px 26px; min-width: 0; }
+.shot-frame { position: relative; display: inline-block; max-width: min(100%, 720px); vertical-align: top; }
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+/* 赤枠は明るい表示・暗い表示のどちらでも目立つよう、固定の赤に白い縁を付ける。 */
+.shot-box {
+  position: absolute;
+  border: 3px solid #e3000f;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .75);
+  pointer-events: none;
+}
+.shot figcaption { margin-top: 6px; font-size: 12px; line-height: 18px; color: var(--muted); }
+.shot figcaption span { display: block; color: var(--subtle); }
+.shot-missing { color: var(--warn-text); font-size: 12px; }
 .tag {
   display: inline-block;
   margin-left: 6px;
@@ -2564,6 +2588,23 @@ const LOADED_GROUP = '読み込んだレシピだけにある項目';
 // 見出しコメントのない項目の分類。recipe.yaml へは見出しコメントを書かない。
 const NO_GROUP = '分類なし';
 
+// Windows 設定の項目ごとに、変わる場所が写った画面の画像（images フォルダー）を対応付ける。
+// コマンドの中のレジストリ値の名前で見分ける。画像は撮影した PC の状態を写した例。
+const SCREENSHOTS = [
+  { match: /\/v LaunchTo\b/, file: 'folder-options-general.png', where: 'エクスプローラーのオプション ＞ 一般 ＞ エクスプローラーで開く', box: [24, 70, 396, 32] },
+  { match: /\/v DisableAutoplay\b/, file: 'autoplay.png', where: '設定 ＞ Bluetooth とデバイス ＞ 自動再生 ＞ すべてのメディアとデバイスで自動再生を使う', box: [28, 70, 270, 70] },
+  { match: /StorageOnArrival/, file: 'autoplay.png', where: '設定 ＞ Bluetooth とデバイス ＞ 自動再生 ＞ リムーバブル ドライブ', box: [28, 206, 340, 76] },
+  { match: /\/v AllowTelemetry\b/, file: 'privacy-feedback.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 診断とフィードバック ＞ 診断データ', box: [40, 70, 1000, 240] },
+  { match: /\\Input\\TIPC"/, file: 'privacy-feedback.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 診断とフィードバック ＞ 手書き入力とタイプ入力の改善', box: [40, 312, 1000, 72] },
+  { match: /\/v IsDeviceSearchHistoryEnabled\b/, file: 'search-permissions.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 検索 ＞ 履歴の検索', box: [40, 152, 1000, 72] },
+  { match: /\/v IsMSACloudSearchEnabled\b/, file: 'search-permissions.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 検索 ＞ 自分のアカウントを検索 ＞ Microsoft アカウント', box: [40, 536, 1000, 58] },
+  { match: /\/v IsBusinessCloudSearchEnabled\b/, file: 'search-permissions.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 検索 ＞ 自分のアカウントを検索 ＞ 職場または学校アカウント', box: [40, 595, 1000, 54] },
+  { match: /\\HypervisorEnforcedCodeIntegrity"/, file: 'core-isolation.png', where: 'Windows セキュリティ ＞ デバイス セキュリティ ＞ コア分離 ＞ メモリ整合性', box: [358, 150, 546, 158] },
+  { match: /\\KernelShadowStacks"/, file: 'core-isolation.png', where: 'Windows セキュリティ ＞ デバイス セキュリティ ＞ コア分離 ＞ カーネル モード ハードウェア強制スタック保護', box: [358, 314, 546, 158] },
+  { match: /\/v RunAsPPL\b/, file: 'core-isolation.png', where: 'Windows セキュリティ ＞ デバイス セキュリティ ＞ コア分離 ＞ ローカル セキュリティ機関の保護', box: [358, 472, 546, 174] },
+];
+const screenshotFor = (item) => SCREENSHOTS.find((shot) => shot.match.test(item.command)) || null;
+
 // ---------------------------------------------------------------------------
 // recipe.yaml を読むための小さな YAML パーサー
 // ネットにつながらない PC でも使えるよう外部ライブラリは使わず、recipe.yaml で使う書き方
@@ -2964,6 +3005,7 @@ const ICONS = {
   warn: '<path d="M10 3 2.5 16.5h15z"/><path d="M10 8v4M10 14.5v.01"/>',
   close: '<path d="m4 4 8 8M12 4l-8 8"/>',
   shield: '<path d="M8 1.5 3 3.5v4c0 3 2.2 5.6 5 7 2.8-1.4 5-4 5-7v-4z"/>',
+  image: '<rect x="2" y="3" width="12" height="10" rx="1.5"/><circle cx="5.5" cy="6.5" r="1"/><path d="m2.5 11.5 3.5-3 2.5 2 2-1.5 3 2.5"/>',
 };
 function icon(name, size) {
   const viewBox = size === 20 ? '0 0 20 20' : '0 0 16 16';
@@ -2986,6 +3028,46 @@ function syncParent(box, children) {
   box.indeterminate = checked > 0 && checked < children.length;
   box.disabled = children.length === 0;
   return checked;
+}
+
+// 「画面を見る」ボタンと、押すと項目の下に広がる画像。画像は開いたときに初めて読み込む。
+function screenshotPreview(shot, figureId) {
+  const figure = h('figure', { className: 'shot', id: figureId, hidden: true });
+  const button = h('button', {
+    type: 'button',
+    className: 'btn small subtle shot-toggle',
+    'aria-expanded': 'false',
+    'aria-controls': figureId,
+    onclick: () => {
+      const open = figure.hidden;
+      figure.hidden = !open;
+      button.setAttribute('aria-expanded', String(open));
+      button.lastChild.textContent = open ? '画面を閉じる' : '画面を見る';
+      if (open && !figure.firstChild) {
+        const img = h('img', { alt: `${shot.where} の画面（該当する項目を赤枠で囲んでいます）` });
+        const frame = h('div', { className: 'shot-frame' }, img);
+        img.addEventListener('load', () => {
+          // 同じ画像を複数の項目で使うため、赤枠は画像に描き込まず、項目ごとの位置に重ねる。
+          // 位置は画像の大きさに対する割合で指定し、画面の幅に合わせて画像が縮んでもずれないようにする。
+          if (!shot.box) return;
+          const [x, y, w, hgt] = shot.box;
+          const { naturalWidth: nw, naturalHeight: nh } = img;
+          frame.append(h('span', {
+            className: 'shot-box',
+            'aria-hidden': 'true',
+            style: `left:${(x / nw) * 100}%;top:${(y / nh) * 100}%;width:${(w / nw) * 100}%;height:${(hgt / nh) * 100}%`,
+          }));
+        });
+        img.addEventListener('error', () => {
+          frame.replaceWith(h('p', { className: 'shot-missing' }, `画像（images/${shot.file}）が見つかりません。recipe-builder.html と同じ場所に images フォルダーを置いてください。`));
+        });
+        // 読み込みの完了を取りこぼさないよう、受け取る準備をしてから読み込みを始める。
+        img.src = `images/${shot.file}`;
+        figure.append(frame, h('figcaption', null, shot.where, h('span', null, '撮影した PC の画面の例です。お使いの PC とは状態が違う場合があります。')));
+      }
+    },
+  }, icon('image'), '画面を見る');
+  return { button, figure };
 }
 
 function emptyState(title, text) {
@@ -3152,11 +3234,15 @@ function renderSectionTab(sectionName) {
         const box = h('input', { type: 'checkbox', id, checked: item.checked, onchange: (event) => { item.checked = event.target.checked; sync(); updateSummary(); } });
         boxes.push(box);
         const title = item.description || def.detail(item);
+        const shot = sectionName === 'windowsSettings' ? screenshotFor(item) : null;
+        const preview = shot ? screenshotPreview(shot, `${id}-shot`) : null;
         return h('div', { className: 'item' },
           box,
           h('label', { for: id, title: def.detail(item) },
             h('span', { className: 'name' }, title, item.custom ? h('span', { className: 'tag' }, '追加') : null),
             h('span', { className: 'detail' }, def.detail(item))),
+          preview ? preview.button : null,
+          preview ? preview.figure : null,
           item.custom ? h('button', {
             type: 'button',
             className: 'btn small subtle danger',
