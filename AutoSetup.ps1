@@ -209,9 +209,25 @@ if ($setupPhase -ne '2') {
         # 設定ファイルに記述された各UWPアプリを一つずつループ処理する。
         foreach ($appxPackage in $config.phase1.appxRemove) {
             Write-Host "-> [$($appxPackage.name)] を削除します..."
-            # ワイルドカードを含むパッケージ名で対象アプリを検索し、PC上の全ユーザーから削除する。
-            Get-AppxPackage -AllUsers $appxPackage.name | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-            Write-Host "-> [$($appxPackage.name)] の削除処理を実行しました。`n"
+            # ワイルドカードを含むパッケージ名で対象アプリを検索する。
+            $foundPackages = @(Get-AppxPackage -AllUsers -Name $appxPackage.name)
+            if ($foundPackages.Count -eq 0) {
+                # Windowsのバージョンによっては最初から入っていないアプリもあるため、失敗ではなくスキップとして扱う。
+                Write-Host "-> [$($appxPackage.name)] は見つかりませんでした。スキップします。`n" -ForegroundColor Cyan
+                continue
+            }
+            # 1つの失敗で残りのパッケージの削除が止まらないよう、パッケージごとに処理する。
+            foreach ($foundPackage in $foundPackages) {
+                try {
+                    Remove-AppxPackage -Package $foundPackage.PackageFullName -AllUsers -ErrorAction Stop
+                    Write-Host "-> [$($foundPackage.Name)] を削除しました。" -ForegroundColor Green
+                }
+                catch {
+                    Write-Warning "-> [$($foundPackage.Name)] の削除に失敗しました: $($_.Exception.Message)"
+                    $script:failedItems.Add("Appx Remove: $($foundPackage.Name)")
+                }
+            }
+            Write-Host ""
         }
         Write-Host "`n--- プリインストールアプリの削除が完了しました ---`n" -ForegroundColor Green
     }
