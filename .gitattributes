@@ -3,6 +3,9 @@
 # WSL（Linux）で実行するシェルスクリプトは、常に LF
 *.sh   text eol=lf
 
+# レシピ作成アプリは LF で保存しているため、core.autocrlf=true の PC でも CRLF に変えさせない
+*.html text eol=lf
+
 # バッチファイルは CRLF + Shift-JIS で保存しているため、Git に一切変換させない
 *.bat  -text
 *.cmd  -text
