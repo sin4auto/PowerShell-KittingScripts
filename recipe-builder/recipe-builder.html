@@ -3995,7 +3995,7 @@ function renderSectionTab(sectionName) {
     h('div', { className: 'list-tools' },
       searchBox(renderList),
       h('button', { type: 'button', className: 'btn', onclick: () => setVisible(true) }, '表示中をすべて選ぶ'),
-      h('button', { type: 'button', className: 'btn subtle', onclick: () => setVisible(false) }, 'すべて外す')),
+      h('button', { type: 'button', className: 'btn', onclick: () => setVisible(false) }, 'すべて外す')),
     listHost,
     h('details', { className: 'card add-card' }, h('summary', null, icon('plus'), '一覧にない項目を追加する'), form),
   ];
