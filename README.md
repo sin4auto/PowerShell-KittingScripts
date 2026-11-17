@@ -1,8 +1,8 @@
 # Windows PC キッティング自動化スクリプト
 
-Windows PCのキッティング（初期セットアップ）から開発環境構築までの一連の作業を自動化するPowerShellスクリプト群です。
+Windows 11 PC のキッティング（初期セットアップ）から開発環境の構築までを自動化する PowerShell スクリプト集です。
 
-**`recipe.yaml`** に設定を定義し **`Start-Admin.bat`** を管理者権限で実行するだけで、手作業による時間のかかるセットアップ作業を大幅に削減し、誰でも一貫性のある環境を迅速に構築できます。
+**`recipe.yaml`** にやりたいことを書き、**`Start-Admin.bat`** を管理者として実行するだけで、手作業で時間のかかるセットアップを大きく減らし、誰がやっても同じ環境をすばやく作れます。`recipe.yaml` は、ブラウザーで開く **レシピ作成アプリ** を使えば、チェックを付けるだけで作れます。
 
 <p align="center">
 <img src="./images/launcher-screenshot.png" alt="コマンドプロンプトのランチャー画面" width="70%">
@@ -10,60 +10,74 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 
 ## 主な機能
 
-- **Windows Updateの完全自動化**: 更新プログラムがなくなるまで、確認・インストール・再起動を無人で繰り返します。
-- **柔軟なアプリケーション管理**: `winget` を利用し、`recipe.yaml` に基づいてアプリの一括インストールや不要なプリインストールアプリの削除を行います。
-- **開発環境の自動構築**: `recipe.yaml` で定義された `code` (VSCode拡張機能)、 `npm` (Node.js) 、 `pip` (Python) などのパッケージマネージャーを通じて、開発用ライブラリを一括でインストールします。
-- **設定ファイルによる柔軟なシステム構築**: エクスプローラーの拡張子表示などのシステム設定を`recipe.yaml`に直接記述することで、スクリプトを編集することなく柔軟に設定を変更できます。
-- **安定した2フェーズ実行**: アプリインストール（フェーズ1）と、PATH環境変数を参照する開発ツール（フェーズ2）の間に再起動を挟むことで、安定した動作を保証します。
-- **対話的な操作メニュー**: `Start-Admin.bat` を実行するだけで、ユーザーはメニューから実行したい処理を簡単に選択できます。
+- **Windows Update の全自動化**: 更新がなくなるまで、確認・インストール・再起動を無人で繰り返します。失敗し続ける更新があっても、上限の周回数で止まります。
+- **アプリの一括インストールと削除**: `winget` で、`recipe.yaml` に書いたアプリをまとめてインストールし、不要なプリインストールアプリを削除します。最後に、インストール済みのアプリをすべて更新します。
+- **Windows の設定変更**: エクスプローラーで拡張子を表示するなどの設定を `recipe.yaml` に書くだけで、スクリプトを編集せずに変えられます。
+- **開発環境の自動構築**: VS Code 拡張機能、`npm`、`pip` などのパッケージマネージャーを通じて、開発用のパッケージをまとめてインストールします。
+- **再起動を挟んだ 2 フェーズ実行**: アプリのインストール（フェーズ 1）と、PATH 環境変数を使う開発ツールの導入（フェーズ 2）の間に再起動を挟みます。インストールしたばかりのコマンドが見つからない、という失敗を防ぎます。
+- **レシピ作成アプリ**: YAML を手で書かなくても、ブラウザーでチェックを付けるだけで `recipe.yaml` を作れます。
+- **失敗を見逃さない結果表示**: 失敗した項目は最後に一覧で表示し、ログファイルにも残します。
+
+## 動作環境
+
+- Windows 11
+- PowerShell 5.1（Windows に最初から入っているもの）
+- 管理者権限
+- インターネット接続（`winget` でのインストールと、必要な PowerShell モジュールの自動インストールに使います）
+
+必要な PowerShell モジュール（`PSWindowsUpdate`、`powershell-yaml`）は、入っていなければスクリプトが自動でインストールします。
 
 ## 推奨ワークフロー
 
-1.  **OSのクリーンインストール**: Windows 11をクリーンインストールします。
-2.  **リポジトリの配置**: このリポジトリをダウンロードし、フォルダをPCの任意の場所（例: `C:\Work`）に配置します。USBメモリ、外付けストレージ内で実行しても基本的に安全です。
-3.  **設定ファイルの編集**: `recipe.yaml` をテキストエディタで開き、不要な項目を行頭に `#` を付けてコメントアウトし、自分の好みに合わせて編集します。
-4.  **スクリプトの実行**:
-    1.  `Start-Admin.bat` を**右クリック**し、「**管理者として実行**」を選択します。
-    2.  メニューから `1. AutoWindowsUpdate` を選択し、OSを最新の状態にします。（**強く推奨**）
-    3.  処理が完了したら、再度 `Start-Admin.bat` を管理者として実行します。
-    4.  メニューから `2. AutoSetup` を選択し、アプリケーションのインストールと環境構築を開始します。
-5.  **最終確認**:
-    - すべての自動処理が完了したら、PCを一度手動で再起動します。
-    - Windows Updateの画面やデバイスマネージャーを開き、更新漏れや不明なデバイスがないか最終確認を行います。
+1. **OS のクリーンインストール**: Windows 11 をクリーンインストールします。
+2. **リポジトリの配置**: このリポジトリをダウンロードし、フォルダーを PC の好きな場所（例: `C:\Work`）に置きます。USB メモリや外付けストレージから実行しても、基本的には問題ありません（[実行場所ごとの注意点](#実行場所ごとの注意点) を参照）。
+3. **`recipe.yaml` の準備**: 次のどちらかの方法で、やりたいことを決めます。
+   - [レシピ作成アプリ](#レシピ作成アプリ) でチェックを付けて保存し、リポジトリ直下の `recipe.yaml` と置き換えます。
+   - `recipe.yaml` をテキストエディターで開き、不要な項目の行頭に `#` を付けてコメントアウトします。
+4. **スクリプトの実行**:
+   1. `Start-Admin.bat` を **右クリック** し、「**管理者として実行**」を選びます。
+   2. メニューから `1. AutoWindowsUpdate` を選び、OS を最新の状態にします（**強く推奨**）。再起動のたびに、サインインすると続きが自動で始まります。
+   3. 終わったら、もう一度 `Start-Admin.bat` を管理者として実行します。
+   4. メニューから `2. AutoSetup` を選び、アプリのインストールと環境構築を始めます。フェーズ 1 のあと自動で再起動し、サインインするとフェーズ 2 が始まります。
+5. **最終確認**:
+   - 画面の結果まとめに、失敗した項目がないか確認します。失敗があれば、[ログファイル](#ログと結果の確認) で原因を確認します。
+   - PC を一度、手動で再起動します。
+   - Windows Update の画面やデバイスマネージャーを開き、更新漏れや不明なデバイスがないか確認します。
 
 ## スクリプト構成
 
 | ファイル名 | 役割 |
 |---|---|
-| `Start-Admin.bat` | **起点となるファイル。** 管理者権限を確認し、対話形式で実行するスクリプトを選択させます。 |
-| `AutoWindowsUpdate.ps1` | Windows Updateを全自動で実行します。更新がなくなるまで、更新の確認・インストール・再起動を繰り返します。失敗し続ける更新で止まらなくなるのを防ぐため、10周で中断します。同じ更新が2周続けてインストールに失敗した場合も、その時点で中断します。 |
-| `AutoSetup.ps1` | `recipe.yaml` に基づき、アプリのインストール、システム設定、開発環境の構築を2フェーズ（再起動を挟む）に分けて実行します。 |
-| `recipe.yaml` | **カスタマイズの中心。** インストールするアプリ、システム設定、開発パッケージなどを、コメント付きで分かりやすく定義します。 |
-| `template-recipes/` | `recipe.yaml` のテンプレート集。代表的な構成例をフォルダ単位で保持し、必要に応じてコピーして利用できます。 |
-| `APP_RecipeBuilder/recipe-builder.html` | レシピ作成アプリ。ブラウザーで開き、チェックを付けて `recipe.yaml` を作れます。ネット接続は不要です。 |
+| `Start-Admin.bat` | **入口となるファイル。** 管理者権限を確認し、実行するスクリプトをメニューから選ばせます。 |
+| `AutoWindowsUpdate.ps1` | Windows Update を全自動で実行します。更新がなくなるまで、確認・インストール・再起動を繰り返します。失敗し続ける更新で止まらなくなるのを防ぐため、10 周で中断します。同じ更新が 2 周続けてインストールに失敗した場合も、その時点で中断します。 |
+| `AutoSetup.ps1` | `recipe.yaml` に従って、Windows の設定変更、アプリのインストールと削除、開発環境の構築を、再起動を挟んだ 2 フェーズで実行します。 |
+| `recipe.yaml` | **カスタマイズの中心。** インストールするアプリ、Windows の設定、開発パッケージなどを、コメント付きで定義します。 |
+| `template-recipes/` | `recipe.yaml` のテンプレート集です。目的別の構成例をフォルダーごとに置いています。 |
+| `APP_RecipeBuilder/recipe-builder.html` | **レシピ作成アプリ。** ブラウザーで開き、チェックを付けて `recipe.yaml` を作れます。ネット接続は不要です。 |
 | `APP_RecipeBuilder/Update-RecipeBuilder.ps1` | `recipe.yaml` と `template-recipes/` の中身を、レシピ作成アプリに埋め込み直します。 |
 | `APP_RecipeBuilder/images/` | レシピ作成アプリの「画面を見る」で表示する、Windows の設定画面の画像です。 |
-| `キッティング手順.txt` | 自動化スクリプトを使用する際の、手動作業を含めた全体的な作業フローのメモです。 |
-| `AutoSetup未対応の設定手順チートシート/` | スクリプトによる自動化範囲外の、各種手動設定に関する手順書が格納されています。（例: Hyper-V、WSL2のセットアップなど） |
-| `.github/workflows/lint.yml` | GitHub Actions の自動チェック。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェックを行います。 |
-| `.github/scripts/Test-Recipe.ps1` | `recipe.yaml` と `template-recipes/` の書式チェック。書き間違えたキーや必須キーの抜けを見つけます。手元でも `powershell-yaml` を入れた PowerShell で実行できます。 |
+| `キッティング手順.txt` | 手動の作業も含めた、キッティング全体の作業の流れのメモです。 |
+| `AutoSetup未対応の設定手順チートシート/` | スクリプトで自動化していない設定の手順書です（例: Hyper-V、WSL2 のセットアップ）。 |
+| `.github/workflows/lint.yml` | GitHub Actions の自動チェックです。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェックを行います。 |
+| `.github/scripts/Test-Recipe.ps1` | `recipe.yaml` と `template-recipes/` の書式チェックです。書き間違えたキーや、必須キーの抜けを見つけます。手元でも、`powershell-yaml` を入れた PowerShell で実行できます。 |
 
 ## カスタマイズ
 
-セットアップ内容は `recipe.yaml` を編集することで自由にカスタマイズできます。不要な項目は行頭に `#` を付けてコメントアウトしてください。
+セットアップの内容は、`recipe.yaml` を編集して自由に変えられます。不要な項目は、行頭に `#` を付けてコメントアウトしてください。
 
 ### レシピ作成アプリ
 
-YAML を手で書かずに `recipe.yaml` を作りたい場合は、`APP_RecipeBuilder/recipe-builder.html` をダブルクリックしてブラウザーで開きます。
+YAML を手で書かずに `recipe.yaml` を作りたい場合は、`APP_RecipeBuilder/recipe-builder.html` をダブルクリックして、ブラウザーで開きます。
 
 <p align="center">
 <img src="./images/recipe-builder-screenshot.png" alt="レシピ作成アプリの画面。左で項目にチェックを付け、右にできあがる recipe.yaml が表示される" width="90%">
 </p>
 
-- 「Windows 設定」「アプリ」「削除するアプリ」「開発パッケージ」のタブで、入れたい項目にチェックを付けます。
-- テンプレートから始めることも、「recipe.yaml を読み込む」で手元の `recipe.yaml` を読み込んで続きを編集することもできます。
+- 「Windows 設定」「アプリ」「削除するアプリ」「開発パッケージ」のタブで、入れたい項目にチェックを付けます。右側に、できあがる `recipe.yaml` がその場で表示されます。
+- 「出発点」でテンプレートを選んで「このテンプレートで始める」を押すと、テンプレートの内容どおりにチェックが付きます。「recipe.yaml を読み込む」で、手元の `recipe.yaml` を読み込んで続きを編集することもできます。
+- 「すべて選択」「選択をすべて外す」で、すべてのタブのチェックをまとめて付けたり外したりできます。各タブの「表示中をすべて選ぶ」「すべて外す」は、そのタブの中だけが対象です。
 - 一覧にない項目は、各タブの「一覧にない項目を追加する」から追加できます。
-- 「Windows 設定」のタブの一部の項目は、「画面を見る」で、その設定が表示される Windows の画面を確かめられます。画像は撮影した PC の画面の例で、お使いの PC とは状態が違う場合があります。アプリを別の場所にコピーするときは、`images` フォルダーも一緒にコピーしてください。
+- 「Windows 設定」タブの一部の項目は、「画面を見る」で、その設定が表示される Windows の画面を確かめられます。画像は撮影した PC の画面の例なので、お使いの PC とは状態が違う場合があります。アプリを別の場所にコピーするときは、`images` フォルダーも一緒にコピーしてください。
 - 「recipe.yaml を保存」で保存した `recipe.yaml` を、`AutoSetup.ps1` と同じフォルダーに置いて使います。
 
 `recipe.yaml` や `template-recipes/` を変更したときは、次のコマンドでアプリの一覧を更新してください。
@@ -72,25 +86,29 @@ YAML を手で書かずに `recipe.yaml` を作りたい場合は、`APP_RecipeB
 .\APP_RecipeBuilder\Update-RecipeBuilder.ps1
 ```
 
-### フェーズ1 (`phase1`)
+### フェーズ 1 (`phase1`)
 
-再起動前に実行される基本的なシステムセットアップを定義します。
+再起動の前に実行する、基本的なセットアップを定義します。上から順に、次の処理を行います。
 
-- `windowsSettings`: レジストリ変更を伴うシステム設定を、`description`と`command`キーで定義します。
-- `wingetInstall`: `winget` でインストールするアプリのIDと、必要に応じてインストールオプションを記述します。
-- `appxRemove`: 削除したいWindows標準アプリの名称（ワイルドカード使用可）を記述します。
+- `windowsSettings`: Windows の設定を変えるコマンドを、`description`（説明）と `command`（実行するコマンド）で定義します。レジストリの変更などに使います。
+- `wingetInstall`: `winget` でインストールするアプリの `id` と、必要に応じてインストールオプション（`options`）を書きます。
+- `appxRemove`: 削除したい Windows 標準アプリの名前を書きます（ワイルドカード `*` を使えます）。
 
-### フェーズ2 (`phase2`)
+この 3 つのあと、`winget` でインストール済みのアプリをすべて更新し、フェーズ 2 を自動で始めるよう設定して再起動します。
 
-再起動後に実行される開発者向けパッケージのインストールを定義します。
+### フェーズ 2 (`phase2`)
 
-- `packageManagers`: 複数のパッケージマネージャーをリスト形式で定義します。
-  - `managerName`: ログに表示される管理ツールの名前です（例: 'npm', 'pip'）。
-  - `checkCommand`: パッケージがインストール済みか確認するためのコマンドです。`{package}` というプレースホルダーがパッケージ名に置換されます。終了コードが 0 以外になるか、エラーが出たときは「未インストール」とみなします（`Get-Command` などの PowerShell コマンドもそのまま使えます）。
-  - `installCommand`: パッケージをインストールするためのコマンドです。`{package}` が置換されます。
-  - `packages`: このマネージャーでインストールするパッケージのリストです。
+再起動の後に実行する、開発者向けパッケージのインストールを定義します。
 
-**設定例 (`recipe.yaml`):**
+- `packageManagers`: パッケージマネージャーを、リスト形式で複数定義できます。
+  - `managerName`: ログに表示する名前です（例: `'npm'`、`'pip'`）。
+  - `checkCommand`: パッケージがインストール済みかを確認するコマンドです。`{package}` はパッケージ名に置き換わります。終了コードが 0 以外になるか、エラーが出たときは「未インストール」とみなします（`Get-Command` などの PowerShell コマンドもそのまま使えます）。
+  - `installCommand`: パッケージをインストールするコマンドです。`{package}` が置き換わります。
+  - `packages`: このマネージャーでインストールするパッケージの一覧です。
+
+リポジトリ直下の `recipe.yaml` では、フェーズ 2 は空（`packageManagers: []`）になっています。次の例は、`template-recipes/step2_VSCode/recipe.yaml` の一部です。
+
+**設定例（VS Code 拡張機能）:**
 ```yaml
 phase2:
   packageManagers:
@@ -124,42 +142,77 @@ phase2:
           name: mikestead.dotenv
 ```
 
+## テンプレートレシピの活用
+
+`template-recipes/` には、目的別の `recipe.yaml` のサンプルがあります。環境構築のたたき台がほしいときは、近い構成のテンプレートをリポジトリ直下にコピーし、自分に合わせて調整してから `AutoSetup.ps1` を実行してください。レシピ作成アプリの「出発点」からも選べます。
+
+- `step1_only_basic/`: フェーズ 1 だけの最小構成です（基本の設定とアプリ）。
+- `step1_only_dev/`: フェーズ 1 だけで、開発用のアプリも入れる構成です。
+- `step2_VSCode/`・`step2_npm/`・`step2_pip/`・`step2_Rust/`・`step2_Go/`・`step2_Haskell/`: フェーズ 2 で、それぞれのツールや言語のパッケージを入れる構成です。
+- `step2_all/`: 上のフェーズ 2 をすべてまとめた、全部入りの構成です。
+
+## ログと結果の確認
+
+スクリプトの実行記録は、スクリプトと同じフォルダーに保存されます。
+
+- `AutoWindowsUpdate.log`: `AutoWindowsUpdate.ps1` の実行記録です。
+- `AutoSetup.log`: `AutoSetup.ps1` の実行記録です。フェーズ 1 とフェーズ 2 の記録が、1 つのファイルにまとめて追記されます。
+- `AutoSetup-phase1-failures.log`: フェーズ 1 で失敗した項目の一覧です。再起動で画面が消えても、フェーズ 2 の最後の結果まとめに一緒に表示するために使います。表示し終わると削除されます。
+
+失敗した項目があると、処理の最後に一覧で表示されます。
+
 ## 実行場所ごとの注意点
 
 ### ローカル固定ディスク（例: `C:` / `D:`）
-- 最も安全です。再起動後もパスが安定して参照できます。
+- 最も安全です。再起動後もパスが変わりません。
 
-### USBメモリ／外付けストレージ
-- 基本的に安全ですが、再起動やログオン後も同じドライブレターでマウントされ続ける必要があります。
-- 取り外しやレター変更が発生するとフェーズ2や再開処理が開始できません。失敗した場合はドライブを接続し直し、手動で再実行してください。
+### USB メモリ／外付けストレージ
+- 基本的には問題ありませんが、再起動やサインインの後も、同じドライブレターでつながっている必要があります。
+- 取り外したりドライブレターが変わったりすると、フェーズ 2 や再起動後の続きが始まりません。失敗した場合は、ドライブをつなぎ直して手動で実行し直してください。
 
-### Active Directory管理のファイルサーバー共有
-- UNCパス上でも実行できますが、共有への書き込み権限と安定した接続が必須です。
-- ログオン時に自動再接続されない環境ではタスクスケジューラがスクリプトを見つけられず失敗します。必要に応じてローカルにコピーしてから実行してください。
+### Active Directory 管理のファイルサーバー共有
+- UNC パス上でも実行できますが、共有への書き込み権限と、安定した接続が必要です。
+- サインイン時に共有へ自動で再接続されない環境では、タスクスケジューラがスクリプトを見つけられずに失敗します。必要に応じて、ローカルにコピーしてから実行してください。
 
-### NAS共有
-- 基本的な制約はファイルサーバー共有と同じです。
-- NASのスリープや再接続遅延によりタスクが失敗することがあります。長時間処理が続く場合はローカルディスクでの実行を検討してください。
+### NAS 共有
+- 基本的な制約は、ファイルサーバー共有と同じです。
+- NAS のスリープや再接続の遅れで、タスクが失敗することがあります。処理が長くかかる場合は、ローカルディスクでの実行を検討してください。
 
-## テンプレートレシピの活用
+## トラブルシューティング
 
-`template-recipes/` ディレクトリには、フェーズや目的別に分かれたサンプル `recipe.yaml` が格納されています。`step1_only_basic/` のようにフェーズ1のみを含む最小構成から、`step1_only_dev/` のような本格的な開発者向け環境、 `step2_VSCode/`や`step2_Rust/` のように開発言語・ツール別の拡張セット、それらをすべてまとめた全部入りの `step2_all/` まで揃っています。環境構築のたたき台がほしい場合は、近い構成のテンプレートをリポジトリ直下にコピーし、自分の要件に合わせて調整してから `AutoSetup.ps1` を実行してください。
+### `Start-Admin.bat` のメニューが文字化けする
+- 英語版の Windows（Hyper-V のクイック作成で用意した開発者用環境など）では、システムロケールが英語のため、日本語が文字化けします。
+- 「設定 > 時刻と言語 > 言語と地域 > 管理用の言語の設定 > システム ロケールの変更」で「日本語（日本）」を選び、再起動してください。「ベータ: ワールドワイド言語サポートで Unicode UTF-8 を使用」のチェックは外したままにします。
+- くわしい手順は、[Hyper-V に Windows 11 をインストールする手順](./AutoSetup未対応の設定手順チートシート/Hyper-VにWindows11をインストールする手順.md) の「4B‑2：日本語化（GUI）」を参照してください。
 
-## Winget Configurationとの違い
+### フェーズ 2 が始まらない
+- 再起動後の自動実行の登録に失敗した場合、`AutoSetup.ps1` は自動で再起動せず、手順を表示して止まります。
+- 手動で PC を再起動したあと、管理者の PowerShell で次のコマンドを実行すると、フェーズ 2 を始められます。
 
-Microsoftが提供する `winget configuration` は、宣言的な環境構築の標準機能として非常に強力です。しかし、このプロジェクトは特定のワークフローをより深く自動化するために、いくつかのユニークな機能を提供します。
+```powershell
+& "C:\Work\PowerShell-KittingScripts\AutoSetup.ps1" -setupPhase 2
+```
 
-1.  **Windows Updateの自動ループ**
-    `winget configuration` は基本的に一度きりの実行ですが、このプロジェクトの `AutoWindowsUpdate.ps1` は、**更新がなくなるまで「更新チェック → インストール → 再起動」のサイクルを自律的に繰り返します。** これはタスクスケジューラを活用することで実現しており、一度実行すれば完全に最新の状態になるまで無人で処理を継続できる強力な機能です。
+（パスは、リポジトリを置いた場所に読み替えてください。）
 
-2.  **安定性を重視した厳密な2フェーズ実行**
-    `winget configuration` でも再起動は扱えますが、このスクリプトは**PATH環境変数の問題を確実に回避するため、アーキテクチャとして「システム変更」と「開発ツール導入」の間に必ず再起動を挟む**厳格な2フェーズ構造を採用しています。これにより、フェーズ2で`npm`や`uv`などのコマンドが「見つからない」といったトラブルを根本的に防止します。
+### `powershell-yaml` モジュールを準備できない
+- インターネット接続を確認し、PowerShell で `Install-Module -Name powershell-yaml -Scope CurrentUser` を手動で実行してください。
 
-3.  **対話的な操作メニューによるユーザー体験**
-    `winget configuration` はコマンドラインベースのツールですが、このプロジェクトは `Start-Admin.bat` を起点とするシンプルなメニューを提供します。これにより、PowerShellに不慣れなユーザーでも、「1. まずはアップデート」「2. 次にセットアップ」というように、**迷うことなく直感的に操作を進めることが可能**です。
+## Winget Configuration との違い
 
-4.  **拡張が容易なパッケージマネージャー定義**
-    `npm`や`pip`といったパッケージのインストールロジックは、`recipe.yaml`で直接定義できます。ユーザーは`checkCommand`や`installCommand`を設定ファイルに記述するだけで、**スクリプトを編集することなく、`cargo` (Rust)のような新しいパッケージマネージャーを自由に追加できます。** これにより、プロジェクトの要求に合わせてツールチェーンを柔軟に拡張できる高い保守性を実現しています。
+Microsoft の `winget configuration` は、宣言的に環境を構築できる強力な標準機能です。このプロジェクトは、特定の作業の流れをより深く自動化するために、次の機能を持っています。
+
+1. **Windows Update の自動ループ**
+   `AutoWindowsUpdate.ps1` は、**更新がなくなるまで「更新の確認 → インストール → 再起動」を自動で繰り返します。** タスクスケジューラを使って再起動後も処理を続けるので、一度実行すれば、最新の状態になるまで無人で進みます。
+
+2. **再起動を必ず挟む 2 フェーズ実行**
+   「システムの変更」と「開発ツールの導入」の間に必ず再起動を挟むことで、PATH 環境変数が反映されていないために、フェーズ 2 で `npm` や `uv` などのコマンドが見つからない、という問題を防ぎます。
+
+3. **メニューから選ぶだけの操作**
+   `Start-Admin.bat` のメニューから「1. まずはアップデート」「2. 次にセットアップ」と選ぶだけなので、PowerShell に慣れていない人でも迷わずに進められます。
+
+4. **パッケージマネージャーを自由に追加できる**
+   `npm` や `pip` などのインストール方法は、`recipe.yaml` の `checkCommand` と `installCommand` で定義します。**スクリプトを編集せずに、`cargo`（Rust）のような新しいパッケージマネージャーを追加できます。**
 
 ## ライセンス
 
@@ -168,9 +221,9 @@ Microsoftが提供する `winget configuration` は、宣言的な環境構築�
 ---
 # Windows PC Kitting Automation Scripts (English)
 
-This repository provides a collection of PowerShell scripts that automate the entire workflow from Windows PC kitting (initial provisioning) to development environment setup.
+A collection of PowerShell scripts that automate everything from Windows 11 PC kitting (initial setup) to building a development environment.
 
-Define your settings in **`recipe.yaml`** and simply run **`Start-Admin.bat`** with administrative privileges to dramatically cut down on time-consuming manual setup while letting anyone build a consistent environment quickly.
+Write what you want in **`recipe.yaml`** and run **`Start-Admin.bat`** as administrator. This greatly reduces time-consuming manual setup and lets anyone build the same environment quickly. With the browser-based **recipe builder app**, you can create `recipe.yaml` just by ticking checkboxes.
 
 <p align="center">
 <img src="./images/launcher-screenshot.png" alt="Launcher menu in Command Prompt" width="70%">
@@ -178,47 +231,60 @@ Define your settings in **`recipe.yaml`** and simply run **`Start-Admin.bat`** w
 
 ## Key Features
 
-- **Fully automated Windows Update**: Checks, installs, and reboots unattended until no updates remain.
-- **Flexible application management**: Leverages `winget` to batch-install apps and remove unwanted preinstalled software based on `recipe.yaml`.
-- **Automated development environment provisioning**: Installs development libraries at once via package managers defined in `recipe.yaml`, such as `code` (VS Code extensions), `npm` (Node.js), and `pip` (Python).
-- **Configuration-driven system setup**: Describe system tweaks directly in `recipe.yaml`—for example, file extension visibility—so you can adjust behavior without editing scripts.
-- **Reliable two-phase execution**: Inserts a reboot between the app installation phase and the development tool phase to ensure stable behavior.
-- **Interactive menu-driven experience**: Running `Start-Admin.bat` lets users choose tasks from a simple menu with minimal PowerShell knowledge.
+- **Fully automated Windows Update**: Checks, installs, and reboots unattended until no updates remain. Even if an update keeps failing, it stops at the round limit.
+- **Batch app installation and removal**: Uses `winget` to install the apps listed in `recipe.yaml` and remove unwanted preinstalled apps. At the end, it updates all installed apps.
+- **Windows settings changes**: Write settings such as showing file extensions in File Explorer in `recipe.yaml`, and change them without editing the scripts.
+- **Automated development environment setup**: Installs development packages at once through package managers such as VS Code extensions, `npm`, and `pip`.
+- **Two-phase execution with a reboot in between**: Inserts a reboot between app installation (phase 1) and development tools that rely on the PATH environment variable (phase 2). This prevents failures where newly installed commands cannot be found.
+- **Recipe builder app**: Create `recipe.yaml` by ticking checkboxes in a browser, without writing YAML by hand.
+- **Results that do not hide failures**: Failed items are listed at the end and also recorded in log files.
+
+## Requirements
+
+- Windows 11
+- PowerShell 5.1 (included with Windows)
+- Administrator privileges
+- Internet connection (used for `winget` installations and for installing the required PowerShell modules automatically)
+
+If the required PowerShell modules (`PSWindowsUpdate`, `powershell-yaml`) are missing, the scripts install them automatically.
 
 ## Recommended Workflow
 
-1.  **Perform a clean OS installation**: Install Windows 11 fresh.
-2.  **Place the repository**: Download this repository and put the folder anywhere on the PC (e.g., `C:\Work`). It also runs safely from a USB drive or other external storage.
-3.  **Edit the configuration file**: Open `recipe.yaml` in a text editor. Comment out unnecessary entries with `#` and tailor it to your preferences.
-4.  **Run the scripts**:
-    1.  Right-click `Start-Admin.bat` and choose **Run as administrator**.
-    2.  From the menu, select `1. AutoWindowsUpdate` to bring the OS fully up to date (**strongly recommended**).
-    3.  After it finishes, run `Start-Admin.bat` as administrator again.
-    4.  Select `2. AutoSetup` from the menu to begin app installation and environment provisioning.
-5.  **Final checks**:
-    - After all automated tasks finish, restart the PC manually once.
-    - Open Windows Update and Device Manager to confirm there are no missing updates or unknown devices.
+1. **Clean OS installation**: Install Windows 11 fresh.
+2. **Place the repository**: Download this repository and put the folder anywhere on the PC (e.g., `C:\Work`). Running it from a USB drive or other external storage is generally fine (see [Location-Specific Considerations](#location-specific-considerations)).
+3. **Prepare `recipe.yaml`**: Decide what to do in one of these ways.
+   - Tick items in the [recipe builder app](#recipe-builder-app), save, and replace `recipe.yaml` in the repository root.
+   - Open `recipe.yaml` in a text editor and comment out unnecessary entries with `#` at the start of the line.
+4. **Run the scripts**:
+   1. **Right-click** `Start-Admin.bat` and choose **Run as administrator**.
+   2. From the menu, select `1. AutoWindowsUpdate` to bring the OS up to date (**strongly recommended**). After each reboot, the next round starts automatically when you sign in.
+   3. When it finishes, run `Start-Admin.bat` as administrator again.
+   4. Select `2. AutoSetup` from the menu to start app installation and environment setup. After phase 1, the PC reboots automatically, and phase 2 starts when you sign in.
+5. **Final checks**:
+   - Check the result summary on the screen for failed items. If there are any, check the cause in the [log files](#logs-and-results).
+   - Restart the PC manually once.
+   - Open Windows Update and Device Manager to confirm there are no missing updates or unknown devices.
 
 ## Script Structure
 
 | File Name | Role |
 |---|---|
-| `Start-Admin.bat` | **Entry point.** Confirms administrative privileges and lets you pick scripts interactively. |
-| `AutoWindowsUpdate.ps1` | Runs Windows Update end-to-end. Repeats checking, installing, and rebooting until nothing remains. Stops after 10 rounds so that an update that keeps failing cannot cause an endless loop. Also stops as soon as the same update fails to install in two consecutive rounds. |
-| `AutoSetup.ps1` | Executes app installation, system tweaks, and development environment setup in two phases (with a reboot in between) based on `recipe.yaml`. |
-| `recipe.yaml` | **Customization hub.** Defines apps to install, system settings, development packages, and more with explanatory comments. |
-| `template-recipes/` | Template collection for `recipe.yaml`. Stores representative examples arranged by folder so you can copy and adapt them. |
-| `APP_RecipeBuilder/recipe-builder.html` | Recipe builder app. Open it in a browser and create `recipe.yaml` by ticking checkboxes. No internet connection is needed. |
+| `Start-Admin.bat` | **Entry point.** Confirms administrator privileges and lets you choose a script from a menu. |
+| `AutoWindowsUpdate.ps1` | Runs Windows Update end to end. Repeats checking, installing, and rebooting until no updates remain. Stops after 10 rounds so that an update that keeps failing cannot cause an endless loop. Also stops as soon as the same update fails to install in two consecutive rounds. |
+| `AutoSetup.ps1` | Following `recipe.yaml`, changes Windows settings, installs and removes apps, and sets up the development environment in two phases with a reboot in between. |
+| `recipe.yaml` | **Customization hub.** Defines apps to install, Windows settings, development packages, and more, with comments. |
+| `template-recipes/` | Template collection for `recipe.yaml`. Holds purpose-specific examples, one folder each. |
+| `APP_RecipeBuilder/recipe-builder.html` | **Recipe builder app.** Open it in a browser and create `recipe.yaml` by ticking checkboxes. No internet connection is needed. |
 | `APP_RecipeBuilder/Update-RecipeBuilder.ps1` | Re-embeds the contents of `recipe.yaml` and `template-recipes/` into the recipe builder app. |
 | `APP_RecipeBuilder/images/` | Screenshots of Windows settings screens, shown by "画面を見る" (show the screen) in the recipe builder app. |
-| `キッティング手順.txt` | Notes covering the full operational flow, including manual steps when using the automation scripts. |
-| `AutoSetup未対応の設定手順チートシート/` | Guides for manual tasks outside the automation scope (e.g., Hyper-V, WSL2 setup). |
+| `キッティング手順.txt` | Notes on the overall kitting workflow, including manual steps. |
+| `AutoSetup未対応の設定手順チートシート/` | Guides for settings that the scripts do not automate (e.g., Hyper-V, WSL2 setup). |
 | `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7, coding style with PSScriptAnalyzer, and the format of `recipe.yaml`. |
 | `.github/scripts/Test-Recipe.ps1` | Format check for `recipe.yaml` and `template-recipes/`. Finds misspelled keys and missing required keys. You can also run it locally in PowerShell with `powershell-yaml` installed. |
 
 ## Customization
 
-You can freely customize the setup by editing `recipe.yaml`. Comment out any unnecessary entries with `#`.
+You can freely change what the setup does by editing `recipe.yaml`. Comment out unnecessary entries with `#` at the start of the line.
 
 ### Recipe Builder App
 
@@ -228,8 +294,9 @@ If you want to create `recipe.yaml` without writing YAML by hand, double-click `
 <img src="./images/recipe-builder-screenshot.png" alt="Recipe builder app: tick items on the left and the resulting recipe.yaml appears on the right" width="90%">
 </p>
 
-- Tick the items you want on the "Windows 設定" (Windows settings), "アプリ" (apps), "削除するアプリ" (apps to remove), and "開発パッケージ" (development packages) tabs.
-- You can start from a template, or load an existing `recipe.yaml` with "recipe.yaml を読み込む" (load recipe.yaml) and continue editing it.
+- Tick the items you want on the "Windows 設定" (Windows settings), "アプリ" (apps), "削除するアプリ" (apps to remove), and "開発パッケージ" (development packages) tabs. The resulting `recipe.yaml` appears on the right as you go.
+- Choose a template in "出発点" (starting point) and press "このテンプレートで始める" (start with this template) to tick items as the template defines. You can also load an existing `recipe.yaml` with "recipe.yaml を読み込む" (load recipe.yaml) and continue editing it.
+- "すべて選択" (select all) and "選択をすべて外す" (clear all) tick or clear items on all tabs at once. "表示中をすべて選ぶ" (select all shown) and "すべて外す" (clear all) on each tab affect only that tab.
 - Items that are not in the list can be added from "一覧にない項目を追加する" (add an item that is not in the list) on each tab.
 - For some items on the "Windows 設定" tab, "画面を見る" (show the screen) shows the Windows screen where that setting appears. The images are examples taken on one PC, so your PC may show a different state. When you copy the app somewhere else, copy the `images` folder with it.
 - Save `recipe.yaml` with "recipe.yaml を保存" (save recipe.yaml) and place it in the same folder as `AutoSetup.ps1`.
@@ -242,23 +309,27 @@ When you change `recipe.yaml` or `template-recipes/`, run the following command 
 
 ### Phase 1 (`phase1`)
 
-Defines the fundamental system setup that runs before the reboot.
+Defines the basic setup that runs before the reboot. The following run in order from the top.
 
-- `windowsSettings`: Describe system tweaks (including registry edits) with `description` and `command`.
-- `wingetInstall`: List `winget` app IDs and optional install arguments.
-- `appxRemove`: List the built-in Windows app names (supports wildcards) you want to remove.
+- `windowsSettings`: Define commands that change Windows settings with `description` and `command` (the command to run). Used for registry changes and similar tweaks.
+- `wingetInstall`: List the `id` of each app to install with `winget`, plus install options (`options`) if needed.
+- `appxRemove`: List the names of built-in Windows apps to remove (the `*` wildcard is supported).
+
+After these three, it updates all installed apps with `winget`, sets phase 2 to start automatically, and reboots.
 
 ### Phase 2 (`phase2`)
 
-Defines developer-oriented package installation executed after the reboot.
+Defines the developer package installation that runs after the reboot.
 
-- `packageManagers`: List multiple package managers as objects.
-  - `managerName`: Label shown in logs (e.g., 'npm', 'pip').
-  - `checkCommand`: Command used to verify whether a package is installed. `{package}` is substituted with the package name. A non-zero exit code or an error means "not installed" (PowerShell cmdlets such as `Get-Command` work as-is).
-  - `installCommand`: Command used to install a package. `{package}` is replaced accordingly.
-  - `packages`: Array of packages to install with that manager.
+- `packageManagers`: Define one or more package managers as a list.
+  - `managerName`: Name shown in logs (e.g., `'npm'`, `'pip'`).
+  - `checkCommand`: Command that checks whether a package is installed. `{package}` is replaced with the package name. A non-zero exit code or an error means "not installed" (PowerShell cmdlets such as `Get-Command` work as-is).
+  - `installCommand`: Command that installs a package. `{package}` is replaced as well.
+  - `packages`: List of packages to install with that manager.
 
-**Example configuration (`recipe.yaml`):**
+In the `recipe.yaml` at the repository root, phase 2 is empty (`packageManagers: []`). The following example is an excerpt from `template-recipes/step2_VSCode/recipe.yaml`.
+
+**Example (VS Code extensions):**
 ```yaml
 phase2:
   packageManagers:
@@ -292,42 +363,77 @@ phase2:
           name: mikestead.dotenv
 ```
 
+## Using Template Recipes
+
+`template-recipes/` contains sample `recipe.yaml` files for different purposes. If you want a starting point, copy the closest template to the repository root, adjust it to your needs, and then run `AutoSetup.ps1`. You can also choose them from "出発点" (starting point) in the recipe builder app.
+
+- `step1_only_basic/`: Minimal setup with phase 1 only (basic settings and apps).
+- `step1_only_dev/`: Phase 1 only, also installing development apps.
+- `step2_VSCode/`, `step2_npm/`, `step2_pip/`, `step2_Rust/`, `step2_Go/`, `step2_Haskell/`: Install packages for each tool or language in phase 2.
+- `step2_all/`: All-in-one setup that combines all of the phase 2 sets above.
+
+## Logs and Results
+
+Execution logs are saved in the same folder as the scripts.
+
+- `AutoWindowsUpdate.log`: Log of `AutoWindowsUpdate.ps1`.
+- `AutoSetup.log`: Log of `AutoSetup.ps1`. Phase 1 and phase 2 are appended to the same file.
+- `AutoSetup-phase1-failures.log`: List of items that failed in phase 1. It is used to show them in the result summary at the end of phase 2, even though the reboot clears the screen. It is deleted after being shown.
+
+If any items fail, they are listed at the end of the run.
+
 ## Location-Specific Considerations
 
 ### Local fixed drives (e.g., `C:` / `D:`)
-- Safest option. Paths remain stable after reboots.
+- Safest option. Paths do not change after reboots.
 
 ### USB drives / external storage
-- Generally safe, but the volume must stay mounted under the same drive letter after reboots or logons.
-- If the drive is removed or the letter changes, phase 2 or resume processing cannot start. Reattach the drive and rerun manually if a failure occurs.
+- Generally fine, but the drive must stay connected under the same drive letter after reboots and sign-ins.
+- If the drive is removed or the letter changes, phase 2 or the next round after a reboot cannot start. If that happens, reconnect the drive and rerun manually.
 
 ### Active Directory-managed file shares
-- Works over UNC paths, but requires write permissions and a stable connection.
-- In environments where the share does not reconnect automatically on logon, Task Scheduler cannot find the scripts. Copy them locally first if needed.
+- Works over UNC paths, but requires write permission to the share and a stable connection.
+- In environments where the share does not reconnect automatically at sign-in, Task Scheduler cannot find the scripts and fails. Copy them locally first if needed.
 
 ### NAS shares
-- Follow constraints similar to file shares.
-- NAS sleep or reconnection delays may cause tasks to fail. When running long processes, consider executing from a local disk.
+- The same basic constraints as file shares apply.
+- NAS sleep or reconnection delays may cause tasks to fail. For long runs, consider running from a local disk.
 
-## Using Template Recipes
+## Troubleshooting
 
-The `template-recipes/` directory contains sample `recipe.yaml` files grouped by phase and purpose. They range from minimal configurations such as `step1_only_basic/`, to developer-focused setups like `step1_only_dev/`, language/tool-specific add-ons like `step2_VSCode/` or `step2_Rust/`, and the all-in-one `step2_all/` that combines all of them. Copy the template closest to your desired environment to the repository root, adjust it to your needs, and then run `AutoSetup.ps1`.
+### The `Start-Admin.bat` menu shows garbled text
+- On English Windows (such as the developer environment created with Hyper-V Quick Create), the system locale is English, so Japanese text is garbled.
+- Go to "Settings > Time & language > Language & region > Administrative language settings > Change system locale", select "Japanese (Japan)", and restart. Leave "Beta: Use Unicode UTF-8 for worldwide language support" unchecked.
+- For detailed steps, see "4B‑2：日本語化（GUI）" (Japanese localization) in [Hyper-V に Windows 11 をインストールする手順](./AutoSetup未対応の設定手順チートシート/Hyper-VにWindows11をインストールする手順.md) (Japanese only).
+
+### Phase 2 does not start
+- If registering the automatic run after the reboot fails, `AutoSetup.ps1` does not reboot automatically; it shows the steps and stops.
+- Restart the PC manually, then run the following command in an administrator PowerShell to start phase 2.
+
+```powershell
+& "C:\Work\PowerShell-KittingScripts\AutoSetup.ps1" -setupPhase 2
+```
+
+(Replace the path with where you placed the repository.)
+
+### The `powershell-yaml` module cannot be prepared
+- Check your internet connection and run `Install-Module -Name powershell-yaml -Scope CurrentUser` manually in PowerShell.
 
 ## How This Differs from Winget Configuration
 
-Microsoft's `winget configuration` is a powerful declarative option, but this project offers several unique capabilities to automate a specific workflow more deeply.
+Microsoft's `winget configuration` is a powerful built-in feature for declarative environment setup. This project has the following features to automate a specific workflow more deeply.
 
-1.  **Automated Windows Update Loop**
-    While `winget configuration` typically runs once, `AutoWindowsUpdate.ps1` **autonomously loops through "check for updates → install → reboot" until no updates remain.** It leverages Task Scheduler so that once invoked, it continues unattended until the system is fully patched.
+1. **Automated Windows Update loop**
+   `AutoWindowsUpdate.ps1` **automatically repeats "check for updates → install → reboot" until no updates remain.** It uses Task Scheduler to continue after each reboot, so once started, it runs unattended until the system is up to date.
 
-2.  **Strict Two-Phase Execution for Stability**
-    `winget configuration` can handle reboots, but this project **guarantees avoidance of PATH-related issues by architecting a strict two-phase flow with an enforced reboot between "system changes" and "developer tool installation".** That prevents scenarios where commands such as `npm` or `uv` are unavailable in phase 2.
+2. **Two-phase execution that always reboots in between**
+   By always rebooting between "system changes" and "developer tool installation", it prevents commands such as `npm` or `uv` from being unavailable in phase 2 because the PATH environment variable has not been refreshed.
 
-3.  **Interactive Menu-Driven User Experience**
-    `winget configuration` is command-line only, whereas this project provides a simple menu starting from `Start-Admin.bat`. Even users unfamiliar with PowerShell can intuitively follow "1. Update first" → "2. Then run setup".
+3. **Simple menu-driven operation**
+   You just choose "1. Update first" and then "2. Run setup" from the `Start-Admin.bat` menu, so even people unfamiliar with PowerShell can proceed without getting lost.
 
-4.  **Easily Extensible Package Manager Definitions**
-    Installation logic for package managers like `npm` or `pip` is defined directly in `recipe.yaml`. Users just specify `checkCommand` and `installCommand` in the configuration to **add new managers such as `cargo` (Rust) without touching the scripts.** This delivers high maintainability by letting you extend the toolchain to match project needs.
+4. **Freely add package managers**
+   How to install packages for `npm`, `pip`, and others is defined with `checkCommand` and `installCommand` in `recipe.yaml`. **You can add new package managers such as `cargo` (Rust) without editing the scripts.**
 
 ## License
 
