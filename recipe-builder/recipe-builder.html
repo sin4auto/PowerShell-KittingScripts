@@ -516,7 +516,8 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
   <button type="button" class="btn" id="apply-template">このテンプレートで始める</button>
   <span class="hint">テンプレートを選ぶと、その内容どおりにチェックが付きます。</span>
   <span class="spacer"></span>
-  <button type="button" class="btn subtle" id="clear-all">選択をすべて外す</button>
+  <button type="button" class="btn" id="select-all">すべて選択</button>
+  <button type="button" class="btn" id="clear-all">選択をすべて外す</button>
 </div>
 
 <div class="layout">
@@ -3587,10 +3588,11 @@ function applyRecipe(config) {
   return warnings;
 }
 
-function clearSelection() {
-  for (const list of Object.values(state.sections)) for (const item of list) item.checked = false;
-  for (const manager of state.managers) for (const pkg of manager.packages) pkg.checked = false;
+function setAllChecked(checked) {
+  for (const list of Object.values(state.sections)) for (const item of list) item.checked = checked;
+  for (const manager of state.managers) for (const pkg of manager.packages) pkg.checked = checked;
 }
+function clearSelection() { setAllChecked(false); }
 
 function selectedCount(tabId) {
   if (tabId === 'packageManagers') return state.managers.reduce((sum, m) => sum + m.packages.filter((p) => p.checked).length, 0);
@@ -4187,6 +4189,13 @@ $('file-input').addEventListener('change', (event) => {
   };
   reader.onerror = () => toast('warn', `「${file.name}」を読み込めませんでした。`);
   reader.readAsText(file, 'utf-8');
+});
+
+$('select-all').addEventListener('click', () => {
+  const undo = undoAction(takeSnapshot());
+  setAllChecked(true);
+  renderTabBody();
+  toast('ok', 'すべてのタブの項目にチェックを付けました。', null, undo);
 });
 
 $('clear-all').addEventListener('click', () => {
