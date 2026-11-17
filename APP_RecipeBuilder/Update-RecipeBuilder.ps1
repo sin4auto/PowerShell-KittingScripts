@@ -1,12 +1,12 @@
 ﻿<#
 .SYNOPSIS
-    recipe-builder/recipe-builder.html に、recipe.yaml とテンプレートの中身を埋め込み直します。
+    APP_RecipeBuilder/recipe-builder.html に、recipe.yaml とテンプレートの中身を埋め込み直します。
 .DESCRIPTION
     レシピ作成アプリは、ネットにつながらない PC でもダブルクリックで使えるよう、1つの HTML ファイルにしています。
     ブラウザーは file:// で開いたページからほかのファイルを読めないため、テンプレートを HTML の中に埋め込んでいます。
     recipe.yaml や template-recipes の中身を変えたら、このスクリプトを実行してください。
 .EXAMPLE
-    .\recipe-builder\Update-RecipeBuilder.ps1
+    .\APP_RecipeBuilder\Update-RecipeBuilder.ps1
 #>
 $ErrorActionPreference = 'Stop'
 

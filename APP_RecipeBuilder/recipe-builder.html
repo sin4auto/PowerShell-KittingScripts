@@ -540,7 +540,7 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
-<!-- BEGIN TEMPLATES (recipe-builder/Update-RecipeBuilder.ps1 が自動で書き換えます。手で編集しないでください) -->
+<!-- BEGIN TEMPLATES (APP_RecipeBuilder/Update-RecipeBuilder.ps1 が自動で書き換えます。手で編集しないでください) -->
 <script type="text/plain" class="recipe-template" data-name="step1_only_basic" data-path="template-recipes/step1_only_basic/recipe.yaml">
 # ================================================================
 # Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
@@ -3614,7 +3614,7 @@ function buildYaml() {
   const out = [
     '# ================================================================',
     '# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル',
-    '# レシピ作成アプリ (recipe-builder/recipe-builder.html) で作成しました。',
+    '# レシピ作成アプリ (APP_RecipeBuilder/recipe-builder.html) で作成しました。',
     '# ================================================================',
     '# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。',
     'phase1:',
@@ -4260,7 +4260,7 @@ $('download-yaml').addEventListener('click', () => {
   buildTabs();
   renderTabBody();
   if (templates.length === 0) {
-    toast('warn', 'テンプレートが埋め込まれていません。recipe-builder/Update-RecipeBuilder.ps1 を実行してください。', templateErrors);
+    toast('warn', 'テンプレートが埋め込まれていません。APP_RecipeBuilder/Update-RecipeBuilder.ps1 を実行してください。', templateErrors);
   } else if (templateErrors.length > 0) {
     toast('warn', '読み込めなかったテンプレートがあります。', templateErrors);
   }

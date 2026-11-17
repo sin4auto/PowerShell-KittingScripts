@@ -4,7 +4,7 @@
     {
       "name": "recipe-builder",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", "recipe-builder"],
+      "runtimeArgs": ["-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", "APP_RecipeBuilder"],
       "port": 8765
     }
   ]

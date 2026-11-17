@@ -40,9 +40,9 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 | `AutoSetup.ps1` | `recipe.yaml` に基づき、アプリのインストール、システム設定、開発環境の構築を2フェーズ（再起動を挟む）に分けて実行します。 |
 | `recipe.yaml` | **カスタマイズの中心。** インストールするアプリ、システム設定、開発パッケージなどを、コメント付きで分かりやすく定義します。 |
 | `template-recipes/` | `recipe.yaml` のテンプレート集。代表的な構成例をフォルダ単位で保持し、必要に応じてコピーして利用できます。 |
-| `recipe-builder/recipe-builder.html` | レシピ作成アプリ。ブラウザーで開き、チェックを付けて `recipe.yaml` を作れます。ネット接続は不要です。 |
-| `recipe-builder/Update-RecipeBuilder.ps1` | `recipe.yaml` と `template-recipes/` の中身を、レシピ作成アプリに埋め込み直します。 |
-| `recipe-builder/images/` | レシピ作成アプリの「画面を見る」で表示する、Windows の設定画面の画像です。 |
+| `APP_RecipeBuilder/recipe-builder.html` | レシピ作成アプリ。ブラウザーで開き、チェックを付けて `recipe.yaml` を作れます。ネット接続は不要です。 |
+| `APP_RecipeBuilder/Update-RecipeBuilder.ps1` | `recipe.yaml` と `template-recipes/` の中身を、レシピ作成アプリに埋め込み直します。 |
+| `APP_RecipeBuilder/images/` | レシピ作成アプリの「画面を見る」で表示する、Windows の設定画面の画像です。 |
 | `キッティング手順.txt` | 自動化スクリプトを使用する際の、手動作業を含めた全体的な作業フローのメモです。 |
 | `AutoSetup未対応の設定手順チートシート/` | スクリプトによる自動化範囲外の、各種手動設定に関する手順書が格納されています。（例: Hyper-V、WSL2のセットアップなど） |
 | `.github/workflows/lint.yml` | GitHub Actions の自動チェック。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェックを行います。 |
@@ -54,7 +54,7 @@ Windows PCのキッティング（初期セットアップ）から開発環境�
 
 ### レシピ作成アプリ
 
-YAML を手で書かずに `recipe.yaml` を作りたい場合は、`recipe-builder/recipe-builder.html` をダブルクリックしてブラウザーで開きます。
+YAML を手で書かずに `recipe.yaml` を作りたい場合は、`APP_RecipeBuilder/recipe-builder.html` をダブルクリックしてブラウザーで開きます。
 
 <p align="center">
 <img src="./images/recipe-builder-screenshot.png" alt="レシピ作成アプリの画面。左で項目にチェックを付け、右にできあがる recipe.yaml が表示される" width="90%">
@@ -69,7 +69,7 @@ YAML を手で書かずに `recipe.yaml` を作りたい場合は、`recipe-buil
 `recipe.yaml` や `template-recipes/` を変更したときは、次のコマンドでアプリの一覧を更新してください。
 
 ```powershell
-.\recipe-builder\Update-RecipeBuilder.ps1
+.\APP_RecipeBuilder\Update-RecipeBuilder.ps1
 ```
 
 ### フェーズ1 (`phase1`)
@@ -208,9 +208,9 @@ Define your settings in **`recipe.yaml`** and simply run **`Start-Admin.bat`** w
 | `AutoSetup.ps1` | Executes app installation, system tweaks, and development environment setup in two phases (with a reboot in between) based on `recipe.yaml`. |
 | `recipe.yaml` | **Customization hub.** Defines apps to install, system settings, development packages, and more with explanatory comments. |
 | `template-recipes/` | Template collection for `recipe.yaml`. Stores representative examples arranged by folder so you can copy and adapt them. |
-| `recipe-builder/recipe-builder.html` | Recipe builder app. Open it in a browser and create `recipe.yaml` by ticking checkboxes. No internet connection is needed. |
-| `recipe-builder/Update-RecipeBuilder.ps1` | Re-embeds the contents of `recipe.yaml` and `template-recipes/` into the recipe builder app. |
-| `recipe-builder/images/` | Screenshots of Windows settings screens, shown by "画面を見る" (show the screen) in the recipe builder app. |
+| `APP_RecipeBuilder/recipe-builder.html` | Recipe builder app. Open it in a browser and create `recipe.yaml` by ticking checkboxes. No internet connection is needed. |
+| `APP_RecipeBuilder/Update-RecipeBuilder.ps1` | Re-embeds the contents of `recipe.yaml` and `template-recipes/` into the recipe builder app. |
+| `APP_RecipeBuilder/images/` | Screenshots of Windows settings screens, shown by "画面を見る" (show the screen) in the recipe builder app. |
 | `キッティング手順.txt` | Notes covering the full operational flow, including manual steps when using the automation scripts. |
 | `AutoSetup未対応の設定手順チートシート/` | Guides for manual tasks outside the automation scope (e.g., Hyper-V, WSL2 setup). |
 | `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7, coding style with PSScriptAnalyzer, and the format of `recipe.yaml`. |
@@ -222,7 +222,7 @@ You can freely customize the setup by editing `recipe.yaml`. Comment out any unn
 
 ### Recipe Builder App
 
-If you want to create `recipe.yaml` without writing YAML by hand, double-click `recipe-builder/recipe-builder.html` to open it in a browser.
+If you want to create `recipe.yaml` without writing YAML by hand, double-click `APP_RecipeBuilder/recipe-builder.html` to open it in a browser.
 
 <p align="center">
 <img src="./images/recipe-builder-screenshot.png" alt="Recipe builder app: tick items on the left and the resulting recipe.yaml appears on the right" width="90%">
@@ -237,7 +237,7 @@ If you want to create `recipe.yaml` without writing YAML by hand, double-click `
 When you change `recipe.yaml` or `template-recipes/`, run the following command to update the lists in the app.
 
 ```powershell
-.\recipe-builder\Update-RecipeBuilder.ps1
+.\APP_RecipeBuilder\Update-RecipeBuilder.ps1
 ```
 
 ### Phase 1 (`phase1`)
