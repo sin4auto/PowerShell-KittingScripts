@@ -216,8 +216,6 @@ phase1:
       name: "*Microsoft.BingWeather*"
     - description: 'マップ'
       name: "*Microsoft.WindowsMaps*"
-    - description: 'ヘルプ'
-      name: "*Microsoft.GetHelp*"
     - description: 'ヒント'
       name: "*Microsoft.Getstarted*"
     - description: 'フィードバックHub'
@@ -236,6 +234,8 @@ phase1:
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
+    # - description: 'ヘルプ'
+    #   name: "*Microsoft.GetHelp*"
     # - description: 'フォト'
     #   name: "*Microsoft.Windows.Photos*"
     # - description: 'ペイント 3D'
