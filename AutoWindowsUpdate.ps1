@@ -89,7 +89,11 @@ try {
         Write-Host "-> 依存モジュールをインストールします..." -ForegroundColor Yellow
         # 失敗したまま進むと「インストール完了」と誤って表示されるため、失敗したらここで中断する。
         try {
-            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction Stop
+            # PowerShell 7 には NuGet プロバイダーが最初から入っているため、足りないときだけ入れる。
+            $nugetProvider = Get-PackageProvider -ListAvailable -Name NuGet -ErrorAction SilentlyContinue | Where-Object { $_.Version -ge [version]'2.8.5.201' }
+            if (-not $nugetProvider) {
+                Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction Stop
+            }
             # 'PSWindowsUpdate'モジュールを全ユーザー向けにインストールする。
             Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers -ErrorAction Stop
         } catch {
