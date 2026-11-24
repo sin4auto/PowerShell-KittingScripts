@@ -75,8 +75,6 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
-    - description: 'バッテリー駆動中にPCがスリープしないように設定'
-      command: "powercfg.exe /change standby-timeout-dc 0"
     # [タスクバー・スタートメニュー]
     - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
