@@ -148,9 +148,10 @@ phase2:
 `template-recipes/` には、目的別の `recipe.yaml` のサンプルがあります。環境構築のたたき台がほしいときは、近い構成のテンプレートをリポジトリ直下にコピーし、自分に合わせて調整してから `AutoSetup.ps1` を実行してください。レシピ作成アプリの「出発点」からも選べます。
 
 - `step1_only_basic/`: フェーズ 1 だけの最小構成です（基本の設定とアプリ）。
-- `step1_only_dev/`: フェーズ 1 だけで、開発用のアプリも入れる構成です。
+- `step1_only_dev/`: フェーズ 1 が中心で、開発用のアプリも入れる構成です。フェーズ 2 では、PSScriptAnalyzer（PowerShell の書き方チェック）だけを入れます。
 - `step2_VSCode/`・`step2_npm/`・`step2_pip/`・`step2_Rust/`・`step2_Go/`・`step2_Haskell/`: フェーズ 2 で、それぞれのツールや言語のパッケージを入れる構成です。
 - `step2_all/`: 上のフェーズ 2 をすべてまとめた、全部入りの構成です。
+- `step1_only_basic/` 以外のテンプレートは、フェーズ 2 で PSScriptAnalyzer を PowerShell 7 に入れます。
 
 ## ログと結果の確認
 
@@ -370,9 +371,10 @@ phase2:
 `template-recipes/` contains sample `recipe.yaml` files for different purposes. If you want a starting point, copy the closest template to the repository root, adjust it to your needs, and then run `AutoSetup.ps1`. You can also choose them from "出発点" (starting point) in the recipe builder app.
 
 - `step1_only_basic/`: Minimal setup with phase 1 only (basic settings and apps).
-- `step1_only_dev/`: Phase 1 only, also installing development apps.
+- `step1_only_dev/`: Mainly phase 1, also installing development apps. Phase 2 installs only PSScriptAnalyzer (a PowerShell style checker).
 - `step2_VSCode/`, `step2_npm/`, `step2_pip/`, `step2_Rust/`, `step2_Go/`, `step2_Haskell/`: Install packages for each tool or language in phase 2.
 - `step2_all/`: All-in-one setup that combines all of the phase 2 sets above.
+- All templates except `step1_only_basic/` install PSScriptAnalyzer into PowerShell 7 in phase 2.
 
 ## Logs and Results
 
