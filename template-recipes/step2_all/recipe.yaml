@@ -154,8 +154,8 @@ phase1:
       id: Ninja-build.Ninja
     - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
       id: LLVM.LLVM
-    - description: 'Visual Studio 2022 Build Tools（MSVC と Windows SDK のビルド環境）'
-      id: Microsoft.VisualStudio.2022.BuildTools
+    - description: 'Visual Studio 2026 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.BuildTools
     # [言語・SDK]
     - description: 'Visual C++ 再頒布可能パッケージ（多くのアプリが動くのに必要な部品）'
       id: Microsoft.VCRedist.2015+.x64
