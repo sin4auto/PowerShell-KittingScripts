@@ -419,7 +419,8 @@ phase2:
 
     # --- ghcup: Stack CLI ---
     - managerName: 'ghcup-stack'
-      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''stack'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
+      checkCommand: 'if (-not (Get-Command ''stack'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
       installCommand: 'ghcup install stack latest'
       packages:
         - description: 'Stack（プロジェクト/ビルドツール）'
@@ -427,7 +428,8 @@ phase2:
 
     # --- ghcup: Haskell Language Server ---
     - managerName: 'ghcup-hls'
-      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''haskell-language-server-wrapper'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
+      checkCommand: 'if (-not (Get-Command ''haskell-language-server-wrapper'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
       installCommand: 'ghcup install hls latest'
       packages:
         - description: 'Haskell Language Server（LSPサポート）'
@@ -435,7 +437,8 @@ phase2:
 
     # --- cabal: グローバルCLIユーティリティ ---
     - managerName: 'cabal-global'
-      checkCommand: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Get-Command ''{package}'' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"'
+      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
+      checkCommand: 'if (-not (Get-Command ''{package}'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
       installCommand: 'cabal update; cabal install --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
       packages:
         - description: 'コード整形（fourmolu）'
