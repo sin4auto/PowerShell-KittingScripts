@@ -40,11 +40,5 @@
   },
   "enabledMcpjsonServers": [
     "context7"
-  ],
-  "disabledMcpjsonServers": [
-    "openaiDeveloperDocs",
-    "github",
-    "playwright",
-    "linear"
   ]
 }
