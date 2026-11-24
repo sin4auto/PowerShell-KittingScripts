@@ -247,10 +247,10 @@ phase2:
       checkCommand: 'ghcup whereis ghc {package}'
       installCommand: 'ghcup install ghc {package}'
       packages:
-        - description: 'GHC 9.12 系（最新安定版）'
-          name: 9.12.2
-        #- description: 'GHC 9.10 系（LTS / 保守互換）'
-        #  name: 9.10.2
+        - description: 'GHC 9.14 系（長期サポート版・最新）'
+          name: 9.14.1
+        #- description: 'GHC 9.10 系（GHCup のおすすめ版）'
+        #  name: 9.10.3
 
     # --- ghcup: Cabal CLI ---
     - managerName: 'ghcup-cabal'
