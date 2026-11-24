@@ -23,6 +23,7 @@ Windows 11 PC のキッティング（初期セットアップ）から開発環
 - Windows 11
 - PowerShell 5.1（Windows に最初から入っているもの）または PowerShell 7
   - `Start-Admin.bat` は、PowerShell 7（`pwsh.exe`）が入っていれば 7 で、なければ 5.1 でスクリプトを動かします。5.1 は非推奨になったため、7 を優先しています。
+  - 5.1 で始めた場合も、再起動のときに 7 が入っていれば、再起動のあとは 7 で続けます（例：AutoSetup のフェーズ 1 で 7 を入れると、フェーズ 2 は 7 で動きます）。
 - 管理者権限
 - インターネット接続（`winget` でのインストールと、必要な PowerShell モジュールの自動インストールに使います）
 
@@ -246,6 +247,7 @@ Write what you want in **`recipe.yaml`** and run **`Start-Admin.bat`** as admini
 - Windows 11
 - PowerShell 5.1 (included with Windows) or PowerShell 7
   - `Start-Admin.bat` runs the scripts with PowerShell 7 (`pwsh.exe`) if it is installed, and with 5.1 otherwise. PowerShell 7 comes first because 5.1 is now deprecated.
+  - Even if a run starts on 5.1, it continues on 7 after a restart when 7 is installed by then (for example, if AutoSetup installs 7 in phase 1, phase 2 runs on 7).
 - Administrator privileges
 - Internet connection (used for `winget` installations and for installing the required PowerShell modules automatically)
 

@@ -20,6 +20,7 @@
     - 要管理者権限。
     - 初回実行にはインターネット接続が必須。
     - PowerShell 5.1 と 7 の両方で動く。Start-Admin.bat は、7 があれば 7 で起動する。
+    - 5.1 で始めても、再起動のときに 7 が入っていれば、再起動のあとは 7 で続ける。
     Copyright (c) 2025 sin4auto
 #>
 #=============================================================================
@@ -283,8 +284,17 @@ if ($setupPhase -ne '2') {
     $taskRegistered = $false
     try {
         # タスクとして実行するアクション（このスクリプト自身を引数付きで呼び出す）を定義する。
-        # フェーズ1とフェーズ2で PowerShell 5.1 と 7 が入れ替わらないよう、今動いている版の実行ファイルを登録する。
-        $powerShellExe = if ($PSVersionTable.PSEdition -eq 'Core') { Join-Path $PSHOME 'pwsh.exe' } else { Join-Path $PSHOME 'powershell.exe' }
+        # 5.1 は非推奨のため、フェーズ1で PowerShell 7 が入っていれば、フェーズ2は 7 で動かす。
+        # 7 を入れた直後は、今動いている PowerShell の PATH に反映されていないため、標準のインストール先も調べる。
+        $powerShellExe = Join-Path $PSHOME 'powershell.exe'
+        if ($PSVersionTable.PSEdition -eq 'Core') {
+            $powerShellExe = Join-Path $PSHOME 'pwsh.exe'
+        } else {
+            $pwshCandidates = @(Join-Path $env:ProgramFiles 'PowerShell\7\pwsh.exe') + @(Get-Command pwsh.exe -ErrorAction SilentlyContinue | ForEach-Object { $_.Source })
+            $pwshPath = $pwshCandidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
+            if ($pwshPath) { $powerShellExe = $pwshPath }
+        }
+        Write-Host "-> フェーズ2は次の PowerShell で動かします: $powerShellExe" -ForegroundColor DarkGray
         $taskAction = New-ScheduledTaskAction -Execute $powerShellExe -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -setupPhase 2"
         # タスクを実行するトリガー（ユーザーのログオン時）を定義する。
         $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
