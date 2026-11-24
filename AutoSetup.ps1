@@ -209,12 +209,14 @@ if ($setupPhase -ne '2') {
             # 前のアプリの結果「0」が残っていると、未インストールでも導入済みと誤判定するため、「未判定」に戻す。
             $global:LASTEXITCODE = $null
             # 'winget list'を使い、対象のアプリが既にインストール済みかを確認する。
-            winget list --id $wingetApp.id -e --accept-source-agreements --disable-interactivity
+            # ソースを winget に固定する。msstore が証明書エラー(0x8a15005e)などで使えないと、
+            # ソース未指定の winget はインストール先を決められず、全アプリの導入が失敗するため。
+            winget list --id $wingetApp.id -e --source winget --accept-source-agreements --disable-interactivity
             # インストール済みでなければインストールを実行する
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "-> [$($wingetApp.id)] をインストールします..."
                 $wingetArgs = @(
-                    'install', '--id', $wingetApp.id, '-e',
+                    'install', '--id', $wingetApp.id, '-e', '--source', 'winget',
                     '--accept-package-agreements', '--accept-source-agreements', '--disable-interactivity'
                 )
                 if (-not ([string]::IsNullOrEmpty($wingetApp.options))) {
