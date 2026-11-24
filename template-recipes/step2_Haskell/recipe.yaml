@@ -97,8 +97,9 @@ phase1:
     - description: '260 文字を超える長いパスを使えるようにする'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
     - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      # PowerShell 7 で AutoSetup を動かしても Windows PowerShell（5.1）の設定を変えるよう、powershell.exe を呼ぶ（5.1 と 7 は設定の保存先が別）。
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
-      command: 'try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { throw ''実行ポリシーを RemoteSigned にできませんでした'' }'
+      command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
     # [操作・便利機能]
     - description: 'クリップボードの履歴（Windows + V）を有効にする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
