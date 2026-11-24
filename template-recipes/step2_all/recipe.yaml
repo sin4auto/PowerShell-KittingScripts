@@ -72,7 +72,7 @@ phase1:
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
     - description: '高速スタートアップを無効化'
-      command: "powercfg.exe /h off"
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     - description: 'バッテリー駆動中にPCがスリープしないように設定'
