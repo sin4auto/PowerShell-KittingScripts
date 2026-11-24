@@ -268,10 +268,8 @@ phase2:
         - description: 'dotenvファイル支援'
           name: mikestead.dotenv
         # [コーディング支援（AI）]
-        - description: 'AIによる賢い補完'
-          name: VisualStudioExptTeam.vscodeintellicode
-        - description: 'AIコード自動生成'
-          name: GitHub.copilot
+        - description: 'AIコード自動生成・チャット（GitHub Copilot）'
+          name: GitHub.copilot-chat
         # [バージョン管理 / コラボ / CI]
         - description: 'Git機能を強化'
           name: eamodio.gitlens
@@ -290,8 +288,8 @@ phase2:
           name: ms-vscode-remote.remote-ssh
         - description: 'Dev Containers（コンテナ内開発）'
           name: ms-vscode-remote.remote-containers
-        - description: 'Docker操作拡張'
-          name: ms-azuretools.vscode-docker
+        - description: 'コンテナ操作（Container Tools。旧 Docker 拡張）'
+          name: ms-azuretools.vscode-containers
         # [デバッグ / ビルド / カバレッジ]
         - description: 'CMakeツール連携'
           name: ms-vscode.cmake-tools
