@@ -16,7 +16,7 @@
 .NOTES
     - 要管理者権限。
     - 初回実行にはインターネット接続が必須。
-    - PowerShell 5.1での動作を想定。
+    - PowerShell 5.1 と 7 の両方で動く。Start-Admin.bat は、7 があれば 7 で起動する。
     - 完了後、手動での最終確認を推奨します: [設定] > [Windows Update] > [更新プログラムのチェック]
     Copyright (c) 2025 sin4auto
 #>
@@ -137,7 +137,9 @@ try {
         # タスクスケジューラの登録処理でエラーが発生した場合に備える。
         try {
             # タスクとして実行するアクション（このスクリプト自身）を定義する。
-            $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -Round $($Round + 1)"
+            # 再起動の前後で PowerShell 5.1 と 7 が入れ替わらないよう、今動いている版の実行ファイルを登録する。
+            $powerShellExe = if ($PSVersionTable.PSEdition -eq 'Core') { Join-Path $PSHOME 'pwsh.exe' } else { Join-Path $PSHOME 'powershell.exe' }
+            $taskAction = New-ScheduledTaskAction -Execute $powerShellExe -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -Round $($Round + 1)"
             # タスクを実行するトリガー（ユーザーのログオン時）を定義する。
             $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
             # スクリプトを実行している現在のユーザーのIDを確実に取得する。

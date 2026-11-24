@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   syntax:
-    # 実際の実行環境は Windows PowerShell 5.1 だが、7 で書き方が壊れていないかも合わせて見る。
+    # Start-Admin.bat は PowerShell 7 があれば 7、なければ 5.1 で動かすため、両方で書き方が壊れていないかを見る。
     strategy:
       fail-fast: false
       matrix:

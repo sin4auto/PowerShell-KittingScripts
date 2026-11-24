@@ -20,6 +20,15 @@ if %errorlevel% NEQ 0 (
     goto End
 )
 
+:: =====================================================================
+:: ■ 使う PowerShell を選ぶ
+:: =====================================================================
+:: Windows PowerShell 5.1 は非推奨になり、将来の Windows では最初から入らなくなる。
+:: そのため PowerShell 7（pwsh.exe）があれば 7 を使い、なければ 5.1 を使う。
+set "PS_EXE=powershell.exe"
+where pwsh.exe >nul 2>nul
+if %errorlevel% EQU 0 set "PS_EXE=pwsh.exe"
+
 :menu
 cls
 echo ================================================
@@ -49,13 +58,13 @@ goto menu
 
 :RunUpdate
 echo "AutoWindowsUpdate" を実行します...
-powershell.exe -ExecutionPolicy Bypass -File "%~dp0AutoWindowsUpdate.ps1"
+%PS_EXE% -ExecutionPolicy Bypass -File "%~dp0AutoWindowsUpdate.ps1"
 if errorlevel 1 goto Failed
 goto Finish
 
 :RunSetup
 echo "AutoSetup" を実行します...
-powershell.exe -ExecutionPolicy Bypass -File "%~dp0AutoSetup.ps1"
+%PS_EXE% -ExecutionPolicy Bypass -File "%~dp0AutoSetup.ps1"
 if errorlevel 1 goto Failed
 goto Finish
 
