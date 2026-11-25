@@ -630,8 +630,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
@@ -804,8 +804,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
@@ -1053,8 +1053,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
@@ -1587,8 +1587,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
@@ -1854,8 +1854,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
@@ -2147,8 +2147,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
@@ -2402,8 +2402,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
@@ -2658,8 +2658,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
@@ -2980,8 +2980,8 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '高速スタートアップを無効化'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
     # [タスクバー・スタートメニュー]
