@@ -76,7 +76,7 @@ YAML を手で書かずに `recipe.yaml` を作りたい場合は、`APP_RecipeB
 </p>
 
 - 「Windows 設定」「アプリ」「削除するアプリ」「開発パッケージ」のタブで、入れたい項目にチェックを付けます。右側に、できあがる `recipe.yaml` がその場で表示されます。
-- 「出発点」でテンプレートを選んで「このテンプレートで始める」を押すと、テンプレートの内容どおりにチェックが付きます。「recipe.yaml を読み込む」で、手元の `recipe.yaml` を読み込んで続きを編集することもできます。
+- 「出発点」でテンプレートを選ぶと、その場でテンプレートの内容どおりにチェックが付きます。チェックを変えた後に、選んでいるテンプレートの状態へ戻したいときは「テンプレートの状態に戻す」を押します。どちらも、通知の「元に戻す」で前の選択に戻せます。「recipe.yaml を読み込む」で、手元の `recipe.yaml` を読み込んで続きを編集することもできます。
 - `recipe.yaml` で `#` を付けてコメントアウトした項目は、チェックの付いていない項目として表示されます。逆に、チェックを外した項目は、保存する `recipe.yaml` にコメントアウトした形で残ります。あとから有効にするときは、その項目の各行の先頭にある `# `（`#` と、その後ろの空白1つ）を消します。
 - 「すべて選択」「選択をすべて外す」で、すべてのタブのチェックをまとめて付けたり外したりできます。各タブの「表示中をすべて選ぶ」「すべて外す」は、そのタブの中だけが対象です。
 - 一覧にない項目は、各タブの「一覧にない項目を追加する」から追加できます。
@@ -301,7 +301,7 @@ If you want to create `recipe.yaml` without writing YAML by hand, double-click `
 </p>
 
 - Tick the items you want on the "Windows 設定" (Windows settings), "アプリ" (apps), "削除するアプリ" (apps to remove), and "開発パッケージ" (development packages) tabs. The resulting `recipe.yaml` appears on the right as you go.
-- Choose a template in "出発点" (starting point) and press "このテンプレートで始める" (start with this template) to tick items as the template defines. You can also load an existing `recipe.yaml` with "recipe.yaml を読み込む" (load recipe.yaml) and continue editing it.
+- Choose a template in "出発点" (starting point) to tick items as the template defines right away. To go back to the selected template after changing ticks, press "テンプレートの状態に戻す" (reset to the template). Either way, "元に戻す" (undo) in the notification restores the previous selection. You can also load an existing `recipe.yaml` with "recipe.yaml を読み込む" (load recipe.yaml) and continue editing it.
 - Entries commented out with `#` in `recipe.yaml` appear as unticked items. In the other direction, unticked items are kept in the saved `recipe.yaml` as commented-out entries. To enable one later, remove the leading `# ` (the `#` and the one space after it) from each of its lines.
 - "すべて選択" (select all) and "選択をすべて外す" (clear all) tick or clear items on all tabs at once. "表示中をすべて選ぶ" (select all shown) and "すべて外す" (clear all) on each tab affect only that tab.
 - Items that are not in the list can be added from "一覧にない項目を追加する" (add an item that is not in the list) on each tab.

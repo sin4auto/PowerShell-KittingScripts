@@ -527,7 +527,7 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
 <div class="startbar">
   <label for="template-select">出発点</label>
   <select class="field" id="template-select"></select>
-  <button type="button" class="btn" id="apply-template">このテンプレートで始める</button>
+  <button type="button" class="btn" id="apply-template">テンプレートの状態に戻す</button>
   <span class="hint">テンプレートを選ぶと、その内容どおりにチェックが付きます。</span>
   <span class="spacer"></span>
   <button type="button" class="btn" id="select-all">すべて選択</button>
@@ -4302,7 +4302,7 @@ function undoAction(snapshot) {
 // ---------------------------------------------------------------------------
 // ボタンの動き
 // ---------------------------------------------------------------------------
-$('apply-template').addEventListener('click', () => {
+function applySelectedTemplate() {
   const template = templates[Number($('template-select').value)];
   if (!template) return;
   const undo = undoAction(takeSnapshot());
@@ -4310,7 +4310,11 @@ $('apply-template').addEventListener('click', () => {
   renderTabBody();
   if (warnings.length) toast('warn', `テンプレート「${template.name}」に、確認が必要な点があります。`, warnings, undo);
   else toast('ok', `テンプレート「${template.name}」の内容でチェックを付けました。`, null, undo);
-});
+}
+// 選んだだけでは変わらないと、切り替えたつもりで別のテンプレートのまま保存してしまうため、選んだ時点で適用する。
+$('template-select').addEventListener('change', applySelectedTemplate);
+// 同じテンプレートを選び直しても change は起きないため、手を加えた後にテンプレートの状態へ戻すボタンを残す。
+$('apply-template').addEventListener('click', applySelectedTemplate);
 
 $('load-file').addEventListener('click', () => $('file-input').click());
 $('file-input').addEventListener('change', (event) => {
