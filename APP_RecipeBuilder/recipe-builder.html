@@ -3344,9 +3344,39 @@ class YamlError extends Error {
   }
 }
 
+// コメントアウトした項目も、未チェックの選択肢として画面に出す。
+// まずコメントを無視して読み（AutoSetup.ps1 と同じ読み方。書き間違いはここでエラーにする）、
+// 次にコメントアウトした項目も含めて読み直す。読み直しで形が崩れたときは、コメントを無視した結果を使う。
 function parseYaml(text) {
+  const plain = parseYamlLines(text, false);
+  try {
+    return parseYamlLines(text, true);
+  } catch {
+    return plain;
+  }
+}
+
+// 「# - key: 値」の行と、それに続く同じ位置の「#   key: 値」の行を、コメントアウトした項目として読む。
+// 「#」から「- 」の手前までを外すと、コメントアウトする前と同じインデントに戻る書き方だけを対象にする。
+// 戻り値は、外した後の行（コメントアウトした項目でなければ null）。
+function uncommentLine(raw, block) {
+  const hashCol = raw.indexOf('#');
+  if (!/^ *$/.test(raw.slice(0, hashCol))) return null;
+  // 項目の続きの行。先に調べるのは、コメントアウトした項目の中の「- 」（packages の中身）を、新しい項目と取り違えないため。
+  if (block && hashCol === block.hashCol && /^ *$/.test(raw.slice(hashCol + 1, hashCol + block.strip))) {
+    const rest = raw.slice(hashCol + block.strip);
+    const added = rest.match(/^ */)[0].length;
+    if (added > 0 && rest.trim() !== '') return { block, indent: hashCol + added, text: rest.trim() };
+  }
+  const opening = raw.slice(hashCol + 1).match(/^( *)- +[A-Za-z0-9_.-]+:(\s|$)/);
+  if (opening) return { block: { hashCol, strip: 1 + opening[1].length }, indent: hashCol, text: raw.slice(hashCol + 1).trim() };
+  return null;
+}
+
+function parseYamlLines(text, includeCommented) {
   const lines = [];
   let pendingGroup = null;
+  let block = null;
   text.replace(/^﻿/, '').split(/\r?\n/).forEach((raw, index) => {
     const lineNo = index + 1;
     const trimmed = raw.trim();
@@ -3354,9 +3384,20 @@ function parseYaml(text) {
     if (trimmed.startsWith('#')) {
       // 「# [エクスプローラー設定]」のような見出しコメントは、画面のグループ分けに使う。
       const group = trimmed.match(/^#\s*\[(.+)\]\s*$/);
-      if (group) pendingGroup = group[1].trim();
+      if (group) {
+        pendingGroup = group[1].trim();
+        block = null;
+        return;
+      }
+      const uncommented = includeCommented ? uncommentLine(raw, block) : null;
+      block = uncommented ? uncommented.block : null;
+      if (uncommented) {
+        lines.push({ indent: uncommented.indent, text: uncommented.text, lineNo, groupMarker: pendingGroup, commented: true });
+        pendingGroup = null;
+      }
       return;
     }
+    block = null;
     const leading = raw.match(/^[ \t]*/)[0];
     if (leading.includes('\t')) throw new YamlError(lineNo, 'インデントにタブ文字は使えません。半角スペースにしてください。');
     lines.push({ indent: leading.length, text: trimmed, lineNo, groupMarker: pendingGroup });
@@ -3395,6 +3436,7 @@ function parseYaml(text) {
       }
       if (item && typeof item === 'object' && !Array.isArray(item)) {
         Object.defineProperty(item, '__group', { value: group, enumerable: false });
+        Object.defineProperty(item, '__commented', { value: line.commented === true, enumerable: false });
       }
       result.push(item);
     }
@@ -3564,6 +3606,38 @@ function unknownKeys(source, allowed) {
   return Object.keys(source).filter((key) => !allowed.includes(key));
 }
 
+const isCommented = (source) => isPlainObject(source) && source.__commented === true;
+
+// コメントアウトした項目は、一覧になければ足すだけで、チェックは付けない。
+// AutoSetup.ps1 は読まない部分なので、書き方の注意（警告）も出さない。
+function addCommentedSectionItem(sectionName, source) {
+  const keyValue = toText(source[SECTIONS[sectionName].key]).trim();
+  if (keyValue === '' || findItem(sectionName, keyValue)) return;
+  const item = sectionItemFrom(sectionName, source, LOADED_GROUP);
+  item.custom = true;
+  state.sections[sectionName].push(item);
+}
+function addCommentedPackages(manager, packages) {
+  for (const pkg of Array.isArray(packages) ? packages : []) {
+    if (!isPlainObject(pkg)) continue;
+    const pkgName = toText(pkg.name).trim();
+    if (pkgName === '' || manager.packages.some((p) => p.name === pkgName)) continue;
+    manager.packages.push(newPackage(pkgName, toText(pkg.description).trim(), false, true));
+  }
+}
+function addCommentedManager(source) {
+  const name = toText(source.managerName).trim();
+  const checkCommand = toText(source.checkCommand).trim();
+  const installCommand = toText(source.installCommand).trim();
+  if (!name || !checkCommand || !installCommand) return;
+  let manager = findManager(name);
+  if (!manager) {
+    manager = newManager(name, checkCommand, installCommand, true);
+    state.managers.push(manager);
+  }
+  addCommentedPackages(manager, source.packages);
+}
+
 // レシピを読み込み、その中身どおりにチェックを付け直す。一覧にない項目は追加する。
 function applyRecipe(config) {
   const warnings = [];
@@ -3578,7 +3652,9 @@ function applyRecipe(config) {
     const list = phase1[sectionName];
     if (list === null || list === undefined) continue;
     if (!Array.isArray(list)) { warnings.push(`phase1.${sectionName} がリストの形ではないため、読み飛ばしました。`); continue; }
-    list.forEach((source, index) => {
+    for (const source of list.filter(isCommented)) addCommentedSectionItem(sectionName, source);
+    // 「何番目」は、AutoSetup.ps1 が読む項目（コメントアウトしていない項目）だけで数える。
+    list.filter((source) => !isCommented(source)).forEach((source, index) => {
       const where = `phase1.${sectionName} の ${index + 1} 番目`;
       if (!isPlainObject(source)) { warnings.push(`${where} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
       for (const key of unknownKeys(source, def.keys)) warnings.push(`${where} の「${key}」は使われないため、読み飛ばしました。`);
@@ -3603,7 +3679,8 @@ function applyRecipe(config) {
   if (managers !== null && managers !== undefined && !Array.isArray(managers)) {
     warnings.push('phase2.packageManagers がリストの形ではないため、読み飛ばしました。');
   } else if (Array.isArray(managers)) {
-    managers.forEach((source, index) => {
+    for (const source of managers.filter(isCommented)) addCommentedManager(source);
+    managers.filter((source) => !isCommented(source)).forEach((source, index) => {
       const where = `phase2.packageManagers の ${index + 1} 番目`;
       if (!isPlainObject(source)) { warnings.push(`${where} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
       for (const key of unknownKeys(source, MANAGER_KEYS)) warnings.push(`${where} の「${key}」は使われないため、読み飛ばしました。`);
@@ -3627,7 +3704,8 @@ function applyRecipe(config) {
         warnings.push(`${where} の packages がリストの形ではないため、読み飛ばしました。`);
         return;
       }
-      (packages || []).forEach((pkg, pkgIndex) => {
+      addCommentedPackages(manager, (packages || []).filter(isCommented));
+      (packages || []).filter((pkg) => !isCommented(pkg)).forEach((pkg, pkgIndex) => {
         const pkgWhere = `${where} の packages の ${pkgIndex + 1} 番目`;
         if (!isPlainObject(pkg)) { warnings.push(`${pkgWhere} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
         for (const key of unknownKeys(pkg, PACKAGE_KEYS)) warnings.push(`${pkgWhere} の「${key}」は使われないため、読み飛ばしました。`);
@@ -3675,12 +3753,19 @@ function buildYaml() {
     '# レシピ作成アプリ (APP_RecipeBuilder/recipe-builder.html) で作成しました。',
     '# ================================================================',
     '# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。',
+    '# チェックを外した項目は、コメントアウトして残しています。有効にするときは、各行の先頭の「# 」（# と空白1つ）を消してください。',
     'phase1:',
   ];
+  // チェックを外した項目は「# - key: 値」「#   key: 値」の形にする。
+  // 「# 」を外すと元のインデントに戻る形なので、手で有効にしやすく、このアプリでも未チェックの項目として読み戻せる。
+  const pushItem = (indent, checked, itemLines) => {
+    for (const line of itemLines) out.push(`${indent}${checked ? '' : '# '}${line}`);
+  };
   for (const sectionName of Object.keys(SECTIONS)) {
     const def = SECTIONS[sectionName];
-    const items = state.sections[sectionName].filter((item) => item.checked);
+    const items = state.sections[sectionName];
     if (items.length === 0) { out.push(`  ${sectionName}: []`); continue; }
+    // 「[]」の後ろにコメントアウトした項目を並べると、読み戻すときに形が崩れるため、何も選ばれていなくても「key:」で始める。
     out.push(`  ${sectionName}:`);
     let lastGroup = null;
     for (const item of items) {
@@ -3689,27 +3774,30 @@ function buildYaml() {
         lastGroup = item.group;
       }
       const keys = def.keys.filter((key) => item[key] !== '');
-      keys.forEach((key, index) => out.push(`${index === 0 ? '    - ' : '      '}${key}: ${quote(item[key])}`));
+      pushItem('    ', item.checked, keys.map((key, index) => `${index === 0 ? '- ' : '  '}${key}: ${quote(item[key])}`));
     }
   }
   out.push('', 'phase2:');
-  const managers = state.managers.filter((manager) => manager.packages.some((pkg) => pkg.checked));
-  if (managers.length === 0) {
+  if (state.managers.length === 0) {
     out.push('  packageManagers: []');
   } else {
     out.push('  packageManagers:');
-    for (const manager of managers) {
-      out.push(`    - managerName: ${quote(manager.managerName)}`);
-      out.push(`      checkCommand: ${quote(manager.checkCommand)}`);
-      out.push(`      installCommand: ${quote(manager.installCommand)}`);
-      out.push('      packages:');
-      for (const pkg of manager.packages.filter((p) => p.checked)) {
-        if (pkg.description) {
-          out.push(`        - description: ${quote(pkg.description)}`);
-          out.push(`          name: ${quote(pkg.name)}`);
-        } else {
-          out.push(`        - name: ${quote(pkg.name)}`);
-        }
+    for (const manager of state.managers) {
+      const packageLines = (pkg) => (pkg.description
+        ? [`- description: ${quote(pkg.description)}`, `  name: ${quote(pkg.name)}`]
+        : [`- name: ${quote(pkg.name)}`]);
+      const headerLines = [
+        `- managerName: ${quote(manager.managerName)}`,
+        `  checkCommand: ${quote(manager.checkCommand)}`,
+        `  installCommand: ${quote(manager.installCommand)}`,
+        '  packages:',
+      ];
+      if (manager.packages.some((pkg) => pkg.checked)) {
+        pushItem('    ', true, headerLines);
+        for (const pkg of manager.packages) pushItem('        ', pkg.checked, packageLines(pkg));
+      } else {
+        // 1つも選ばれていないパッケージマネージャーは、まるごとコメントアウトする。
+        pushItem('    ', false, [...headerLines, ...manager.packages.flatMap((pkg) => packageLines(pkg).map((line) => `    ${line}`))]);
       }
     }
   }
