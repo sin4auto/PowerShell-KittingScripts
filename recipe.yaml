@@ -3,7 +3,6 @@
 # ================================================================
 # このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
 # 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
-
 # ----------------------------------------------------------------
 # ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
 # ----------------------------------------------------------------
@@ -105,7 +104,7 @@ phase1:
     - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
       command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
 
-  # --- Winget (基本アプリケーションのインストール) ---
+# --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
@@ -123,6 +122,73 @@ phase1:
     - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
       id: Adobe.Acrobat.Reader.64-bit
       options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'GitHub Desktop（GitHub をマウスで操作できる Git の画面）'
+      id: GitHub.GitHubDesktop
+    - description: 'GitHub CLI（GitHub をコマンドで操作する gh）'
+      id: GitHub.cli
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+    - description: 'Visual Studio Code（高機能なコードエディタ）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2026 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.BuildTools
+      options: '--custom "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"'
+    # [言語・SDK]
+    - description: 'Visual C++ 再頒布可能パッケージ（多くのアプリが動くのに必要な部品）'
+      id: Microsoft.VCRedist.2015+.x64
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.10
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'サクラエディタ（日本製の定番テキストエディタ）'
+      id: sakura-editor.sakura
+    - description: 'Obsidian（Markdown で書くノートアプリ）'
+      id: Obsidian.Obsidian
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
 
   # --- Appx (不要なプリインストールアプリの削除) ---
   appxRemove:
@@ -155,19 +221,103 @@ phase1:
       name: "*Microsoft.ZuneVideo*"
     # - description: 'ヘルプ'
     #   name: "*Microsoft.GetHelp*"
-    # - description: 'フォト'
-    #   name: "*Microsoft.Windows.Photos*"
-    # - description: 'ペイント 3D'
-    #   name: "*Microsoft.MSPaint*"
-    # - description: 'ビデオエディター'
-    #   name: "*Clipchamp.Clipchamp*"
-    # - description: '複合現実ポータル'
-    #   name: "*Microsoft.MixedReality.Portal*"
-    # - description: 'ソリティア & カジュアルゲーム'
-    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
 # ----------------------------------------------------------------
 phase2:
-  packageManagers: []
+  packageManagers:
+    - managerName: 'vscode'
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
+      installCommand: 'code --install-extension {package}'
+      packages:
+        # [UI / 表示]
+        - description: 'UIの日本語化'
+          name: ms-ceintl.vscode-language-pack-ja
+        - description: 'インデントを色付け'
+          name: oderwat.indent-rainbow
+        - description: '全角スペースをハイライト'
+          name: mosapride.zenkaku
+        - description: 'コメントを種類別に色分け'
+          name: aaron-bond.better-comments
+        - description: 'エラー/警告を行内表示'
+          name: usernamehw.errorlens
+        - description: 'EditorConfig（書式統一）'
+          name: EditorConfig.EditorConfig
+        # [ユーティリティ / Markdown]
+        - description: '印刷（コード/Markdown をブラウザ経由で印刷・PDF化）'
+          name: pdconsec.vscode-print
+        - description: 'Markdown編集サポート'
+          name: yzhang.markdown-all-in-one
+        - description: 'TODOコメントの一覧表示'
+          name: gruntfuggly.todo-tree
+        - description: 'ファイルパス入力補完'
+          name: christian-kohler.path-intellisense
+        - description: 'dotenvファイル支援'
+          name: mikestead.dotenv
+        # [コーディング支援（AI）]
+        - description: 'AIコード自動生成・チャット（GitHub Copilot）'
+          name: GitHub.copilot-chat
+        # [バージョン管理 / コラボ / CI]
+        - description: 'Git機能を強化'
+          name: eamodio.gitlens
+        - description: 'Gitブランチツリー可視化'
+          name: mhutchie.git-graph
+        - description: 'GitHub PRレビュー'
+          name: GitHub.vscode-pull-request-github
+        - description: 'GitHub Actions支援'
+          name: github.vscode-github-actions
+        - description: 'Live Share（共同編集）'
+          name: MS-vsliveshare.vsliveshare
+        # [リモート / コンテナ / Docker]
+        - description: 'WSL上のプロジェクトを直接編集'
+          name: ms-vscode-remote.remote-wsl
+        - description: 'Remote SSH（リモート開発）'
+          name: ms-vscode-remote.remote-ssh
+        - description: 'Dev Containers（コンテナ内開発）'
+          name: ms-vscode-remote.remote-containers
+        - description: 'コンテナ操作（Container Tools。旧 Docker 拡張）'
+          name: ms-azuretools.vscode-containers
+        # [デバッグ / ビルド / カバレッジ]
+        - description: 'CMakeツール連携'
+          name: ms-vscode.cmake-tools
+        - description: 'Makefile支援'
+          name: ms-vscode.makefile-tools
+        - description: 'LLDBデバッガ（Rust/C/C++）'
+          name: vadimcn.vscode-lldb
+        - description: 'テストカバレッジ可視化'
+          name: ryanluker.vscode-coverage-gutters
+        # [言語サポート]
+        - description: 'Python言語サポート'
+          name: ms-python.python
+        - description: 'Python型解析（Pylance）'
+          name: ms-python.vscode-pylance
+        - description: 'Jupyterノートブック'
+          name: ms-toolsai.jupyter
+        - description: 'C/C++言語サポート（拡張パック）'
+          name: ms-vscode.cpptools-extension-pack
+        - description: 'Rust言語サポート（rust-analyzer）'
+          name: rust-lang.rust-analyzer
+        - description: 'Haskell言語サポート'
+          name: haskell.haskell
+        - description: 'Go言語サポート'
+          name: golang.Go
+        - description: 'C#言語サポート'
+          name: ms-dotnettools.csharp
+        - description: 'Java言語サポート'
+          name: redhat.java
+        - description: 'PowerShell言語サポート'
+          name: ms-vscode.powershell
+        - description: 'YAML言語サポート'
+          name: redhat.vscode-yaml
+        - description: 'TOMLサポート（Cargo/設定）'
+          name: tamasfe.even-better-toml
+
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
