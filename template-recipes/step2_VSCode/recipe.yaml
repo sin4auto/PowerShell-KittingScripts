@@ -228,7 +228,8 @@ phase1:
 phase2:
   packageManagers:
     - managerName: 'vscode'
-      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
+      # 終了コードだけで判定するため、findstr が見つけた行はログに出さない。
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}" > $null'
       installCommand: 'code --install-extension {package}'
       packages:
         # [UI / 表示]

@@ -115,7 +115,7 @@ YAML を手で書かずに `recipe.yaml` を作りたい場合は、`APP_RecipeB
 phase2:
   packageManagers:
     - managerName: 'vscode'
-      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}" > $null'
       installCommand: 'code --install-extension {package}'
       packages:
         # [UI / 表示]
@@ -339,7 +339,7 @@ In the `recipe.yaml` at the repository root, phase 2 is empty (`packageManagers:
 phase2:
   packageManagers:
     - managerName: 'vscode'
-      checkCommand: 'code --list-extensions | findstr /i /c:"{package}"'
+      checkCommand: 'code --list-extensions | findstr /i /c:"{package}" > $null'
       installCommand: 'code --install-extension {package}'
       packages:
         # [UI / Display]
