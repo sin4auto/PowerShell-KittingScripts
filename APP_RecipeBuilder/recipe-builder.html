@@ -1371,9 +1371,11 @@ phase2:
           name: github.com/cweill/gotests/gotests@latest
 
     # --- ghcup: Haskell コンパイラ (GHC) ---
+    # --set を付けないと、GHCup の導入時に入るおすすめ版が既定のまま残り、cabal もそちらでビルドする。
+    # 複数のバージョンを並べた場合は、最後に入れたものが既定になる。
     - managerName: 'ghcup-ghc'
       checkCommand: 'ghcup whereis ghc {package}'
-      installCommand: 'ghcup install ghc {package}'
+      installCommand: 'ghcup install ghc --set {package}'
       packages:
         - description: 'GHC 9.14 系（長期サポート版・最新）'
           name: 9.14.1
@@ -2038,9 +2040,11 @@ phase1:
 phase2:
   packageManagers:
     # --- ghcup: Haskell コンパイラ (GHC) ---
+    # --set を付けないと、GHCup の導入時に入るおすすめ版が既定のまま残り、cabal もそちらでビルドする。
+    # 複数のバージョンを並べた場合は、最後に入れたものが既定になる。
     - managerName: 'ghcup-ghc'
       checkCommand: 'ghcup whereis ghc {package}'
-      installCommand: 'ghcup install ghc {package}'
+      installCommand: 'ghcup install ghc --set {package}'
       packages:
         - description: 'GHC 9.14 系（長期サポート版・最新）'
           name: 9.14.1
