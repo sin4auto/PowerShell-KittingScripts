@@ -313,6 +313,9 @@ input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var
 .search svg { position: absolute; left: 10px; top: 8px; width: 16px; height: 16px; color: var(--subtle); pointer-events: none; }
 .search .field { width: 100%; padding-left: 34px; }
 .tab-lead { color: var(--muted); margin: -4px 0 16px; }
+.other-head { margin: 24px 0 12px; padding-top: 16px; border-top: 1px dashed var(--border-strong); }
+.other-head h2 { margin: 0 0 4px; font-size: 14px; }
+.other-head p { margin: 0; color: var(--muted); }
 
 /* ---- グループのカード ---- */
 .card {
@@ -3310,7 +3313,6 @@ const TABS = [
   { id: 'packageManagers', label: '開発パッケージ' },
 ];
 const CUSTOM_GROUP = '追加した項目';
-const LOADED_GROUP = '読み込んだレシピだけにある項目';
 // 見出しコメントのない項目の分類。recipe.yaml へは見出しコメントを書かない。
 const NO_GROUP = '分類なし';
 // アプリを開いたときに選ばれるテンプレート。
@@ -3548,13 +3550,15 @@ const isPlainObject = (value) => value !== null && typeof value === 'object' && 
 const findItem = (sectionName, keyValue) => state.sections[sectionName].find((item) => item[SECTIONS[sectionName].key] === keyValue);
 const findManager = (name) => state.managers.find((manager) => manager.managerName === name);
 
+// inRecipe: 今のレシピ（選んだテンプレートや読み込んだファイル）に書かれている項目か。
+// 書かれている項目はチェックの有無にかかわらず書き出し（外したものはコメントアウト）、ほかのテンプレートの項目はチェックしたときだけ書き出す。
 function sectionItemFrom(sectionName, source, group) {
-  const item = { group: group || CUSTOM_GROUP, checked: false, custom: false };
+  const item = { group: group || CUSTOM_GROUP, checked: false, custom: false, inRecipe: false };
   for (const key of SECTIONS[sectionName].keys) item[key] = toText(source[key]).trim();
   return item;
 }
-const newManager = (managerName, checkCommand, installCommand, custom) => ({ managerName, checkCommand, installCommand, packages: [], custom });
-const newPackage = (name, description, checked, custom) => ({ name, description, checked, custom });
+const newManager = (managerName, checkCommand, installCommand, custom) => ({ managerName, checkCommand, installCommand, packages: [], custom, inRecipe: false });
+const newPackage = (name, description, checked, custom) => ({ name, description, checked, custom, inRecipe: false });
 
 // 書き出す順番は一覧の順番になるため、テンプレートの項目は、そのテンプレートで1つ前にある項目の直後に入れる。
 // 末尾に足すと、テンプレートにしかない項目の実行順が、読み込んだときと変わってしまう。
@@ -3608,37 +3612,66 @@ function unknownKeys(source, allowed) {
 
 const isCommented = (source) => isPlainObject(source) && source.__commented === true;
 
-// コメントアウトした項目は、一覧になければ足すだけで、チェックは付けない。
-// AutoSetup.ps1 は読まない部分なので、書き方の注意（警告）も出さない。
-function addCommentedSectionItem(sectionName, source) {
-  const keyValue = toText(source[SECTIONS[sectionName].key]).trim();
-  if (keyValue === '' || findItem(sectionName, keyValue)) return;
-  const item = sectionItemFrom(sectionName, source, LOADED_GROUP);
-  item.custom = true;
-  state.sections[sectionName].push(item);
+// レシピに書かれた項目に inRecipe の印を付け、レシピの順番に並べ替えた一覧を返す。
+// 一覧の順番がそのまま書き出す順番になるため、読み込んだときと同じ順番にそろえる。レシピにない項目は、元の順番のまま後ろに回す。
+function orderByRecipe(list, recipeItems) {
+  const inRecipe = new Set(recipeItems);
+  for (const item of list) item.inRecipe = inRecipe.has(item);
+  return [...inRecipe, ...list.filter((item) => !inRecipe.has(item))];
 }
-function addCommentedPackages(manager, packages) {
-  for (const pkg of Array.isArray(packages) ? packages : []) {
-    if (!isPlainObject(pkg)) continue;
-    const pkgName = toText(pkg.name).trim();
-    if (pkgName === '' || manager.packages.some((p) => p.name === pkgName)) continue;
-    manager.packages.push(newPackage(pkgName, toText(pkg.description).trim(), false, true));
+
+// レシピの項目に当たる一覧の項目を返す（一覧になければ追加する）。
+// 読み込んだレシピの説明・オプション・見出しを優先する。書き換えて使っている場合があり、書き出しも読み込んだ形に合わせるため。
+function recipeSectionItem(sectionName, source) {
+  const def = SECTIONS[sectionName];
+  let item = findItem(sectionName, toText(source[def.key]).trim());
+  if (!item) {
+    item = sectionItemFrom(sectionName, source);
+    item.custom = true;
+    state.sections[sectionName].push(item);
   }
+  for (const key of def.keys) if (key !== def.key) item[key] = toText(source[key]).trim();
+  item.group = source.__group || NO_GROUP;
+  return item;
 }
-function addCommentedManager(source) {
-  const name = toText(source.managerName).trim();
-  const checkCommand = toText(source.checkCommand).trim();
-  const installCommand = toText(source.installCommand).trim();
-  if (!name || !checkCommand || !installCommand) return;
+function recipePackage(manager, pkg) {
+  const pkgName = toText(pkg.name).trim();
+  let target = manager.packages.find((p) => p.name === pkgName);
+  if (!target) {
+    target = newPackage(pkgName, '', false, true);
+    manager.packages.push(target);
+  }
+  target.description = toText(pkg.description).trim();
+  return target;
+}
+function recipeManager(name, checkCommand, installCommand) {
   let manager = findManager(name);
   if (!manager) {
     manager = newManager(name, checkCommand, installCommand, true);
     state.managers.push(manager);
   }
-  addCommentedPackages(manager, source.packages);
+  manager.checkCommand = checkCommand;
+  manager.installCommand = installCommand;
+  return manager;
+}
+
+// コメントアウトした項目は、一覧に入れるだけでチェックは付けない。
+// AutoSetup.ps1 は読まない部分なので、書き方の注意（警告）も出さない。
+function commentedManager(source) {
+  const name = toText(source.managerName).trim();
+  const checkCommand = toText(source.checkCommand).trim();
+  const installCommand = toText(source.installCommand).trim();
+  if (!name || !checkCommand || !installCommand) return null;
+  const manager = recipeManager(name, checkCommand, installCommand);
+  const packages = (Array.isArray(source.packages) ? source.packages : [])
+    .filter((pkg) => isPlainObject(pkg) && toText(pkg.name).trim() !== '')
+    .map((pkg) => recipePackage(manager, pkg));
+  manager.packages = orderByRecipe(manager.packages, packages);
+  return manager;
 }
 
 // レシピを読み込み、その中身どおりにチェックを付け直す。一覧にない項目は追加する。
+// 「何番目」は、AutoSetup.ps1 が読む項目（コメントアウトしていない項目）だけで数える。
 function applyRecipe(config) {
   const warnings = [];
   if (!isPlainObject(config)) throw new Error('中身が空か、「phase1:」「phase2:」で始まる形になっていません。');
@@ -3650,77 +3683,80 @@ function applyRecipe(config) {
   for (const sectionName of Object.keys(SECTIONS)) {
     const def = SECTIONS[sectionName];
     const list = phase1[sectionName];
-    if (list === null || list === undefined) continue;
-    if (!Array.isArray(list)) { warnings.push(`phase1.${sectionName} がリストの形ではないため、読み飛ばしました。`); continue; }
-    for (const source of list.filter(isCommented)) addCommentedSectionItem(sectionName, source);
-    // 「何番目」は、AutoSetup.ps1 が読む項目（コメントアウトしていない項目）だけで数える。
-    list.filter((source) => !isCommented(source)).forEach((source, index) => {
-      const where = `phase1.${sectionName} の ${index + 1} 番目`;
-      if (!isPlainObject(source)) { warnings.push(`${where} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
-      for (const key of unknownKeys(source, def.keys)) warnings.push(`${where} の「${key}」は使われないため、読み飛ばしました。`);
-      const keyValue = toText(source[def.key]).trim();
-      if (keyValue === '') { warnings.push(`${where} に「${def.key}」がないため、読み飛ばしました。`); return; }
-      let item = findItem(sectionName, keyValue);
-      if (!item) {
-        item = sectionItemFrom(sectionName, source, LOADED_GROUP);
-        item.custom = true;
-        state.sections[sectionName].push(item);
-      } else {
-        // 読み込んだレシピの説明やオプションを優先する（書き換えて使っている場合があるため）。
-        for (const key of def.keys) if (key !== def.key) item[key] = toText(source[key]).trim();
+    const recipeItems = [];
+    if (list !== null && list !== undefined && !Array.isArray(list)) {
+      warnings.push(`phase1.${sectionName} がリストの形ではないため、読み飛ばしました。`);
+    } else if (Array.isArray(list)) {
+      let index = 0;
+      for (const source of list) {
+        if (isCommented(source)) {
+          if (toText(source[def.key]).trim() !== '') recipeItems.push(recipeSectionItem(sectionName, source));
+          continue;
+        }
+        const where = `phase1.${sectionName} の ${++index} 番目`;
+        if (!isPlainObject(source)) { warnings.push(`${where} が「キー: 値」の形ではないため、読み飛ばしました。`); continue; }
+        for (const key of unknownKeys(source, def.keys)) warnings.push(`${where} の「${key}」は使われないため、読み飛ばしました。`);
+        if (toText(source[def.key]).trim() === '') { warnings.push(`${where} に「${def.key}」がないため、読み飛ばしました。`); continue; }
+        const item = recipeSectionItem(sectionName, source);
+        item.checked = true;
+        recipeItems.push(item);
       }
-      item.checked = true;
-    });
+    }
+    state.sections[sectionName] = orderByRecipe(state.sections[sectionName], recipeItems);
   }
 
   const phase2 = isPlainObject(config.phase2) ? config.phase2 : {};
   for (const key of unknownKeys(phase2, ['packageManagers'])) warnings.push(`phase2 の「${key}」は使われないため、読み飛ばしました。`);
   const managers = phase2.packageManagers;
+  const recipeManagers = [];
   if (managers !== null && managers !== undefined && !Array.isArray(managers)) {
     warnings.push('phase2.packageManagers がリストの形ではないため、読み飛ばしました。');
   } else if (Array.isArray(managers)) {
-    for (const source of managers.filter(isCommented)) addCommentedManager(source);
-    managers.filter((source) => !isCommented(source)).forEach((source, index) => {
-      const where = `phase2.packageManagers の ${index + 1} 番目`;
-      if (!isPlainObject(source)) { warnings.push(`${where} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
+    let index = 0;
+    for (const source of managers) {
+      if (isCommented(source)) {
+        const manager = commentedManager(source);
+        if (manager) recipeManagers.push(manager);
+        continue;
+      }
+      const where = `phase2.packageManagers の ${++index} 番目`;
+      if (!isPlainObject(source)) { warnings.push(`${where} が「キー: 値」の形ではないため、読み飛ばしました。`); continue; }
       for (const key of unknownKeys(source, MANAGER_KEYS)) warnings.push(`${where} の「${key}」は使われないため、読み飛ばしました。`);
       const name = toText(source.managerName).trim();
       const checkCommand = toText(source.checkCommand).trim();
       const installCommand = toText(source.installCommand).trim();
       if (!name || !checkCommand || !installCommand) {
         warnings.push(`${where} に managerName・checkCommand・installCommand のどれかがないため、読み飛ばしました。`);
-        return;
+        continue;
       }
-      let manager = findManager(name);
-      if (!manager) {
-        manager = newManager(name, checkCommand, installCommand, true);
-        state.managers.push(manager);
-      } else {
-        manager.checkCommand = checkCommand;
-        manager.installCommand = installCommand;
-      }
+      const manager = recipeManager(name, checkCommand, installCommand);
+      recipeManagers.push(manager);
       const packages = source.packages;
+      const recipePackages = [];
       if (packages !== null && packages !== undefined && !Array.isArray(packages)) {
         warnings.push(`${where} の packages がリストの形ではないため、読み飛ばしました。`);
-        return;
-      }
-      addCommentedPackages(manager, (packages || []).filter(isCommented));
-      (packages || []).filter((pkg) => !isCommented(pkg)).forEach((pkg, pkgIndex) => {
-        const pkgWhere = `${where} の packages の ${pkgIndex + 1} 番目`;
-        if (!isPlainObject(pkg)) { warnings.push(`${pkgWhere} が「キー: 値」の形ではないため、読み飛ばしました。`); return; }
-        for (const key of unknownKeys(pkg, PACKAGE_KEYS)) warnings.push(`${pkgWhere} の「${key}」は使われないため、読み飛ばしました。`);
-        const pkgName = toText(pkg.name).trim();
-        if (!pkgName) { warnings.push(`${pkgWhere} に「name」がないため、読み飛ばしました。`); return; }
-        let target = manager.packages.find((p) => p.name === pkgName);
-        if (!target) {
-          target = newPackage(pkgName, '', false, true);
-          manager.packages.push(target);
+      } else {
+        let pkgIndex = 0;
+        for (const pkg of packages || []) {
+          if (isCommented(pkg)) {
+            if (toText(pkg.name).trim() !== '') recipePackages.push(recipePackage(manager, pkg));
+            continue;
+          }
+          const pkgWhere = `${where} の packages の ${++pkgIndex} 番目`;
+          if (!isPlainObject(pkg)) { warnings.push(`${pkgWhere} が「キー: 値」の形ではないため、読み飛ばしました。`); continue; }
+          for (const key of unknownKeys(pkg, PACKAGE_KEYS)) warnings.push(`${pkgWhere} の「${key}」は使われないため、読み飛ばしました。`);
+          if (!toText(pkg.name).trim()) { warnings.push(`${pkgWhere} に「name」がないため、読み飛ばしました。`); continue; }
+          const target = recipePackage(manager, pkg);
+          target.checked = true;
+          recipePackages.push(target);
         }
-        target.description = toText(pkg.description).trim();
-        target.checked = true;
-      });
-    });
+      }
+      manager.packages = orderByRecipe(manager.packages, recipePackages);
+    }
   }
+  state.managers = orderByRecipe(state.managers, recipeManagers);
+  // レシピにないパッケージマネージャーのパッケージは、すべて「ほかのテンプレートにある項目」として扱う。
+  for (const manager of state.managers) if (!manager.inRecipe) for (const pkg of manager.packages) pkg.inRecipe = false;
   return warnings;
 }
 
@@ -3763,7 +3799,7 @@ function buildYaml() {
   };
   for (const sectionName of Object.keys(SECTIONS)) {
     const def = SECTIONS[sectionName];
-    const items = state.sections[sectionName];
+    const items = state.sections[sectionName].filter((item) => item.inRecipe || item.checked);
     if (items.length === 0) { out.push(`  ${sectionName}: []`); continue; }
     // 「[]」の後ろにコメントアウトした項目を並べると、読み戻すときに形が崩れるため、何も選ばれていなくても「key:」で始める。
     out.push(`  ${sectionName}:`);
@@ -3778,11 +3814,13 @@ function buildYaml() {
     }
   }
   out.push('', 'phase2:');
-  if (state.managers.length === 0) {
+  const managers = state.managers.filter((manager) => manager.inRecipe || manager.packages.some((pkg) => pkg.checked));
+  if (managers.length === 0) {
     out.push('  packageManagers: []');
   } else {
     out.push('  packageManagers:');
-    for (const manager of state.managers) {
+    for (const manager of managers) {
+      const packages = manager.packages.filter((pkg) => pkg.inRecipe || pkg.checked);
       const packageLines = (pkg) => (pkg.description
         ? [`- description: ${quote(pkg.description)}`, `  name: ${quote(pkg.name)}`]
         : [`- name: ${quote(pkg.name)}`]);
@@ -3792,12 +3830,12 @@ function buildYaml() {
         `  installCommand: ${quote(manager.installCommand)}`,
         '  packages:',
       ];
-      if (manager.packages.some((pkg) => pkg.checked)) {
+      if (packages.some((pkg) => pkg.checked)) {
         pushItem('    ', true, headerLines);
-        for (const pkg of manager.packages) pushItem('        ', pkg.checked, packageLines(pkg));
+        for (const pkg of packages) pushItem('        ', pkg.checked, packageLines(pkg));
       } else {
         // 1つも選ばれていないパッケージマネージャーは、まるごとコメントアウトする。
-        pushItem('    ', false, [...headerLines, ...manager.packages.flatMap((pkg) => packageLines(pkg).map((line) => `    ${line}`))]);
+        pushItem('    ', false, [...headerLines, ...packages.flatMap((pkg) => packageLines(pkg).map((line) => `    ${line}`))]);
       }
     }
   }
@@ -3933,6 +3971,12 @@ function screenshotPreview(shot, figureId) {
 function emptyState(title, text) {
   return h('div', { className: 'card empty-state' }, h('strong', null, title), text);
 }
+// 今のレシピに書かれていない項目の前に置く見出し。ここから下は、チェックしたものだけが recipe.yaml に入る。
+function otherHeading() {
+  return h('div', { className: 'other-head' },
+    h('h2', null, 'ほかのテンプレートにある項目'),
+    h('p', null, '今のレシピには書かれていない項目です。チェックを付けたものだけが recipe.yaml に入ります。'));
+}
 
 function searchBox(onInput) {
   return h('div', { className: 'search' },
@@ -4066,14 +4110,21 @@ function renderSectionTab(sectionName) {
       listHost.replaceChildren(emptyState('当てはまる項目がありません', '絞り込みの言葉を変えるか、下から項目を追加してください。'));
       return;
     }
+    const others = items.filter((item) => !item.inRecipe);
+    listHost.replaceChildren(
+      ...groupCards(items.filter((item) => item.inRecipe), 'recipe'),
+      ...(others.length ? [otherHeading(), ...groupCards(others, 'other')] : []));
+  }
+
+  function groupCards(items, part) {
     const groups = new Map();
     for (const item of items) {
       if (!groups.has(item.group)) groups.set(item.group, []);
       groups.get(item.group).push(item);
     }
-    listHost.replaceChildren(...[...groups].map(([group, groupItems], groupIndex) => {
+    return [...groups].map(([group, groupItems], groupIndex) => {
       const boxes = [];
-      const headId = `group-${sectionName}-${groupIndex}`;
+      const headId = `group-${sectionName}-${part}-${groupIndex}`;
       const { parent, count, sync } = groupToggle(
         groupItems,
         () => boxes.forEach((box, i) => { box.checked = groupItems[i].checked; }),
@@ -4100,7 +4151,7 @@ function renderSectionTab(sectionName) {
           h('h3', null, h('label', { for: headId }, group)),
           count),
         h('div', { className: `items${def.singleColumn ? ' single' : ''}` }, rows));
-    }));
+    });
   }
 
   const error = h('p', { className: 'form-error', role: 'alert' });
@@ -4118,6 +4169,7 @@ function renderSectionTab(sectionName) {
       const item = sectionItemFrom(sectionName, values, CUSTOM_GROUP);
       item.custom = true;
       item.checked = true;
+      item.inRecipe = true;
       state.sections[sectionName].push(item);
       for (const field of def.fields) inputs[field.name].value = '';
       error.textContent = '';
@@ -4155,61 +4207,81 @@ function renderManagersTab() {
 
   function renderList() {
     const filter = (state.filters.packageManagers || '').trim();
-    const cards = [];
+    // レシピにあるパッケージマネージャーは、レシピにあるパッケージだけを上に出す。
+    // ほかのテンプレートにしかないパッケージは、同じパッケージマネージャーでも下の別枠に出す。
+    const recipeCards = [];
+    const otherCards = [];
     state.managers.forEach((manager, managerIndex) => {
-      const managerMatches = matchesFilter(`${manager.managerName} ${manager.checkCommand} ${manager.installCommand}`, filter);
-      const packages = manager.packages.filter((pkg) => managerMatches || matchesFilter(`${pkg.name} ${pkg.description}`, filter));
-      if (!managerMatches && packages.length === 0) return;
-
-      const boxes = [];
-      const headId = `manager-${managerIndex}`;
-      const { parent, count, sync } = groupToggle(
-        manager.packages,
-        () => boxes.forEach(({ box, pkg }) => { box.checked = pkg.checked; }),
-        { id: headId, 'aria-label': `${manager.managerName} のパッケージをすべて選ぶ` });
-
-      const rows = packages.map((pkg) => {
-        const id = `pkg-${managerIndex}-${manager.packages.indexOf(pkg)}`;
-        const box = h('input', { type: 'checkbox', id, checked: pkg.checked, onchange: (event) => { pkg.checked = event.target.checked; sync(); updateSummary(); } });
-        boxes.push({ box, pkg });
-        return h('div', { className: 'item' },
-          box,
-          h('label', { for: id, title: pkg.name },
-            h('span', { className: 'name' }, pkg.description || pkg.name, pkg.custom ? h('span', { className: 'tag' }, '追加') : null),
-            h('span', { className: 'detail' }, pkg.name)),
-          pkg.custom ? removeButton(pkg.name, manager.packages, pkg, renderList) : null);
-      });
-
-      const pkgName = h('input', { type: 'text', className: 'field mono', placeholder: 'パッケージ名', 'aria-label': `${manager.managerName} に追加するパッケージ名` });
-      const pkgDesc = h('input', { type: 'text', className: 'field', placeholder: '説明（任意）', 'aria-label': `${manager.managerName} に追加するパッケージの説明` });
-      const pkgError = h('p', { className: 'form-error', role: 'alert' });
-
-      cards.push(h('section', { className: 'card group' },
-        h('div', { className: 'group-head' },
-          parent,
-          h('div', { className: 'titles' },
-            h('h3', null, h('label', { for: headId }, manager.managerName), manager.custom ? h('span', { className: 'tag' }, '追加') : null),
-            h('span', { className: 'sub', title: manager.installCommand }, manager.installCommand)),
-          count,
-          manager.custom ? removeButton(manager.managerName, state.managers, manager, renderList) : null),
-        rows.length ? h('div', { className: 'items' }, rows) : h('p', { className: 'empty-state' }, 'パッケージがありません。下から追加してください。'),
-        h('form', {
-          className: 'inline-add',
-          novalidate: true,
-          onsubmit: (event) => {
-            event.preventDefault();
-            const values = { name: pkgName.value.trim(), description: pkgDesc.value.trim() };
-            const problem = validateFields([{ name: 'name', label: 'パッケージ名', required: true }, { name: 'description', label: '説明' }], values);
-            if (problem) { pkgError.textContent = problem; return; }
-            if (manager.packages.some((p) => p.name === values.name)) { pkgError.textContent = '同じパッケージが、すでにあります。'; return; }
-            manager.packages.push(newPackage(values.name, values.description, true, true));
-            renderList();
-            updateSummary();
-            toast('ok', `${manager.managerName} に ${values.name} を追加しました。`);
-          },
-        }, pkgName, pkgDesc, h('button', { type: 'submit', className: 'btn' }, icon('plus'), 'パッケージを追加'), pkgError)));
+      if (manager.inRecipe) recipeCards.push(managerCard(manager, managerIndex, manager.packages.filter((pkg) => pkg.inRecipe), 'recipe', filter));
+      const others = manager.inRecipe ? manager.packages.filter((pkg) => !pkg.inRecipe) : manager.packages;
+      if (!manager.inRecipe || others.length) otherCards.push(managerCard(manager, managerIndex, others, 'other', filter));
     });
+    const cards = recipeCards.filter(Boolean);
+    const shownOthers = otherCards.filter(Boolean);
+    if (shownOthers.length) cards.push(otherHeading(), ...shownOthers);
     listHost.replaceChildren(...(cards.length ? cards : [emptyState('当てはまる項目がありません', '絞り込みの言葉を変えてください。')]));
+  }
+
+  // 1つのパッケージマネージャーのカード。絞り込みに何も当てはまらないときは null を返す。
+  // パッケージの追加と、追加したパッケージマネージャーの削除は、そのパッケージマネージャーの本体のカードにだけ置く
+  // （レシピにあるものは上、ないものは下の別枠のカード）。
+  function managerCard(manager, managerIndex, cardPackages, part, filter) {
+    const isMain = (part === 'recipe') === manager.inRecipe;
+    const managerMatches = matchesFilter(`${manager.managerName} ${manager.checkCommand} ${manager.installCommand}`, filter);
+    const packages = cardPackages.filter((pkg) => managerMatches || matchesFilter(`${pkg.name} ${pkg.description}`, filter));
+    if (!managerMatches && packages.length === 0) return null;
+
+    const boxes = [];
+    const headId = `manager-${part}-${managerIndex}`;
+    const { parent, count, sync } = groupToggle(
+      cardPackages,
+      () => boxes.forEach(({ box, pkg }) => { box.checked = pkg.checked; }),
+      { id: headId, 'aria-label': `${manager.managerName} のパッケージをすべて選ぶ` });
+
+    const rows = packages.map((pkg) => {
+      const id = `pkg-${part}-${managerIndex}-${manager.packages.indexOf(pkg)}`;
+      const box = h('input', { type: 'checkbox', id, checked: pkg.checked, onchange: (event) => { pkg.checked = event.target.checked; sync(); updateSummary(); } });
+      boxes.push({ box, pkg });
+      return h('div', { className: 'item' },
+        box,
+        h('label', { for: id, title: pkg.name },
+          h('span', { className: 'name' }, pkg.description || pkg.name, pkg.custom ? h('span', { className: 'tag' }, '追加') : null),
+          h('span', { className: 'detail' }, pkg.name)),
+        pkg.custom ? removeButton(pkg.name, manager.packages, pkg, renderList) : null);
+    });
+
+    const pkgName = h('input', { type: 'text', className: 'field mono', placeholder: 'パッケージ名', 'aria-label': `${manager.managerName} に追加するパッケージ名` });
+    const pkgDesc = h('input', { type: 'text', className: 'field', placeholder: '説明（任意）', 'aria-label': `${manager.managerName} に追加するパッケージの説明` });
+    const pkgError = h('p', { className: 'form-error', role: 'alert' });
+    const addForm = h('form', {
+      className: 'inline-add',
+      novalidate: true,
+      onsubmit: (event) => {
+        event.preventDefault();
+        const values = { name: pkgName.value.trim(), description: pkgDesc.value.trim() };
+        const problem = validateFields([{ name: 'name', label: 'パッケージ名', required: true }, { name: 'description', label: '説明' }], values);
+        if (problem) { pkgError.textContent = problem; return; }
+        if (manager.packages.some((p) => p.name === values.name)) { pkgError.textContent = '同じパッケージが、すでにあります。'; return; }
+        const pkg = newPackage(values.name, values.description, true, true);
+        // 追加したパッケージは、そのパッケージマネージャーと同じ側（レシピにあるか、ほかのテンプレートか）に置く。
+        pkg.inRecipe = manager.inRecipe;
+        manager.packages.push(pkg);
+        renderList();
+        updateSummary();
+        toast('ok', `${manager.managerName} に ${values.name} を追加しました。`);
+      },
+    }, pkgName, pkgDesc, h('button', { type: 'submit', className: 'btn' }, icon('plus'), 'パッケージを追加'), pkgError);
+
+    return h('section', { className: 'card group' },
+      h('div', { className: 'group-head' },
+        parent,
+        h('div', { className: 'titles' },
+          h('h3', null, h('label', { for: headId }, manager.managerName), manager.custom ? h('span', { className: 'tag' }, '追加') : null),
+          h('span', { className: 'sub', title: manager.installCommand }, manager.installCommand)),
+        count,
+        manager.custom && isMain ? removeButton(manager.managerName, state.managers, manager, renderList) : null),
+      rows.length ? h('div', { className: 'items' }, rows) : h('p', { className: 'empty-state' }, 'パッケージがありません。下から追加してください。'),
+      isMain ? addForm : null);
   }
 
   const managerFields = [
@@ -4232,7 +4304,9 @@ function renderManagersTab() {
       }
       if (!problem && findManager(values.managerName)) problem = '同じ名前が、すでにあります。';
       if (problem) { error.textContent = problem; return; }
-      state.managers.push(newManager(values.managerName, values.checkCommand, values.installCommand, true));
+      const manager = newManager(values.managerName, values.checkCommand, values.installCommand, true);
+      manager.inRecipe = true;
+      state.managers.push(manager);
       for (const field of managerFields) inputs[field.name].value = '';
       error.textContent = '';
       renderList();
@@ -4244,7 +4318,7 @@ function renderManagersTab() {
     inputs[field.name] = h('input', { type: 'text', className: `field${field.mono ? ' mono' : ''}`, placeholder: field.placeholder, 'aria-required': 'true' });
     return formRow(field, inputs[field.name]);
   }),
-  h('p', { className: 'form-note' }, icon('shield'), 'パッケージを1つ以上選んだものだけが recipe.yaml に入ります。コマンドは、そのまま PowerShell で実行されます。'),
+  h('p', { className: 'form-note' }, icon('shield'), 'パッケージを1つも選んでいないときは、まるごとコメントアウトして recipe.yaml に入ります。コマンドは、そのまま PowerShell で実行されます。'),
   error,
   h('div', { className: 'form-actions' }, h('button', { type: 'submit', className: 'btn primary' }, '追加する')));
 
