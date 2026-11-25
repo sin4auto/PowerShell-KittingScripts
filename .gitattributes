@@ -22,3 +22,11 @@
 # 画像はバイナリとして扱う
 *.png  binary
 *.jpg  binary
+
+# Release の zip（Source code）は、キッティングする人が使う。開発用の設定は使わないため入れない
+.claude/       export-ignore
+.github/       export-ignore
+.vscode/       export-ignore
+.mcp.json      export-ignore
+.gitattributes export-ignore
+.gitignore     export-ignore
