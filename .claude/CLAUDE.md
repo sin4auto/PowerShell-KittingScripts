@@ -15,11 +15,12 @@
 - 動作の確認は、実行ではなく構文チェックで行う（下の「確かめ方」）
 
 ## 文字コードと改行（守らないと文字化け・動作不良になる）
-- `.ps1`：UTF-8（BOM 付き）。PowerShell 5.1 で日本語を正しく読むために BOM が必要
+- `.ps1`：UTF-8（BOM 付き）、改行 CRLF。PowerShell 5.1 で日本語を正しく読むために BOM が必要
 - `.bat`：Shift-JIS、改行 CRLF。UTF-8 にするとコマンドプロンプトで文字化けする。Edit/Write ツールでは編集できないので、文字コードを保つ方法で変更する
 - `.sh`：UTF-8、改行 LF（WSL で実行するため）
-- `recipe.yaml`：UTF-8
-- 改行の扱いは `.gitattributes` で固定している
+- `recipe.yaml`：UTF-8、改行 CRLF
+- `.html`：UTF-8、改行 LF（`Update-RecipeBuilder.ps1` が LF で書き出すため）
+- 改行の扱いは `.gitattributes` で固定している。Git Bash の `sed -i` は CRLF を LF に変えてしまうので、使うなら `sed -b -i` にする。変更後は `git ls-files --eol` で確かめる
 
 ## 動作環境
 - PowerShell 5.1 でも動くこと。PowerShell 7 にしかない書き方（`&&`、`??`、三項演算子など）は使わない

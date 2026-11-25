@@ -1,5 +1,14 @@
 # 改行コードのルールを固定する（どのPC・どの Git 設定で取り出しても同じ状態にする）
 
+# 決まりのないファイルは Git にテキストかどうかを判定させ、リポジトリの中では LF で保存する。
+# 取り出すときの改行は、各 PC の設定（core.autocrlf など）に任せる
+* text=auto
+
+# Windows でしか動かさないスクリプトとレシピは、どの PC でも CRLF で取り出す
+*.ps1  text eol=crlf
+*.yaml text eol=crlf
+*.yml  text eol=crlf
+
 # WSL（Linux）で実行するシェルスクリプトは、常に LF
 *.sh   text eol=lf
 
