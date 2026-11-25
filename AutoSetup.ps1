@@ -274,7 +274,8 @@ if ($setupPhase -ne '2') {
     # winget 自体が見つからない場合に前の終了コードを成功と取り違えないよう、「未判定」に戻す。
     $global:LASTEXITCODE = $null
     # wingetで管理されている全てのパッケージを最新バージョンに一括で更新する。
-    winget upgrade --all --silent --accept-package-agreements --accept-source-agreements
+    # msstore ソースは証明書エラーや利用規約の表示で止まることがあるため、install・list と同じく winget ソースに限る。
+    winget upgrade --all --source winget --silent --accept-package-agreements --accept-source-agreements
     # 更新プロセスで何らかの問題が発生したかを確認する。
     if ($LASTEXITCODE -ne 0) {
         Write-Warning "-> アプリ全体の更新プロセス中にエラーが報告されました。終了コード: $LASTEXITCODE"
