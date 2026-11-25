@@ -467,9 +467,8 @@ phase2:
           name: christian-kohler.path-intellisense
         - description: 'dotenvファイル支援'
           name: mikestead.dotenv
-        # [コーディング支援（AI）]
-        - description: 'AIコード自動生成・チャット（GitHub Copilot）'
-          name: GitHub.copilot-chat
+        # GitHub Copilot Chat は VS Code に組み込まれたので入れない。
+        # code --list-extensions に出てこないため、毎回「未インストール」と判定され、インストールが走ってしまう。
         # [バージョン管理 / コラボ / CI]
         - description: 'Git機能を強化'
           name: eamodio.gitlens
