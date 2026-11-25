@@ -221,6 +221,16 @@ phase1:
       name: "*Microsoft.ZuneVideo*"
     # - description: 'ヘルプ'
     #   name: "*Microsoft.GetHelp*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ

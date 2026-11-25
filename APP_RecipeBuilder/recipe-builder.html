@@ -1422,6 +1422,7 @@ phase2:
           name: weeder
 
     - managerName: 'vscode'
+      # 終了コードだけで判定するため、findstr が見つけた行はログに出さない。
       checkCommand: 'code --list-extensions | findstr /i /c:"{package}" > $null'
       installCommand: 'code --install-extension {package}'
       packages:
@@ -1740,6 +1741,16 @@ phase1:
       name: "*Microsoft.ZuneVideo*"
     # - description: 'ヘルプ'
     #   name: "*Microsoft.GetHelp*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
@@ -2010,6 +2021,16 @@ phase1:
       name: "*Microsoft.ZuneVideo*"
     # - description: 'ヘルプ'
     #   name: "*Microsoft.GetHelp*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
@@ -2300,6 +2321,16 @@ phase1:
       name: "*Microsoft.ZuneVideo*"
     # - description: 'ヘルプ'
     #   name: "*Microsoft.GetHelp*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
@@ -2555,6 +2586,16 @@ phase1:
       name: "*Microsoft.ZuneVideo*"
     # - description: 'ヘルプ'
     #   name: "*Microsoft.GetHelp*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
@@ -2811,6 +2852,16 @@ phase1:
       name: "*Microsoft.ZuneVideo*"
     # - description: 'ヘルプ'
     #   name: "*Microsoft.GetHelp*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
@@ -3133,6 +3184,16 @@ phase1:
       name: "*Microsoft.ZuneVideo*"
     # - description: 'ヘルプ'
     #   name: "*Microsoft.GetHelp*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'ビデオエディター'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'ソリティア & カジュアルゲーム'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
 # ■ フェーズ2 開発環境のセットアップ
@@ -3140,6 +3201,7 @@ phase1:
 phase2:
   packageManagers:
     - managerName: 'vscode'
+      # 終了コードだけで判定するため、findstr が見つけた行はログに出さない。
       checkCommand: 'code --list-extensions | findstr /i /c:"{package}" > $null'
       installCommand: 'code --install-extension {package}'
       packages:
