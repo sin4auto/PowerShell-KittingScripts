@@ -190,6 +190,9 @@ if ($setupPhase -ne '2') {
         }
         Write-Host "`n--- Windowsの各種設定変更が完了しました ---`n" -ForegroundColor Green
     }
+    # winget が「インストールは成功、完了には再起動が必要」のときに返す終了コード（0x8A150109）。
+    # Visual Studio Build Tools のように、インストーラーが 3010 を返すとこのコードになる。
+    $wingetRebootRequiredToFinish = -1978334967
     # --- アプリケーションのインストール (winget) ---
     # recipe.yamlに'phase1.wingetInstall'セクションが存在する場合にのみ実行する。
     if ($config.phase1.wingetInstall) {
@@ -228,6 +231,10 @@ if ($setupPhase -ne '2') {
                 winget @wingetArgs
                 if ($LASTEXITCODE -eq 0) {
                     Write-Host "-> [$($wingetApp.id)] のインストールに成功しました。`n" -ForegroundColor Green
+                }
+                elseif ($LASTEXITCODE -eq $wingetRebootRequiredToFinish) {
+                    # フェーズ1の最後に必ず再起動するため、再起動で仕上がるインストールは成功として扱う。
+                    Write-Host "-> [$($wingetApp.id)] のインストールに成功しました（再起動で完了します）。`n" -ForegroundColor Green
                 }
                 else {
                     Write-Warning "-> [$($wingetApp.id)] のインストール中にエラーが発生しました。終了コード: $LASTEXITCODE`n"
@@ -276,8 +283,8 @@ if ($setupPhase -ne '2') {
     # wingetで管理されている全てのパッケージを最新バージョンに一括で更新する。
     # msstore ソースは証明書エラーや利用規約の表示で止まることがあるため、install・list と同じく winget ソースに限る。
     winget upgrade --all --source winget --silent --accept-package-agreements --accept-source-agreements
-    # 更新プロセスで何らかの問題が発生したかを確認する。
-    if ($LASTEXITCODE -ne 0) {
+    # 更新プロセスで何らかの問題が発生したかを確認する。再起動で仕上がる更新は、このあとの再起動で完了するため失敗にしない。
+    if (($LASTEXITCODE -ne 0) -and ($LASTEXITCODE -ne $wingetRebootRequiredToFinish)) {
         Write-Warning "-> アプリ全体の更新プロセス中にエラーが報告されました。終了コード: $LASTEXITCODE"
         $script:failedItems.Add("Winget Upgrade: 全体更新")
     }
