@@ -154,17 +154,20 @@ phase2:
 - `step1_only_dev/`: フェーズ 1 が中心で、開発用のアプリも入れる構成です。フェーズ 2 では、PSScriptAnalyzer（PowerShell の書き方チェック）だけを入れます。
 - `step2_VSCode/`・`step2_npm/`・`step2_pip/`・`step2_Rust/`・`step2_Go/`・`step2_Haskell/`: フェーズ 2 で、それぞれのツールや言語のパッケージを入れる構成です。
 - `step2_all/`: 上のフェーズ 2 をすべてまとめた、全部入りの構成です。
+- `step2_Haskell/` と `step2_all/` は、GHC 9.14.1 を既定にします。hlint は GHC 9.14 にまだ対応していないため、既定は変えずに GHC 9.10.3 も入れ、hlint だけそちらでビルドします。
 - `step1_only_basic/` 以外のテンプレートは、フェーズ 2 で PSScriptAnalyzer を PowerShell 7 に入れます。
 
 ## ログと結果の確認
 
 スクリプトの実行記録は、スクリプトと同じフォルダーに保存されます。
 
-- `AutoWindowsUpdate.log`: `AutoWindowsUpdate.ps1` の実行記録です。
-- `AutoSetup.log`: `AutoSetup.ps1` の実行記録です。フェーズ 1 とフェーズ 2 の記録が、1 つのファイルにまとめて追記されます。
+- `AutoWindowsUpdate.log`: `AutoWindowsUpdate.ps1` の実行記録です。更新ごとの結果（承諾・ダウンロード・インストール・失敗など）を、KB 番号とタイトルと一緒に 1 行ずつ記録します。
+- `AutoSetup.log`: `AutoSetup.ps1` の実行記録です。フェーズ 1 とフェーズ 2 の記録が、1 つのファイルにまとめて追記されます。PowerShell 7 で動いているときは、`recipe.yaml` のコマンドが出したエラーメッセージも記録します。5.1 で動いたときは記録されないので、失敗の原因がログに無い場合は、そのコマンドを手動で実行して確かめてください。
 - `AutoSetup-phase1-failures.log`: フェーズ 1 で失敗した項目の一覧です。再起動で画面が消えても、フェーズ 2 の最後の結果まとめに一緒に表示するために使います。表示し終わると削除されます。
 
 失敗した項目があると、処理の最後に一覧で表示されます。
+
+Visual Studio Build Tools のように、インストールの完了に再起動が必要なアプリは、失敗ではなく「インストールに成功しました（再起動で完了します）」と表示します。フェーズ 1 の最後の再起動で完了します。
 
 ## 実行場所ごとの注意点
 
@@ -380,17 +383,20 @@ phase2:
 - `step1_only_dev/`: Mainly phase 1, also installing development apps. Phase 2 installs only PSScriptAnalyzer (a PowerShell style checker).
 - `step2_VSCode/`, `step2_npm/`, `step2_pip/`, `step2_Rust/`, `step2_Go/`, `step2_Haskell/`: Install packages for each tool or language in phase 2.
 - `step2_all/`: All-in-one setup that combines all of the phase 2 sets above.
+- `step2_Haskell/` and `step2_all/` make GHC 9.14.1 the default. Because hlint does not support GHC 9.14 yet, they also install GHC 9.10.3 without changing the default and build only hlint with it.
 - All templates except `step1_only_basic/` install PSScriptAnalyzer into PowerShell 7 in phase 2.
 
 ## Logs and Results
 
 Execution logs are saved in the same folder as the scripts.
 
-- `AutoWindowsUpdate.log`: Log of `AutoWindowsUpdate.ps1`.
-- `AutoSetup.log`: Log of `AutoSetup.ps1`. Phase 1 and phase 2 are appended to the same file.
+- `AutoWindowsUpdate.log`: Log of `AutoWindowsUpdate.ps1`. Records the result of each update (accepted, downloaded, installed, failed, and so on) on one line with its KB number and title.
+- `AutoSetup.log`: Log of `AutoSetup.ps1`. Phase 1 and phase 2 are appended to the same file. When it runs on PowerShell 7, error messages from the commands in `recipe.yaml` are also recorded. They are not recorded when it runs on 5.1, so if the log does not show why something failed, run that command manually to check.
 - `AutoSetup-phase1-failures.log`: List of items that failed in phase 1. It is used to show them in the result summary at the end of phase 2, even though the reboot clears the screen. It is deleted after being shown.
 
 If any items fail, they are listed at the end of the run.
+
+Apps that need a restart to finish installing, such as Visual Studio Build Tools, are shown as "インストールに成功しました（再起動で完了します）" (installed; finishes after a restart) instead of as failures. The restart at the end of phase 1 completes them.
 
 ## Location-Specific Considerations
 
