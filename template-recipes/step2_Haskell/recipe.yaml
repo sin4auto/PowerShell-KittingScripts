@@ -12,11 +12,11 @@ phase1:
     # [Windows Update]
     - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
       command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
-    # [エクスプローラー設定]
-    - description: 'エクスプローラーで隠しファイルを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    # [エクスプローラー]
     - description: 'エクスプローラーで登録されている拡張子を常に表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
     - description: 'アドレスバーに常に完全なパスを表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
     - description: 'エクスプローラー起動時のデフォルト表示を「PC」にする'
@@ -25,44 +25,60 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
-    # [自動再生設定]
+    # [自動再生]
     - description: '全てのメディアとデバイスで自動再生機能を有効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
     - description: 'リムーバブルドライブ接続時、フォルダーを開いてファイルを表示する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
-    # [通知・プライバシー設定]
+    # [通知・おすすめ・広告]
     - description: 'サインイン時の「ようこそ」画面やヒント表示を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
     - description: 'デバイス設定の完了を促す通知を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
     - description: 'Windowsの使用に関するヒントや提案の通知を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリが自動でインストールされないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    # [プライバシー（診断・履歴）]
     - description: 'OSの診断データを必須なものに限定する'
       command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
     - description: '手書き・キーボード入力の履歴がMicrosoftに送信されるのを防ぐ'
       command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
-    - description: '診断データに基づいた個人向けのおすすめ機能などを無効化する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
     - description: 'アクティビティの履歴を記録しない'
       command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
     - description: 'アクティビティの履歴を Microsoft に送らない'
       command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
     - description: 'Windows がフィードバックを求めないようにする'
       command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
-    # [検索・プライバシー設定]
+    # [検索]
+    - description: 'デバイス上の検索履歴の保存を無効化する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
     - description: 'Windows SearchでMicrosoftアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
     - description: 'Windows Searchで職場/学校アカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
     - description: 'Windows SearchでAzure ADアカウントのクラウドコンテンツ検索を無効化'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
-    - description: 'デバイス上の検索履歴の保存を無効化する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
     - description: '検索ボックスの「検索ハイライト」を無効化する'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
-    - description: 'スタートメニューの検索で Web（Bing）の結果を表示しない'
-      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
-    # [セキュリティ・電源設定]
+    # [スタート・タスクバー]
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    # [セキュリティ]
     - description: 'コア分離 - メモリ整合性を有効化'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
     - description: 'コア分離 - カーネルモードハードウェア強制スタック保護を有効化'
@@ -71,26 +87,16 @@ phase1:
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
     - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
       command: 'Set-MpPreference -PUAProtection Enabled'
-    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
-      command: "powercfg.exe /hibernate off"
+    # [電源]
     - description: 'AC電源接続中にPCがスリープしないように設定'
       command: "powercfg.exe /change standby-timeout-ac 0"
-    # [タスクバー・スタートメニュー]
-    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
-    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
-    # [広告・おすすめの停止]
-    - description: '広告 ID を無効にする'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
-    - description: 'おすすめのアプリが自動でインストールされないようにする'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
-    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
-    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
-    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    - description: '休止状態を無効化（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
+    # [便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
     # [開発者向け]
     - description: '260 文字を超える長いパスを使えるようにする'
       command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
@@ -98,11 +104,6 @@ phase1:
       # PowerShell 7 で AutoSetup を動かしても Windows PowerShell（5.1）の設定を変えるよう、powershell.exe を呼ぶ（5.1 と 7 は設定の保存先が別）。
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
       command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
-    # [操作・便利機能]
-    - description: 'クリップボードの履歴（Windows + V）を有効にする'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
-    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
-      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
     # [開発環境の準備]
     - description: 'Haskell ツールチェーン (GHCup) を公式スクリプトでインストール'
       command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
