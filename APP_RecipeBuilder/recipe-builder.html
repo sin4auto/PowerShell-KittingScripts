@@ -1419,12 +1419,21 @@ phase2:
       packages:
         - description: 'コード整形（fourmolu）'
           name: fourmolu
-        - description: '静的解析（hlint）'
-          name: hlint
         - description: '関数・型の検索（hoogle）'
           name: hoogle
         - description: '使っていないコードの検出（weeder）'
           name: weeder
+
+    # --- cabal: GHC 9.14 でまだビルドできないツール ---
+    # hlint 3.10 が使う ghc-lib-parser 9.12 は base < 4.22 が条件で、GHC 9.14（base 4.22）では依存関係を解決できない。
+    # 既定の GHC（ghcup-ghc で --set したもの）は変えずに 9.10.3 を入れ、そちらでビルドする。hlint が GHC 9.14 に対応したら cabal-global に戻す。
+    - managerName: 'cabal-global-ghc910'
+      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
+      checkCommand: 'if (-not (Get-Command ''{package}'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
+      installCommand: 'ghcup install ghc 9.10.3; cabal update; cabal install -w ghc-9.10.3 --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      packages:
+        - description: '静的解析（hlint。GHC 9.10.3 でビルド）'
+          name: hlint
 
     - managerName: 'vscode'
       # 終了コードだけで判定するため、findstr が見つけた行はログに出さない。
@@ -2087,12 +2096,21 @@ phase2:
       packages:
         - description: 'コード整形（fourmolu）'
           name: fourmolu
-        - description: '静的解析（hlint）'
-          name: hlint
         - description: '関数・型の検索（hoogle）'
           name: hoogle
         - description: '使っていないコードの検出（weeder）'
           name: weeder
+
+    # --- cabal: GHC 9.14 でまだビルドできないツール ---
+    # hlint 3.10 が使う ghc-lib-parser 9.12 は base < 4.22 が条件で、GHC 9.14（base 4.22）では依存関係を解決できない。
+    # 既定の GHC（ghcup-ghc で --set したもの）は変えずに 9.10.3 を入れ、そちらでビルドする。hlint が GHC 9.14 に対応したら cabal-global に戻す。
+    - managerName: 'cabal-global-ghc910'
+      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
+      checkCommand: 'if (-not (Get-Command ''{package}'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
+      installCommand: 'ghcup install ghc 9.10.3; cabal update; cabal install -w ghc-9.10.3 --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      packages:
+        - description: '静的解析（hlint。GHC 9.10.3 でビルド）'
+          name: hlint
 
     # --- PowerShell モジュール（PowerShell Gallery） ---
     - managerName: 'psgallery'
