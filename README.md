@@ -81,7 +81,7 @@ YAML を手で書かずに `recipe.yaml` を作りたい場合は、`APP_RecipeB
 - `recipe.yaml` で `#` を付けてコメントアウトした項目は、チェックの付いていない項目として表示されます。逆に、チェックを外した項目は、保存する `recipe.yaml` にコメントアウトした形で残ります。あとから有効にするときは、その項目の各行の先頭にある `# `（`#` と、その後ろの空白1つ）を消します。
 - 「すべて選択」「選択をすべて外す」で、すべてのタブのチェックをまとめて付けたり外したりできます。各タブの「表示中をすべて選ぶ」「すべて外す」は、そのタブの中だけが対象です。
 - 一覧にない項目は、各タブの「一覧にない項目を追加する」から追加できます。
-- 「Windows 設定」タブの一部の項目は、「画面を見る」で、その設定が表示される Windows の画面を確かめられます。画像は撮影した PC の画面の例なので、お使いの PC とは状態が違う場合があります。アプリを別の場所にコピーするときは、`images` フォルダーも一緒にコピーしてください。
+- 「Windows 設定」タブの項目のうち、設定画面に当たる場所があるものは、「画面を見る」で、その設定が表示される Windows の画面を確かめられます。画像は撮影した PC の画面の例なので、お使いの PC とは状態が違う場合があります。アプリを別の場所にコピーするときは、`images` フォルダーも一緒にコピーしてください。
 - 「recipe.yaml を保存」で保存した `recipe.yaml` を、`AutoSetup.ps1` と同じフォルダーに置いて使います。
 
 `recipe.yaml` や `template-recipes/` を変更したときは、次のコマンドでアプリの一覧を更新してください。
@@ -121,28 +121,28 @@ phase2:
       installCommand: 'code --install-extension {package}'
       packages:
         # [UI / 表示]
-        - description: 'UIの日本語化'
+        - description: '画面の日本語化'
           name: ms-ceintl.vscode-language-pack-ja
-        - description: 'インデントを色付け'
+        - description: 'インデントの色分け'
           name: oderwat.indent-rainbow
-        - description: '全角スペースをハイライト'
+        - description: '全角スペースの強調表示'
           name: mosapride.zenkaku
-        - description: 'コメントを種類別に色分け'
+        - description: 'コメントの種類別の色分け'
           name: aaron-bond.better-comments
-        - description: 'エラー/警告を行内表示'
+        - description: 'エラー・警告の行内表示'
           name: usernamehw.errorlens
-        - description: 'EditorConfig（書式統一）'
+        - description: 'EditorConfig（書式の統一）'
           name: EditorConfig.EditorConfig
         # [ユーティリティ / Markdown]
-        - description: '印刷（コード/Markdown をブラウザ経由で印刷・PDF化）'
+        - description: '印刷（コードや Markdown をブラウザー経由で印刷・PDF 化）'
           name: pdconsec.vscode-print
-        - description: 'Markdown編集サポート'
+        - description: 'Markdown の編集支援'
           name: yzhang.markdown-all-in-one
-        - description: 'TODOコメントの一覧表示'
+        - description: 'TODO コメントの一覧表示'
           name: gruntfuggly.todo-tree
-        - description: 'ファイルパス入力補完'
+        - description: 'ファイル パスの入力補完'
           name: christian-kohler.path-intellisense
-        - description: 'dotenvファイル支援'
+        - description: 'dotenv ファイルの編集支援'
           name: mikestead.dotenv
 ```
 
@@ -214,7 +214,7 @@ Microsoft の `winget configuration` は、宣言的に環境を構築できる�
    「システムの変更」と「開発ツールの導入」の間に必ず再起動を挟むことで、PATH 環境変数が反映されていないために、フェーズ 2 で `npm` や `uv` などのコマンドが見つからない、という問題を防ぎます。
 
 3. **メニューから選ぶだけの操作**
-   `Start-Admin.bat` のメニューから「1. まずはアップデート」「2. 次にセットアップ」と選ぶだけなので、PowerShell に慣れていない人でも迷わずに進められます。
+   `Start-Admin.bat` のメニューから「1. AutoWindowsUpdate を実行する」「2. AutoSetup を実行する」の順に選ぶだけなので、PowerShell に慣れていない人でも迷わずに進められます。
 
 4. **パッケージマネージャーを自由に追加できる**
    `npm` や `pip` などのインストール方法は、`recipe.yaml` の `checkCommand` と `installCommand` で定義します。**スクリプトを編集せずに、`cargo`（Rust）のような新しいパッケージマネージャーを追加できます。**
@@ -307,7 +307,7 @@ If you want to create `recipe.yaml` without writing YAML by hand, double-click `
 - Entries commented out with `#` in `recipe.yaml` appear as unticked items. In the other direction, unticked items are kept in the saved `recipe.yaml` as commented-out entries. To enable one later, remove the leading `# ` (the `#` and the one space after it) from each of its lines.
 - "すべて選択" (select all) and "選択をすべて外す" (clear all) tick or clear items on all tabs at once. "表示中をすべて選ぶ" (select all shown) and "すべて外す" (clear all) on each tab affect only that tab.
 - Items that are not in the list can be added from "一覧にない項目を追加する" (add an item that is not in the list) on each tab.
-- For some items on the "Windows 設定" tab, "画面を見る" (show the screen) shows the Windows screen where that setting appears. The images are examples taken on one PC, so your PC may show a different state. When you copy the app somewhere else, copy the `images` folder with it.
+- For items on the "Windows 設定" tab that have a matching place in the Windows settings screens, "画面を見る" (show the screen) shows the Windows screen where that setting appears. The images are examples taken on one PC, so your PC may show a different state. When you copy the app somewhere else, copy the `images` folder with it.
 - Save `recipe.yaml` with "recipe.yaml を保存" (save recipe.yaml) and place it in the same folder as `AutoSetup.ps1`.
 
 When you change `recipe.yaml` or `template-recipes/`, run the following command to update the lists in the app.
@@ -349,26 +349,26 @@ phase2:
         # [UI / Display]
         - description: 'Japanese UI localization'
           name: ms-ceintl.vscode-language-pack-ja
-        - description: 'Colorize indentation'
+        - description: 'Color-coded indentation'
           name: oderwat.indent-rainbow
-        - description: 'Highlight full-width spaces'
+        - description: 'Highlighted full-width spaces'
           name: mosapride.zenkaku
-        - description: 'Colorize comments by type'
+        - description: 'Color-coded comments by type'
           name: aaron-bond.better-comments
-        - description: 'Inline error / warning display'
+        - description: 'Inline errors and warnings'
           name: usernamehw.errorlens
-        - description: 'EditorConfig (format consistency)'
+        - description: 'EditorConfig (consistent formatting)'
           name: EditorConfig.EditorConfig
         # [Utilities / Markdown]
-        - description: 'Print via browser to paper / PDF'
+        - description: 'Printing (print code or Markdown via a browser, or save as PDF)'
           name: pdconsec.vscode-print
-        - description: 'Markdown authoring support'
+        - description: 'Markdown editing support'
           name: yzhang.markdown-all-in-one
-        - description: 'TODO comment overview'
+        - description: 'List of TODO comments'
           name: gruntfuggly.todo-tree
         - description: 'File path completion'
           name: christian-kohler.path-intellisense
-        - description: 'dotenv support'
+        - description: 'dotenv file editing support'
           name: mikestead.dotenv
 ```
 
@@ -440,7 +440,7 @@ Microsoft's `winget configuration` is a powerful built-in feature for declarativ
    By always rebooting between "system changes" and "developer tool installation", it prevents commands such as `npm` or `uv` from being unavailable in phase 2 because the PATH environment variable has not been refreshed.
 
 3. **Simple menu-driven operation**
-   You just choose "1. Update first" and then "2. Run setup" from the `Start-Admin.bat` menu, so even people unfamiliar with PowerShell can proceed without getting lost.
+   You just choose "1. AutoWindowsUpdate を実行する" (run AutoWindowsUpdate) and then "2. AutoSetup を実行する" (run AutoSetup) from the `Start-Admin.bat` menu, so even people unfamiliar with PowerShell can proceed without getting lost.
 
 4. **Freely add package managers**
    How to install packages for `npm`, `pip`, and others is defined with `checkCommand` and `installCommand` in `recipe.yaml`. **You can add new package managers such as `cargo` (Rust) without editing the scripts.**
