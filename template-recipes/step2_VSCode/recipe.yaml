@@ -7,7 +7,7 @@
 # ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
 # ----------------------------------------------------------------
 phase1:
-  # --- Windowsシステム設定 (レジストリ変更) ---
+  # --- Windows の設定変更（レジストリ・電源・Defender など） ---
   windowsSettings:
     # [Windows Update]
     - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
@@ -110,7 +110,7 @@ phase1:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
       id: Microsoft.PowerShell
-    - description: 'Google Chrome（定番の Web ブラウザ）'
+    - description: 'Google Chrome（定番の Web ブラウザー）'
       id: Google.Chrome
     - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
       id: 7zip.7zip
