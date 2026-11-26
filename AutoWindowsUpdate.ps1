@@ -65,7 +65,7 @@ try {
         $transcriptStarted = $true
     } catch {
         # ログ記録が開始できない場合でも、処理は続行する。
-        Write-Warning "トランスクリプトの開始に失敗。ログは記録されません。Error: $($_.Exception.Message)"
+        Write-Warning "トランスクリプトの開始に失敗しました。ログは記録されません。エラー: $($_.Exception.Message)"
     }
     # --- フェーズ1: 実行前チェック ---
     # スクリプトの実行に必要な管理者権限があるかを確認する。
@@ -127,7 +127,7 @@ try {
         # 利用可能な更新プログラムが一つもなかった場合の処理。
         if (-not $updates) {
             Write-Host "`n>> 更新プログラムは検出されませんでした。システムは最新です。" -ForegroundColor Green
-            Write-Host ">> 全プロセス正常完了。処理を終了します..."
+            Write-Host ">> すべての処理が正常に終わりました。"
             # ループを脱出し、スクリプトを正常終了させる。
             break
         }
@@ -213,7 +213,7 @@ try {
 
     # --- フェーズ3: 正常終了時のクリーンアップ ---
     # whileループが正常にbreakされた（更新がなくなった）場合に実行される。
-    Write-Host "`n全ての処理が完了しました。"
+    Write-Host "`nすべての処理が完了しました。"
     # 念のため、残存している可能性のある自動実行タスクを削除する。
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
 
@@ -221,7 +221,7 @@ try {
     # --- フェーズ4: 例外処理 ---
     # スクリプト全体のtryブロック内で発生した、捕捉可能な全てのエラーをここで処理する。
     $exitCode = 1
-    Write-Host "`nFATAL: エラーが発生しました。 $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "`n致命的なエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
     if ($transcriptStarted) {
         Write-Host "処理を中断します。詳細はログファイルを参照してください: $LogFile" -ForegroundColor Red
     } else {

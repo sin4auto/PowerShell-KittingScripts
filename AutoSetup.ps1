@@ -357,8 +357,12 @@ if ($setupPhase -ne '2') {
         catch {
             Write-Warning "フェーズ1の失敗一覧を保存できませんでした。フェーズ2の結果まとめには表示されません: $($_.Exception.Message)"
         }
+        # 失敗があるのに「すべて完了」と緑で出すと、上の一覧を見落とすため、言い方と色を変える。
+        Write-Host "  フェーズ1の処理が終わりました（失敗した項目は上の一覧を確認してください）" -ForegroundColor Yellow
     }
-    Write-Host "  フェーズ1のすべての処理が完了しました！" -ForegroundColor Green
+    else {
+        Write-Host "  フェーズ1のすべての処理が完了しました！" -ForegroundColor Green
+    }
     Write-Host "===============================================`n"
     if (-not $taskRegistered) {
         # 自動実行がないまま再起動すると、フェーズ2が始まらないことに利用者が気づけないため、ここで止めて手順を示す。
@@ -447,8 +451,12 @@ if ($setupPhase -eq '2') {
             Write-Warning "- $failedItem"
         }
         Write-Host "==============================================="
+        # 失敗があるのに「すべて完了」と緑で出すと、上の一覧を見落とすため、言い方と色を変える。
+        Write-Host "  すべてのセットアップ処理が終わりました（失敗した項目は上の一覧を確認してください）" -ForegroundColor Yellow
     }
-    Write-Host "  すべてのセットアップ処理が完了しました！" -ForegroundColor Green
+    else {
+        Write-Host "  すべてのセットアップ処理が完了しました！" -ForegroundColor Green
+    }
     Write-Host "==============================================="
     # 結果まとめに表示し終えたので削除する。途中で止まった場合は、次にフェーズ2を手動実行したときに再表示される。
     if (Test-Path $phase1FailuresPath) {
