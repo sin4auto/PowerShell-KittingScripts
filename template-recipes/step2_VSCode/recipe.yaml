@@ -114,7 +114,7 @@ phase1:
       id: Google.Chrome
     - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
       id: 7zip.7zip
-    - description: 'VLC（多機能なメディアプレイヤー）'
+    - description: 'VLC（多機能なメディア プレーヤー）'
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
@@ -136,7 +136,7 @@ phase1:
       id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
-    - description: 'Visual Studio Code（高機能なコードエディタ）'
+    - description: 'Visual Studio Code（高機能なコード エディター）'
       id: Microsoft.VisualStudioCode
       options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
     # [ターミナル・コンテナ]
@@ -181,7 +181,7 @@ phase1:
     # [開発支援ツール]
     - description: 'WinMerge（ファイルとフォルダーの差分比較）'
       id: WinMerge.WinMerge
-    - description: 'サクラエディタ（日本製の定番テキストエディタ）'
+    - description: 'サクラエディタ（日本製の定番テキスト エディター）'
       id: sakura-editor.sakura
     - description: 'Obsidian（Markdown で書くノートアプリ）'
       id: Obsidian.Obsidian
@@ -194,7 +194,7 @@ phase1:
   # --- Appx (不要なプリインストールアプリの削除) ---
   appxRemove:
     # [基本機能・情報]
-    - description: 'AIアシスタント'
+    - description: 'Cortana（AI アシスタント）'
       name: "*Cortana*"
     - description: 'ニュース'
       name: "*Microsoft.BingNews*"
@@ -204,33 +204,33 @@ phase1:
       name: "*Microsoft.WindowsMaps*"
     - description: 'ヒント'
       name: "*Microsoft.Getstarted*"
-    - description: 'フィードバックHub'
+    - description: 'フィードバック Hub'
       name: "*Microsoft.WindowsFeedbackHub*"
     - description: 'スマートフォン連携'
       name: "*Microsoft.YourPhone*"
     # [生産性・ユーティリティ]
-    - description: 'OneNote (ストアアプリ版)'
+    - description: 'OneNote（ストア アプリ版）'
       name: "*Microsoft.Office.OneNote*"
-    - description: 'メール/カレンダー'
+    - description: 'メールとカレンダー'
       name: "*microsoft.windowscommunicationsapps*"
-    - description: 'People (連絡先)'
+    - description: 'People（連絡先）'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
     - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
-    # - description: 'ヘルプ'
+    # - description: '問い合わせ（Get Help）'
     #   name: "*Microsoft.GetHelp*"
     # - description: 'フォト'
     #   name: "*Microsoft.Windows.Photos*"
     # - description: 'ペイント 3D'
     #   name: "*Microsoft.MSPaint*"
-    # - description: 'ビデオエディター'
+    # - description: 'Clipchamp（動画編集）'
     #   name: "*Clipchamp.Clipchamp*"
     # - description: '複合現実ポータル'
     #   name: "*Microsoft.MixedReality.Portal*"
-    # - description: 'ソリティア & カジュアルゲーム'
+    # - description: 'Solitaire & Casual Games（ソリティアなどのゲーム）'
     #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
@@ -244,42 +244,42 @@ phase2:
       installCommand: 'code --install-extension {package}'
       packages:
         # [UI / 表示]
-        - description: 'UIの日本語化'
+        - description: '画面の日本語化'
           name: ms-ceintl.vscode-language-pack-ja
-        - description: 'インデントを色付け'
+        - description: 'インデントの色分け'
           name: oderwat.indent-rainbow
-        - description: '全角スペースをハイライト'
+        - description: '全角スペースの強調表示'
           name: mosapride.zenkaku
-        - description: 'コメントを種類別に色分け'
+        - description: 'コメントの種類別の色分け'
           name: aaron-bond.better-comments
-        - description: 'エラー/警告を行内表示'
+        - description: 'エラー・警告の行内表示'
           name: usernamehw.errorlens
-        - description: 'EditorConfig（書式統一）'
+        - description: 'EditorConfig（書式の統一）'
           name: EditorConfig.EditorConfig
         # [ユーティリティ / Markdown]
-        - description: '印刷（コード/Markdown をブラウザ経由で印刷・PDF化）'
+        - description: '印刷（コードや Markdown をブラウザー経由で印刷・PDF 化）'
           name: pdconsec.vscode-print
-        - description: 'Markdown編集サポート'
+        - description: 'Markdown の編集支援'
           name: yzhang.markdown-all-in-one
-        - description: 'TODOコメントの一覧表示'
+        - description: 'TODO コメントの一覧表示'
           name: gruntfuggly.todo-tree
-        - description: 'ファイルパス入力補完'
+        - description: 'ファイル パスの入力補完'
           name: christian-kohler.path-intellisense
-        - description: 'dotenvファイル支援'
+        - description: 'dotenv ファイルの編集支援'
           name: mikestead.dotenv
         # [バージョン管理 / コラボ / CI]
-        - description: 'Git機能を強化'
+        - description: 'Git 機能の強化'
           name: eamodio.gitlens
-        - description: 'Gitブランチツリー可視化'
+        - description: 'Git のブランチ ツリーの表示'
           name: mhutchie.git-graph
-        - description: 'GitHub PRレビュー'
+        - description: 'GitHub のプル リクエストのレビュー'
           name: GitHub.vscode-pull-request-github
-        - description: 'GitHub Actions支援'
+        - description: 'GitHub Actions の編集支援'
           name: github.vscode-github-actions
         - description: 'Live Share（共同編集）'
           name: MS-vsliveshare.vsliveshare
         # [リモート / コンテナ / Docker]
-        - description: 'WSL上のプロジェクトを直接編集'
+        - description: 'WSL 上のプロジェクトの直接編集'
           name: ms-vscode-remote.remote-wsl
         - description: 'Remote SSH（リモート開発）'
           name: ms-vscode-remote.remote-ssh
@@ -288,38 +288,38 @@ phase2:
         - description: 'コンテナ操作（Container Tools。旧 Docker 拡張）'
           name: ms-azuretools.vscode-containers
         # [デバッグ / ビルド / カバレッジ]
-        - description: 'CMakeツール連携'
+        - description: 'CMake との連携'
           name: ms-vscode.cmake-tools
-        - description: 'Makefile支援'
+        - description: 'Makefile の編集支援'
           name: ms-vscode.makefile-tools
-        - description: 'LLDBデバッガ（Rust/C/C++）'
+        - description: 'LLDB デバッガー（Rust・C・C++）'
           name: vadimcn.vscode-lldb
-        - description: 'テストカバレッジ可視化'
+        - description: 'テストカバレッジの表示'
           name: ryanluker.vscode-coverage-gutters
         # [言語サポート]
-        - description: 'Python言語サポート'
+        - description: 'Python の言語サポート'
           name: ms-python.python
-        - description: 'Python型解析（Pylance）'
+        - description: 'Python の型解析（Pylance）'
           name: ms-python.vscode-pylance
-        - description: 'Jupyterノートブック'
+        - description: 'Jupyter ノートブック'
           name: ms-toolsai.jupyter
-        - description: 'C/C++言語サポート（拡張パック）'
+        - description: 'C・C++ の言語サポート（拡張パック）'
           name: ms-vscode.cpptools-extension-pack
-        - description: 'Rust言語サポート（rust-analyzer）'
+        - description: 'Rust の言語サポート（rust-analyzer）'
           name: rust-lang.rust-analyzer
-        - description: 'Haskell言語サポート'
+        - description: 'Haskell の言語サポート'
           name: haskell.haskell
-        - description: 'Go言語サポート'
+        - description: 'Go の言語サポート'
           name: golang.Go
-        - description: 'C#言語サポート'
+        - description: 'C# の言語サポート'
           name: ms-dotnettools.csharp
-        - description: 'Java言語サポート'
+        - description: 'Java の言語サポート'
           name: redhat.java
-        - description: 'PowerShell言語サポート'
+        - description: 'PowerShell の言語サポート'
           name: ms-vscode.powershell
-        - description: 'YAML言語サポート'
+        - description: 'YAML の言語サポート'
           name: redhat.vscode-yaml
-        - description: 'TOMLサポート（Cargo/設定）'
+        - description: 'TOML の言語サポート（Cargo や設定ファイル）'
           name: tamasfe.even-better-toml
 
     # --- PowerShell モジュール（PowerShell Gallery） ---

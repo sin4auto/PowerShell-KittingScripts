@@ -114,7 +114,7 @@ phase1:
       id: Google.Chrome
     - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
       id: 7zip.7zip
-    - description: 'VLC（多機能なメディアプレイヤー）'
+    - description: 'VLC（多機能なメディア プレーヤー）'
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
@@ -136,7 +136,7 @@ phase1:
       id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
-    - description: 'Visual Studio Code（高機能なコードエディタ）'
+    - description: 'Visual Studio Code（高機能なコード エディター）'
       id: Microsoft.VisualStudioCode
       options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
     # [ターミナル・コンテナ]
@@ -181,7 +181,7 @@ phase1:
     # [開発支援ツール]
     - description: 'WinMerge（ファイルとフォルダーの差分比較）'
       id: WinMerge.WinMerge
-    - description: 'サクラエディタ（日本製の定番テキストエディタ）'
+    - description: 'サクラエディタ（日本製の定番テキスト エディター）'
       id: sakura-editor.sakura
     - description: 'Obsidian（Markdown で書くノートアプリ）'
       id: Obsidian.Obsidian
@@ -194,7 +194,7 @@ phase1:
   # --- Appx (不要なプリインストールアプリの削除) ---
   appxRemove:
     # [基本機能・情報]
-    - description: 'AIアシスタント'
+    - description: 'Cortana（AI アシスタント）'
       name: "*Cortana*"
     - description: 'ニュース'
       name: "*Microsoft.BingNews*"
@@ -204,33 +204,33 @@ phase1:
       name: "*Microsoft.WindowsMaps*"
     - description: 'ヒント'
       name: "*Microsoft.Getstarted*"
-    - description: 'フィードバックHub'
+    - description: 'フィードバック Hub'
       name: "*Microsoft.WindowsFeedbackHub*"
     - description: 'スマートフォン連携'
       name: "*Microsoft.YourPhone*"
     # [生産性・ユーティリティ]
-    - description: 'OneNote (ストアアプリ版)'
+    - description: 'OneNote（ストア アプリ版）'
       name: "*Microsoft.Office.OneNote*"
-    - description: 'メール/カレンダー'
+    - description: 'メールとカレンダー'
       name: "*microsoft.windowscommunicationsapps*"
-    - description: 'People (連絡先)'
+    - description: 'People（連絡先）'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
     - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
-    # - description: 'ヘルプ'
+    # - description: '問い合わせ（Get Help）'
     #   name: "*Microsoft.GetHelp*"
     # - description: 'フォト'
     #   name: "*Microsoft.Windows.Photos*"
     # - description: 'ペイント 3D'
     #   name: "*Microsoft.MSPaint*"
-    # - description: 'ビデオエディター'
+    # - description: 'Clipchamp（動画編集）'
     #   name: "*Clipchamp.Clipchamp*"
     # - description: '複合現実ポータル'
     #   name: "*Microsoft.MixedReality.Portal*"
-    # - description: 'ソリティア & カジュアルゲーム'
+    # - description: 'Solitaire & Casual Games（ソリティアなどのゲーム）'
     #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
@@ -245,25 +245,25 @@ phase2:
       checkCommand: 'if (-not (Get-Command ((''{package}''.Split(''/'')[-1]).Split(''@'')[0]) -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
       installCommand: 'go install {package}'
       packages:
-        - description: 'Go言語サーバ'
+        - description: 'Go の言語サーバー'
           name: golang.org/x/tools/gopls@latest
-        - description: 'import自動整形'
+        - description: 'import の自動整形'
           name: golang.org/x/tools/cmd/goimports@latest
-        - description: '厳格整形（gofumpt）'
+        - description: '厳しめのコード整形（gofumpt）'
           name: mvdan.cc/gofumpt@latest
         - description: '静的解析（Staticcheck）'
           name: honnef.co/go/tools/cmd/staticcheck@latest
-        - description: '脆弱性検出（公式）'
+        - description: '脆弱性の検出（公式）'
           name: golang.org/x/vuln/cmd/govulncheck@latest
-        - description: '包括的リンター'
+        - description: 'まとめて使えるリンター'
           name: github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-        - description: 'デバッガ（Delve）'
+        - description: 'デバッガー（Delve）'
           name: github.com/go-delve/delve/cmd/dlv@latest
-        - description: 'モック生成（uber/mock）'
+        - description: 'モックの生成（uber/mock）'
           name: go.uber.org/mock/mockgen@latest
-        - description: 'iota→String 生成'
+        - description: 'iota 定数の String メソッドの生成'
           name: golang.org/x/tools/cmd/stringer@latest
-        - description: 'テストスケルトン生成'
+        - description: 'テストのひな形の生成'
           name: github.com/cweill/gotests/gotests@latest
 
     # --- PowerShell モジュール（PowerShell Gallery） ---

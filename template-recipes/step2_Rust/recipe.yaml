@@ -114,7 +114,7 @@ phase1:
       id: Google.Chrome
     - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
       id: 7zip.7zip
-    - description: 'VLC（多機能なメディアプレイヤー）'
+    - description: 'VLC（多機能なメディア プレーヤー）'
       id: VideoLAN.VLC
     - description: 'PowerToys（Windows を便利にする公式ツール群）'
       id: Microsoft.PowerToys
@@ -136,7 +136,7 @@ phase1:
       id: Python.Python.3.14
     - description: 'uv（高速な Python パッケージインストーラー）'
       id: astral-sh.uv
-    - description: 'Visual Studio Code（高機能なコードエディタ）'
+    - description: 'Visual Studio Code（高機能なコード エディター）'
       id: Microsoft.VisualStudioCode
       options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
     # [ターミナル・コンテナ]
@@ -181,7 +181,7 @@ phase1:
     # [開発支援ツール]
     - description: 'WinMerge（ファイルとフォルダーの差分比較）'
       id: WinMerge.WinMerge
-    - description: 'サクラエディタ（日本製の定番テキストエディタ）'
+    - description: 'サクラエディタ（日本製の定番テキスト エディター）'
       id: sakura-editor.sakura
     - description: 'Obsidian（Markdown で書くノートアプリ）'
       id: Obsidian.Obsidian
@@ -194,7 +194,7 @@ phase1:
   # --- Appx (不要なプリインストールアプリの削除) ---
   appxRemove:
     # [基本機能・情報]
-    - description: 'AIアシスタント'
+    - description: 'Cortana（AI アシスタント）'
       name: "*Cortana*"
     - description: 'ニュース'
       name: "*Microsoft.BingNews*"
@@ -204,33 +204,33 @@ phase1:
       name: "*Microsoft.WindowsMaps*"
     - description: 'ヒント'
       name: "*Microsoft.Getstarted*"
-    - description: 'フィードバックHub'
+    - description: 'フィードバック Hub'
       name: "*Microsoft.WindowsFeedbackHub*"
     - description: 'スマートフォン連携'
       name: "*Microsoft.YourPhone*"
     # [生産性・ユーティリティ]
-    - description: 'OneNote (ストアアプリ版)'
+    - description: 'OneNote（ストア アプリ版）'
       name: "*Microsoft.Office.OneNote*"
-    - description: 'メール/カレンダー'
+    - description: 'メールとカレンダー'
       name: "*microsoft.windowscommunicationsapps*"
-    - description: 'People (連絡先)'
+    - description: 'People（連絡先）'
       name: "*Microsoft.People*"
     # [エンターテイメント・メディア]
     - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
       name: "*Microsoft.ZuneMusic*"
     - description: '映画 & テレビ'
       name: "*Microsoft.ZuneVideo*"
-    # - description: 'ヘルプ'
+    # - description: '問い合わせ（Get Help）'
     #   name: "*Microsoft.GetHelp*"
     # - description: 'フォト'
     #   name: "*Microsoft.Windows.Photos*"
     # - description: 'ペイント 3D'
     #   name: "*Microsoft.MSPaint*"
-    # - description: 'ビデオエディター'
+    # - description: 'Clipchamp（動画編集）'
     #   name: "*Clipchamp.Clipchamp*"
     # - description: '複合現実ポータル'
     #   name: "*Microsoft.MixedReality.Portal*"
-    # - description: 'ソリティア & カジュアルゲーム'
+    # - description: 'Solitaire & Casual Games（ソリティアなどのゲーム）'
     #   name: "*Microsoft.MicrosoftSolitaireCollection*"
 
 # ----------------------------------------------------------------
@@ -258,67 +258,67 @@ phase2:
         name: clippy
       - description: '標準ライブラリのソース'
         name: rust-src
-      - description: 'LLVMツール群（カバレッジ等）'
+      - description: 'LLVM ツール群（カバレッジなど）'
         name: llvm-tools-preview
   # --- rustup (ターゲット追加 / cross & WASM) ---
   - managerName: 'rustup-target'
     checkCommand: 'rustup target list --installed | findstr /b /i {package}'
     installCommand: 'rustup target add {package}'
     packages:
-      - description: 'WASM（ブラウザ系）'
+      - description: 'WebAssembly 向けビルド（ブラウザー用）'
         name: wasm32-unknown-unknown
-      - description: 'WASI（サーバサイドWASM）'
+      - description: 'WebAssembly 向けビルド（WASI。サーバー用）'
         name: wasm32-wasip1
-      - description: 'Linux向けクロスビルド'
+      - description: 'Linux 向けクロスビルド'
         name: x86_64-unknown-linux-gnu
-      - description: 'macOS向けクロスビルド (Intel Mac)'
+      - description: 'macOS 向けクロスビルド（Intel Mac）'
         name: x86_64-apple-darwin
-      - description: 'macOS向けクロスビルド (Apple Silicon)'
+      - description: 'macOS 向けクロスビルド（Apple Silicon）'
         name: aarch64-apple-darwin
-      - description: 'Windows向けクロスビルド (MSVC)'
+      - description: 'Windows 向けクロスビルド（MSVC）'
         name: x86_64-pc-windows-msvc
-      - description: 'Windows向けクロスビルド (GNU)'
+      - description: 'Windows 向けクロスビルド（GNU）'
         name: x86_64-pc-windows-gnu
-      - description: 'ARMv7 Linux向けクロスビルド (Raspberry Piなど)'
+      - description: 'ARMv7 Linux 向けクロスビルド（Raspberry Pi など）'
         name: armv7-unknown-linux-gnueabihf
-      - description: 'AArch64 Linux向けクロスビルド (ARMv8, Raspberry Pi 64bitなど)'
+      - description: 'AArch64 Linux 向けクロスビルド（ARMv8、64 ビット版 Raspberry Pi など）'
         name: aarch64-unknown-linux-gnu
-      - description: 'Android ARMv7向けクロスビルド'
+      - description: 'Android ARMv7 向けクロスビルド'
         name: armv7-linux-androideabi
-      - description: 'Android AArch64向けクロスビルド'
+      - description: 'Android AArch64 向けクロスビルド'
         name: aarch64-linux-android
   # --- cargo (CLIツール / stable) ---
   - managerName: 'cargo-stable'
     checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
     installCommand: 'cargo install --locked {package}'
     packages:
-      - description: '依存追加/更新（cargo-edit）'
+      - description: '依存関係の追加・更新（cargo-edit）'
         name: cargo-edit
-      - description: '脆弱性監査（RustSec）'
+      - description: '脆弱性の監査（RustSec）'
         name: cargo-audit
-      - description: '依存の更新状況'
+      - description: '依存関係の更新状況の確認'
         name: cargo-outdated
-      - description: '高速テストランナー'
+      - description: '高速なテスト実行'
         name: cargo-nextest
-      - description: 'カバレッジ（llvm-cov統合）'
+      - description: 'カバレッジの計測（llvm-cov）'
         name: cargo-llvm-cov
-      - description: 'ファイル変更監視・再実行'
+      - description: 'ファイルの変更を監視して再実行'
         name: cargo-watch
   # --- rustup (コンポーネント / nightly：Miri) ---
   - managerName: 'rustup-component-nightly'
     checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
     installCommand: 'rustup component add {package} --toolchain nightly'
     packages:
-      - description: '未定義動作検査 Miri 本体（cargo miri）'
+      - description: '未定義動作の検査（Miri 本体）'
         name: miri
-      - description: '標準ライブラリのソース（Miri用）'
+      - description: '標準ライブラリのソース（Miri 用）'
         name: rust-src
   # --- cargo (CLIツール / nightly専用) ---
   - managerName: 'cargo-nightly'
     checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
     installCommand: 'cargo +nightly install --locked {package}'
     packages:
-      - description: '未使用依存検出（nightly）'
+      - description: '使っていない依存関係の検出（nightly 版が必要）'
         name: cargo-udeps
 
   # --- PowerShell モジュール（PowerShell Gallery） ---
