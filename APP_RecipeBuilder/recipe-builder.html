@@ -3381,17 +3381,37 @@ const DEFAULT_TEMPLATE = 'step1_only_basic';
 // Windows 設定の項目ごとに、変わる場所が写った画面の画像（images フォルダー）を対応付ける。
 // コマンドの中のレジストリ値の名前で見分ける。画像は撮影した PC の状態を写した例。
 const SCREENSHOTS = [
-  { match: /\/v LaunchTo\b/, file: 'folder-options-general.png', where: 'エクスプローラーのオプション ＞ 一般 ＞ エクスプローラーで開く', box: [24, 70, 396, 32] },
+  { match: /7971f918-a847-4430-9279-4a52d1efe18d/, file: 'windows-update-options.png', where: '設定 ＞ Windows Update ＞ 詳細オプション ＞ その他の Microsoft 製品の更新プログラムを受け取る', box: [18, 66, 850, 68] },
+  { match: /\/v HideFileExt\b/, file: 'system-advanced-explorer.png', where: '設定 ＞ システム ＞ 詳細設定 ＞ エクスプローラー ＞ ファイル拡張子を表示する', box: [18, 113, 850, 70] },
+  { match: /\/v Hidden\b/, file: 'system-advanced-explorer.png', where: '設定 ＞ システム ＞ 詳細設定 ＞ エクスプローラー ＞ 非表示のファイルとシステム ファイルを表示する', box: [18, 186, 850, 70] },
+  { match: /\/v LaunchTo\b/, file: 'folder-options-general.png', where: 'エクスプローラーのオプション ＞ 一般 ＞ エクスプローラーで開く', box: [18, 72, 392, 30] },
+  { match: /\/v ShowRecent\b/, file: 'folder-options-general.png', where: 'エクスプローラーのオプション ＞ 一般 ＞ プライバシー ＞ 最近使用したファイルを表示する', box: [80, 331, 234, 22] },
+  { match: /\/v ShowFrequent\b/, file: 'folder-options-general.png', where: 'エクスプローラーのオプション ＞ 一般 ＞ プライバシー ＞ 使用頻度の高いフォルダーを表示する', box: [80, 355, 234, 22] },
   { match: /\/v DisableAutoplay\b/, file: 'autoplay.png', where: '設定 ＞ Bluetooth とデバイス ＞ 自動再生 ＞ すべてのメディアとデバイスで自動再生を使う', box: [28, 70, 270, 70] },
   { match: /StorageOnArrival/, file: 'autoplay.png', where: '設定 ＞ Bluetooth とデバイス ＞ 自動再生 ＞ リムーバブル ドライブ', box: [28, 206, 340, 76] },
+  { match: /\/v ScoobeSystemSettingEnabled\b/, file: 'notifications-additional.png', where: '設定 ＞ システム ＞ 通知 ＞ 追加の設定 ＞ Windows を最大限に活用し、このデバイスの設定を完了する方法を提案する', box: [60, 330, 790, 46] },
+  { match: /\/v SubscribedContent-338389Enabled\b/, file: 'notifications-additional.png', where: '設定 ＞ システム ＞ 通知 ＞ 追加の設定 ＞ Windows を使用する際のヒントや提案を入手する', box: [60, 381, 790, 46] },
   { match: /\/v AllowTelemetry\b/, file: 'privacy-feedback.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 診断とフィードバック ＞ 診断データ', box: [40, 70, 1000, 240] },
   { match: /\\Input\\TIPC"/, file: 'privacy-feedback.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 診断とフィードバック ＞ 手書き入力とタイプ入力の改善', box: [40, 312, 1000, 72] },
+  { match: /\/v TailoredExperiencesWithDiagnosticDataEnabled\b/, file: 'privacy-recommendations.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 推奨事項 & オファー ＞ パーソナライズされたオファー', box: [18, 66, 844, 68] },
+  { match: /\/v NumberOfSIUFInPeriod\b/, file: 'privacy-feedback.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 診断とフィードバック ＞ フィードバックの間隔', box: [40, 586, 1000, 68] },
   { match: /\/v IsDeviceSearchHistoryEnabled\b/, file: 'search-permissions.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 検索 ＞ 履歴の検索', box: [40, 152, 1000, 72] },
   { match: /\/v IsMSACloudSearchEnabled\b/, file: 'search-permissions.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 検索 ＞ 自分のアカウントを検索 ＞ Microsoft アカウント', box: [40, 536, 1000, 58] },
   { match: /\/v IsBusinessCloudSearchEnabled\b/, file: 'search-permissions.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 検索 ＞ 自分のアカウントを検索 ＞ 職場または学校アカウント', box: [40, 595, 1000, 54] },
   { match: /\\HypervisorEnforcedCodeIntegrity"/, file: 'core-isolation.png', where: 'Windows セキュリティ ＞ デバイス セキュリティ ＞ コア分離 ＞ メモリ整合性', box: [358, 150, 546, 158] },
   { match: /\\KernelShadowStacks"/, file: 'core-isolation.png', where: 'Windows セキュリティ ＞ デバイス セキュリティ ＞ コア分離 ＞ カーネル モード ハードウェア強制スタック保護', box: [358, 314, 546, 158] },
   { match: /\/v RunAsPPL\b/, file: 'core-isolation.png', where: 'Windows セキュリティ ＞ デバイス セキュリティ ＞ コア分離 ＞ ローカル セキュリティ機関の保護', box: [358, 472, 546, 174] },
+  { match: /-PUAProtection\b/, file: 'reputation-protection.png', where: 'Windows セキュリティ ＞ アプリとブラウザー コントロール ＞ 評価ベースの保護 ＞ 望ましくない可能性のあるアプリのブロック', box: [10, 322, 544, 226] },
+  { match: /standby-timeout-ac\b/, file: 'power-sleep.png', where: '設定 ＞ システム ＞ 電源 ＞ 画面、スリープ、休止状態のタイムアウト ＞ 電源に接続 ＞ 次の時間の経過後にデバイスをスリープ状態にする', box: [34, 393, 790, 50] },
+  { match: /\/v TaskbarEndTask\b/, file: 'system-advanced.png', where: '設定 ＞ システム ＞ 詳細設定 ＞ タスクの終了', box: [18, 93, 850, 68] },
+  { match: /\/v Start_TrackDocs\b/, file: 'personalization-start.png', where: '設定 ＞ 個人用設定 ＞ スタート ＞ 新着順 ＞ 最近使ったファイルとおすすめのファイルを表示する', box: [18, 287, 850, 66] },
+  { match: /\\AdvertisingInfo"/, file: 'privacy-recommendations.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 推奨事項 & オファー ＞ 広告識別子', box: [18, 431, 844, 68] },
+  // 3つの値は、どれも設定画面の同じスイッチに当たる。ElevenForum の手順書が、このスイッチを REG ファイルで変える方法として3つを同時に書き換えているため、3項目とも同じ場所を示す。
+  { match: /\/v SubscribedContent-(338393|353694|353696)Enabled\b/, file: 'privacy-recommendations.png', where: '設定 ＞ プライバシーとセキュリティ ＞ 推奨事項 & オファー ＞ [設定] の推奨事項とオファー', box: [18, 358, 844, 68] },
+  { match: /\/v LongPathsEnabled\b/, file: 'system-advanced.png', where: '設定 ＞ システム ＞ 詳細設定 ＞ 長いパスを有効にする', box: [18, 335, 850, 68] },
+  { match: /-ExecutionPolicy RemoteSigned\b/, file: 'system-advanced-powershell.png', where: '設定 ＞ システム ＞ 詳細設定 ＞ PowerShell ＞ 署名せずに実行するローカル PowerShell スクリプトを許可するように、実行ポリシーを変更します', box: [18, 300, 850, 127] },
+  { match: /\/v EnableClipboardHistory\b/, file: 'clipboard.png', where: '設定 ＞ システム ＞ クリップボード ＞ クリップボードの履歴', box: [18, 66, 850, 68] },
+  { match: /\\StickyKeys"/, file: 'sticky-keys.png', where: '設定 ＞ アクセシビリティ ＞ キーボード ＞ 固定キー機能 ＞ 固定キー機能用のキーボード ショートカット', box: [18, 117, 850, 70] },
 ];
 const screenshotFor = (item) => SCREENSHOTS.find((shot) => shot.match.test(item.command)) || null;
 
