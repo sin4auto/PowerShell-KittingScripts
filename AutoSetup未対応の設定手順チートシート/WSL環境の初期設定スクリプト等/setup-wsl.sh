@@ -54,12 +54,9 @@ write_bashrc_block() {
 }
 
 #---- 各セットアップ ----#
-check_location() {
-  # /mnt 配下（Windows 側のドライブ）は権限やパフォーマンス面で不利なので、Linux ホームを起点にする
+move_to_home() {
+  # /mnt 配下（Windows 側のドライブ）は権限やパフォーマンス面で不利なので、どこから実行しても Linux ホームを起点にする
   cd "$HOME"
-  if [[ "$PWD" == /mnt/* ]]; then
-    die "You are under /mnt/. Please move to your Linux home (e.g., cd ~) and re-run."
-  fi
 }
 
 setup_locale_timezone() {
@@ -203,7 +200,7 @@ EOF
 # 処理はすべて main から呼ぶ。curl | bash の途中でダウンロードが切れても、中途半端に実行されないようにするため
 main() {
   log "WSL Ubuntu full environment setup started..."
-  check_location
+  move_to_home
   setup_locale_timezone
   install_base_packages
   setup_git
