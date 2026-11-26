@@ -55,7 +55,16 @@ function Invoke-RecipeCommand {
     $ErrorActionPreference = 'Stop'
     try {
         # 出力を画面へ送る。戻り値に混ざると、失敗の理由と区別できなくなるため。
-        Invoke-Expression -Command $Command | Out-Host
+        if ($PSVersionTable.PSVersion.Major -ge 7) {
+            # 外部コマンドのエラー出力（stderr）はトランスクリプトに残らず、失敗の原因がログから分からなくなるため、通常の出力にまとめて記録する。
+            # 5.1 では、まとめた stderr の行が 'Stop' によって最初の1行で例外になり、成功したコマンドまで失敗になるため、7 だけで行う。
+            Invoke-Expression -Command $Command 2>&1 | ForEach-Object {
+                if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.ToString() } else { $_ }
+            } | Out-Host
+        }
+        else {
+            Invoke-Expression -Command $Command | Out-Host
+        }
     }
     catch {
         return "コマンドの実行に失敗しました: $($_.Exception.Message)"
