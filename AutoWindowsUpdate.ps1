@@ -174,9 +174,13 @@ try {
         # OSが再起動する直前のログが失われるのを防ぐため、一度ログを停止し、即座に追記モードで再開する。
         if ($transcriptStarted) { Stop-Transcript; Start-Transcript -Path $LogFile -Append }
         # 見つかった全ての更新プログラムを承諾し、インストールを実行する。-AutoRebootにより、必要に応じて自動で再起動される。
-        # 失敗を確かめるため結果を受け取る。Tee-Object で画面への表示も残す。
+        # 失敗を確かめるため結果を受け取る。Tee-Object で、進み具合を画面とログにも残す。
+        # 結果をそのまま表示すると、更新1件・段階ごとに数十項目が並び、ログが数千行になるため、1件1行にまとめる。
+        # 再起動の直前まで記録が残るよう、まとめて受け取ってから表示するのではなく、届いた順に表示する。
         $installResults = $null
-        Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose | Tee-Object -Variable installResults
+        Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot -Verbose | Tee-Object -Variable installResults | ForEach-Object {
+            Write-Host ("-> {0,-10} {1,-10} {2}" -f $_.Result, $_.KB, $_.Title)
+        }
         # 再起動コマンドが実行された後のための短い待機時間。
         Write-Host "-> 20秒間待機します..."
         Start-Sleep -Seconds 20
