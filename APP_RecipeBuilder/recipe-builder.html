@@ -587,6 +587,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -762,6 +773,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -1012,6 +1034,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -1556,6 +1589,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -1834,6 +1878,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -2149,6 +2204,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -2415,6 +2481,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -2682,6 +2759,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -3015,6 +3103,17 @@ phase1:
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
     - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {59031a47-3f72-44a7-89c5-5595fe6b30ee} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {F02C1A0D-BE21-4350-88B0-7367FC96EF3C} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {645FF040-5081-101B-9F08-00AA002F954E} /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0} /t REG_DWORD /d 0 /f'
     # [自動再生]
     - description: 'すべてのメディアとデバイスで自動再生を使う'
       command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
@@ -3414,6 +3513,11 @@ const SCREENSHOTS = [
   { match: /\/v LaunchTo\b/, file: 'folder-options-general.png', where: 'エクスプローラーのオプション ＞ 一般 ＞ エクスプローラーで開く', box: [18, 72, 392, 30] },
   { match: /\/v ShowRecent\b/, file: 'folder-options-general.png', where: 'エクスプローラーのオプション ＞ 一般 ＞ プライバシー ＞ 最近使用したファイルを表示する', box: [80, 331, 234, 22] },
   { match: /\/v ShowFrequent\b/, file: 'folder-options-general.png', where: 'エクスプローラーのオプション ＞ 一般 ＞ プライバシー ＞ 使用頻度の高いフォルダーを表示する', box: [80, 355, 234, 22] },
+  { match: /\\HideDesktopIcons\\NewStartPanel" \/v \{20D04FE0-3AEA-1069-A2D8-08002B30309D\}/i, file: 'desktop-icons.png', where: '設定 ＞ 個人用設定 ＞ テーマ ＞ デスクトップ アイコンの設定 ＞ コンピューター', box: [30, 92, 152, 24] },
+  { match: /\\HideDesktopIcons\\NewStartPanel" \/v \{59031a47-3f72-44a7-89c5-5595fe6b30ee\}/i, file: 'desktop-icons.png', where: '設定 ＞ 個人用設定 ＞ テーマ ＞ デスクトップ アイコンの設定 ＞ ユーザーのファイル', box: [30, 118, 162, 24] },
+  { match: /\\HideDesktopIcons\\NewStartPanel" \/v \{F02C1A0D-BE21-4350-88B0-7367FC96EF3C\}/i, file: 'desktop-icons.png', where: '設定 ＞ 個人用設定 ＞ テーマ ＞ デスクトップ アイコンの設定 ＞ ネットワーク', box: [30, 144, 112, 24] },
+  { match: /\\HideDesktopIcons\\NewStartPanel" \/v \{645FF040-5081-101B-9F08-00AA002F954E\}/i, file: 'desktop-icons.png', where: '設定 ＞ 個人用設定 ＞ テーマ ＞ デスクトップ アイコンの設定 ＞ ごみ箱', box: [216, 92, 84, 24] },
+  { match: /\\HideDesktopIcons\\NewStartPanel" \/v \{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0\}/i, file: 'desktop-icons.png', where: '設定 ＞ 個人用設定 ＞ テーマ ＞ デスクトップ アイコンの設定 ＞ コントロール パネル', box: [216, 118, 144, 24] },
   { match: /\/v DisableAutoplay\b/, file: 'autoplay.png', where: '設定 ＞ Bluetooth とデバイス ＞ 自動再生 ＞ すべてのメディアとデバイスで自動再生を使う', box: [28, 70, 270, 70] },
   { match: /StorageOnArrival/, file: 'autoplay.png', where: '設定 ＞ Bluetooth とデバイス ＞ 自動再生 ＞ リムーバブル ドライブ', box: [28, 206, 340, 76] },
   { match: /\/v ScoobeSystemSettingEnabled\b/, file: 'notifications-additional.png', where: '設定 ＞ システム ＞ 通知 ＞ 追加の設定 ＞ Windows を最大限に活用し、このデバイスの設定を完了する方法を提案する', box: [60, 330, 790, 46] },
