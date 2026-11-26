@@ -89,6 +89,16 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 $logFileName = "AutoSetup.log"
 # ログファイルをスクリプトと同じディレクトリに保存するためのフルパスを生成する。
 $logFilePath = Join-Path $PSScriptRoot $logFileName
+# PowerShell 7 は BOM なしの UTF-8 でログを作り、5.1 は BOM のないログに追記すると日本語を「?」に置き換えてしまう。
+# 7 で書いたログに 5.1 で続きを書いても読めるよう、5.1 のときだけ、追記の前にログの先頭へ BOM を付ける。
+# 7 は BOM のあるログに追記するたびに BOM を書き足すため、7 のときは付けない。
+if (($PSVersionTable.PSVersion.Major -lt 6) -and (Test-Path -LiteralPath $logFilePath)) {
+    $logBytes = [System.IO.File]::ReadAllBytes($logFilePath)
+    $hasBom = ($logBytes.Length -ge 3) -and ($logBytes[0] -eq 0xEF) -and ($logBytes[1] -eq 0xBB) -and ($logBytes[2] -eq 0xBF)
+    if (-not $hasBom) {
+        [System.IO.File]::WriteAllBytes($logFilePath, [byte[]]([byte[]](0xEF, 0xBB, 0xBF) + $logBytes))
+    }
+}
 # ログ記録（トランスクリプト）を開始する。-Appendオプションにより、既存のログファイルに追記する形で
 # フェーズ1とフェーズ2の実行記録を一つのファイルにまとめる。
 Start-Transcript -Path $logFilePath -Append
