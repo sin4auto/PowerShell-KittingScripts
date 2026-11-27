@@ -278,6 +278,15 @@ phase2:
         name: rust-src
       - description: 'LLVM ツール群（カバレッジなど）'
         name: llvm-tools
+  # --- rustup (コンポーネント / nightly：Miri) ---
+  - managerName: 'rustup-component-nightly'
+    checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
+    installCommand: 'rustup component add {package} --toolchain nightly'
+    packages:
+      - description: '未定義動作の検査（Miri 本体）'
+        name: miri
+      - description: '標準ライブラリのソース（Miri 用）'
+        name: rust-src
   # --- rustup (ターゲット追加 / cross & WASM) ---
   - managerName: 'rustup-target'
     # 1行に名前だけが出るので、行全体で比べる。先頭だけで比べると、wasm32-wasip1-threads を wasm32-wasip1 と取り違えるため。
@@ -291,16 +300,16 @@ phase2:
         name: wasm32-wasip1
       - description: 'Linux 向けクロスビルド'
         name: x86_64-unknown-linux-gnu
+      - description: 'AArch64 Linux 向けクロスビルド（ARMv8、64 ビット版 Raspberry Pi など）'
+        name: aarch64-unknown-linux-gnu
+      - description: 'ARMv7 Linux 向けクロスビルド（Raspberry Pi など）'
+        name: armv7-unknown-linux-gnueabihf
+      - description: 'Windows 向けクロスビルド（GNU）'
+        name: x86_64-pc-windows-gnu
       - description: 'macOS 向けクロスビルド（Intel Mac）'
         name: x86_64-apple-darwin
       - description: 'macOS 向けクロスビルド（Apple Silicon）'
         name: aarch64-apple-darwin
-      - description: 'Windows 向けクロスビルド（GNU）'
-        name: x86_64-pc-windows-gnu
-      - description: 'ARMv7 Linux 向けクロスビルド（Raspberry Pi など）'
-        name: armv7-unknown-linux-gnueabihf
-      - description: 'AArch64 Linux 向けクロスビルド（ARMv8、64 ビット版 Raspberry Pi など）'
-        name: aarch64-unknown-linux-gnu
       - description: 'Android ARMv7 向けクロスビルド'
         name: armv7-linux-androideabi
       - description: 'Android AArch64 向けクロスビルド'
@@ -312,25 +321,16 @@ phase2:
     packages:
       - description: '依存関係の版の一括更新（cargo-edit の cargo upgrade。cargo add・rm は cargo 本体にある）'
         name: cargo-edit
-      - description: '脆弱性の監査（RustSec）'
-        name: cargo-audit
       - description: '依存関係の更新状況の確認'
         name: cargo-outdated
+      - description: '脆弱性の監査（RustSec）'
+        name: cargo-audit
       - description: '高速なテスト実行'
         name: cargo-nextest
       - description: 'カバレッジの計測（llvm-cov）'
         name: cargo-llvm-cov
       - description: 'ファイルの変更を監視して、チェックやテストを再実行（bacon。開発が終わった cargo-watch の代わり）'
         name: bacon
-  # --- rustup (コンポーネント / nightly：Miri) ---
-  - managerName: 'rustup-component-nightly'
-    checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
-    installCommand: 'rustup component add {package} --toolchain nightly'
-    packages:
-      - description: '未定義動作の検査（Miri 本体）'
-        name: miri
-      - description: '標準ライブラリのソース（Miri 用）'
-        name: rust-src
   # --- cargo (CLIツール / nightly専用) ---
   - managerName: 'cargo-nightly'
     checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
