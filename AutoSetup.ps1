@@ -86,10 +86,8 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 #=============================================================================
 # ■ ログ記録の開始
 #=============================================================================
-# 実行される全コマンドとその出力を記録するログファイル名を定義する。
-$logFileName = "AutoSetup.log"
-# ログファイルをスクリプトと同じディレクトリに保存するためのフルパスを生成する。
-$logFilePath = Join-Path $PSScriptRoot $logFileName
+# 実行される全コマンドとその出力を記録するログファイル。スクリプトと同じフォルダーに置く。
+$logFilePath = Join-Path $PSScriptRoot "AutoSetup.log"
 # PowerShell 7 は BOM なしの UTF-8 でログを作り、5.1 は BOM のないログに追記すると日本語を「?」に置き換えてしまう。
 # 7 で書いたログに 5.1 で続きを書いても読めるよう、5.1 のときだけ、追記の前にログの先頭へ BOM を付ける。
 # 7 は BOM のあるログに追記するたびに BOM を書き足すため、7 のときは付けない。
@@ -100,9 +98,8 @@ if (($PSVersionTable.PSVersion.Major -lt 6) -and (Test-Path -LiteralPath $logFil
         [System.IO.File]::WriteAllBytes($logFilePath, [byte[]]([byte[]](0xEF, 0xBB, 0xBF) + $logBytes))
     }
 }
-# ログ記録（トランスクリプト）を開始する。-Appendオプションにより、既存のログファイルに追記する形で
-# フェーズ1とフェーズ2の実行記録を一つのファイルにまとめる。
-Start-Transcript -Path $logFilePath -Append
+# フェーズ1とフェーズ2の記録を1つのファイルにまとめるため、追記する。
+Start-Transcript -LiteralPath $logFilePath -Append
 #=============================================================================
 # ■ 実行前準備 (環境チェックと設定ファイルの読み込み)
 #=============================================================================
@@ -117,20 +114,15 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 # --- YAML解析モジュールの準備 ---
 try {
-    # 設定ファイル(YAML形式)を読み込むために必要な'powershell-yaml'モジュールが
-    # PCにインストールされているかを確認する。
     if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
         Write-Host "YAMLモジュールが見つかりません。インストールを試みます..." -ForegroundColor Yellow
-        # モジュールが存在しない場合、PowerShell公式リポジトリから自動的にインストールする。
         # PC 全体（AllUsers）に入れる。今のユーザーに入れると 5.1 と 7 で置き場所が分かれ、フェーズ2の 7 から見えずに入れ直しになるため。
         Install-Module -Name powershell-yaml -Scope AllUsers -Repository PSGallery -Force -AllowClobber -ErrorAction Stop
         Write-Host "YAMLモジュールのインストールが完了しました。" -ForegroundColor Green
     }
-    # 準備したモジュールを現在のPowerShellセッションで利用可能にする。
     Import-Module powershell-yaml -ErrorAction Stop
 }
 catch {
-    # モジュールのインストールまたはインポートに失敗した場合、エラーメッセージを表示してスクリプトを停止する。
     # 原因が分かるよう、元のエラーの内容も表示する。導入先は上と同じ「PC 全体」にそろえて案内する。
     Write-Error "YAMLモジュールの準備に失敗しました: $($_.Exception.Message)"
     Write-Error "インターネット接続を確認し、管理者のPowerShellで「Install-Module -Name powershell-yaml -Scope AllUsers」を手動で実行してください。"
@@ -140,19 +132,15 @@ catch {
 }
 # --- 設定ファイルの読み込み ---
 try {
-    # スクリプトと同じディレクトリに'recipe.yaml'が存在するか確認する。
     $configFilePath = Join-Path $PSScriptRoot "recipe.yaml"
-    if (-not (Test-Path $configFilePath)) {
+    if (-not (Test-Path -LiteralPath $configFilePath)) {
         throw "設定ファイル 'recipe.yaml' が見つかりません。"
     }
     Write-Host "設定ファイル 'recipe.yaml' を読み込んでいます..."
-    # 設定ファイルの内容をUTF-8として読み込み、YAMLパーサーでPowerShellオブジェクトに変換する。
-    $config = Get-Content -Path $configFilePath -Encoding UTF8 -Raw | ConvertFrom-Yaml
+    $config = Get-Content -LiteralPath $configFilePath -Encoding UTF8 -Raw | ConvertFrom-Yaml
 }
 catch {
-    # ファイルの読み込みやYAMLの解析中にエラーが発生した場合、その内容を表示して終了する。
     Write-Error "設定ファイルの読み込みでエラーが発生しました: $($_.Exception.Message)"
-    # エラーがYAMLの構文エラーである場合、ユーザーに書式の確認を促すメッセージを追加で表示する。
     if ($_.Exception.InnerException -is [YamlDotNet.Core.YamlException]) {
         Write-Error "YAMLの書式が正しくない可能性があります。インデント等を確認してください。"
     }
@@ -176,17 +164,14 @@ if ($setupPhase -ne '2') {
     Write-Host "-> 既存の自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     # 前回の実行で残った失敗一覧を、今回の結果と混ぜないよう削除する。
-    if (Test-Path $phase1FailuresPath) {
-        Remove-Item -Path $phase1FailuresPath
+    if (Test-Path -LiteralPath $phase1FailuresPath) {
+        Remove-Item -LiteralPath $phase1FailuresPath
     }
     # --- Windowsのシステム設定変更 ---
-    # recipe.yamlに'phase1.windowsSettings'セクションが存在する場合にのみ実行する。
     if ($config.phase1.windowsSettings) {
         Write-Host "--- 1. Windowsの各種設定を変更します ---`n" -ForegroundColor Green
-        # 設定ファイルに記述された各設定項目を一つずつループ処理する。
         foreach ($setting in $config.phase1.windowsSettings) {
             Write-Host "-> $($setting.description)..."
-            # 実行すべきコマンドが定義されていることを確認する。
             if (-not ([string]::IsNullOrEmpty($setting.command))) {
                 $failureReason = Invoke-RecipeCommand -Command $setting.command
                 if ($failureReason) {
@@ -195,7 +180,6 @@ if ($setupPhase -ne '2') {
                 }
             }
             else {
-                # 実行コマンドが定義されていなかった場合もエラーとして扱う。
                 $errorMessage = "設定変更失敗: $($setting.description) - commandプロパティが定義されていません。"
                 Write-Warning "-> commandプロパティが定義されていません。"
                 $script:failedItems.Add($errorMessage)
@@ -207,7 +191,6 @@ if ($setupPhase -ne '2') {
     # Visual Studio Build Tools のように、インストーラーが 3010 を返すとこのコードになる。
     $wingetRebootRequiredToFinish = -1978334967
     # --- アプリケーションのインストール (winget) ---
-    # recipe.yamlに'phase1.wingetInstall'セクションが存在する場合にのみ実行する。
     if ($config.phase1.wingetInstall) {
         Write-Host "--- 2. アプリケーションのインストールを開始します ---`n" -ForegroundColor Green
         # wingetのソースリポジトリをリセットし、潜在的な問題を解消する。
@@ -219,16 +202,13 @@ if ($setupPhase -ne '2') {
             Write-Warning "-> wingetのソースのリセットに失敗しました。終了コード: $LASTEXITCODE"
             $script:failedItems.Add("Winget Source Reset")
         }
-        # 設定ファイルに記述された各アプリケーションを一つずつループ処理する。
         foreach ($wingetApp in $config.phase1.wingetInstall) {
             Write-Host "アプリ [$($wingetApp.id)] の状態を確認しています..."
             # 前のアプリの結果「0」が残っていると、未インストールでも導入済みと誤判定するため、「未判定」に戻す。
             $global:LASTEXITCODE = $null
-            # 'winget list'を使い、対象のアプリが既にインストール済みかを確認する。
             # ソースを winget に固定する。msstore が証明書エラー(0x8a15005e)などで使えないと、
             # ソース未指定の winget はインストール先を決められず、全アプリの導入が失敗するため。
             winget list --id $wingetApp.id -e --source winget --accept-source-agreements --disable-interactivity
-            # インストール済みでなければインストールを実行する
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "-> [$($wingetApp.id)] をインストールします..."
                 $wingetArgs = @(
@@ -261,13 +241,10 @@ if ($setupPhase -ne '2') {
         Write-Host "--- アプリケーションのインストールが完了しました ---`n" -ForegroundColor Green
     }
     # --- 不要な標準アプリの削除 ---
-    # recipe.yamlに'phase1.appxRemove'セクションが存在する場合にのみ実行する。
     if ($config.phase1.appxRemove) {
         Write-Host "--- 3. プリインストールアプリの削除を開始します ---`n" -ForegroundColor Green
-        # 設定ファイルに記述された各UWPアプリを一つずつループ処理する。
         foreach ($appxPackage in $config.phase1.appxRemove) {
             Write-Host "-> [$($appxPackage.name)] を削除します..."
-            # ワイルドカードを含むパッケージ名で対象アプリを検索する。
             $foundPackages = @(Get-AppxPackage -AllUsers -Name $appxPackage.name)
             if ($foundPackages.Count -eq 0) {
                 # Windowsのバージョンによっては最初から入っていないアプリもあるため、失敗ではなくスキップとして扱う。
@@ -293,10 +270,9 @@ if ($setupPhase -ne '2') {
     Write-Host "--- 4. インストール済みアプリ全体を更新します ---`n" -ForegroundColor Green
     # winget 自体が見つからない場合に前の終了コードを成功と取り違えないよう、「未判定」に戻す。
     $global:LASTEXITCODE = $null
-    # wingetで管理されている全てのパッケージを最新バージョンに一括で更新する。
     # msstore ソースは証明書エラーや利用規約の表示で止まることがあるため、install・list と同じく winget ソースに限る。
     winget upgrade --all --source winget --silent --accept-package-agreements --accept-source-agreements
-    # 更新プロセスで何らかの問題が発生したかを確認する。再起動で仕上がる更新は、このあとの再起動で完了するため失敗にしない。
+    # 再起動で仕上がる更新は、このあとの再起動で完了するため失敗にしない。
     if (($LASTEXITCODE -ne 0) -and ($LASTEXITCODE -ne $wingetRebootRequiredToFinish)) {
         Write-Warning "-> アプリ全体の更新プロセス中にエラーが報告されました。終了コード: $LASTEXITCODE"
         $script:failedItems.Add("Winget Upgrade: 全体更新")
@@ -306,7 +282,6 @@ if ($setupPhase -ne '2') {
     Write-Host "--- 5. 再起動後にフェーズ2を自動実行するよう設定します ---`n" -ForegroundColor Green
     $taskRegistered = $false
     try {
-        # タスクとして実行するアクション（このスクリプト自身を引数付きで呼び出す）を定義する。
         # 5.1 は非推奨のため、フェーズ1で PowerShell 7 が入っていれば、フェーズ2は 7 で動かす。
         # 7 を入れた直後は、今動いている PowerShell の PATH に反映されていないため、標準のインストール先も調べる。
         $powerShellExe = Join-Path $PSHOME 'powershell.exe'
@@ -319,26 +294,20 @@ if ($setupPhase -ne '2') {
         }
         Write-Host "-> フェーズ2は次の PowerShell で動かします: $powerShellExe" -ForegroundColor DarkGray
         $taskAction = New-ScheduledTaskAction -Execute $powerShellExe -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -setupPhase 2"
-        # タスクを実行するトリガー（ユーザーのログオン時）を定義する。
         $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
-        # スクリプトを実行している現在のユーザーのIDを確実に取得する。
         $currentUserId = ([System.Security.Principal.WindowsIdentity]::GetCurrent()).Name
-        # タスクの実行者情報と権限レベル（最高の権限）を定義する。
         $taskPrincipal = New-ScheduledTaskPrincipal -UserId $currentUserId -LogonType Interactive -RunLevel Highest
-        # 上記で定義したアクション、トリガー、プリンシパルを組み合わせてタスクをOSに登録する。
         Register-ScheduledTask -TaskName $TaskName -Action $taskAction -Trigger $taskTrigger -Principal $taskPrincipal -Force -ErrorAction Stop
         Write-Host "-> タスクスケジューラに '$TaskName' を登録しました。" -ForegroundColor Green
         $taskRegistered = $true
     }
     catch {
-        # タスクの登録に失敗した場合、致命的なエラーとして報告する。
         Write-Error "致命的エラー: 再起動後の自動実行設定に失敗しました。フェーズ2は開始されません。"
         Write-Error $_.Exception.Message
         $script:failedItems.Add("致命的エラー: タスクスケジューラ登録失敗")
     }
     # --- フェーズ1の完了報告と自動再起動 ---
     Write-Host "==============================================="
-    # もし失敗リストに項目があれば、その内容を一覧表示する。
     if ($script:failedItems.Count -gt 0) {
         Write-Warning "フェーズ1の一部の処理でエラーが発生しました。詳細は以下の通りです："
         foreach ($failedItem in $script:failedItems) {
@@ -346,7 +315,7 @@ if ($setupPhase -ne '2') {
         }
         Write-Host "==============================================="
         try {
-            Set-Content -Path $phase1FailuresPath -Value $script:failedItems -Encoding UTF8 -ErrorAction Stop
+            Set-Content -LiteralPath $phase1FailuresPath -Value $script:failedItems -Encoding UTF8 -ErrorAction Stop
         }
         catch {
             Write-Warning "フェーズ1の失敗一覧を保存できませんでした。フェーズ2の結果まとめには表示されません: $($_.Exception.Message)"
@@ -371,9 +340,7 @@ if ($setupPhase -ne '2') {
     # ユーザーがメッセージを読むための待機時間を設ける。
     Write-Host "10秒後に自動で再起動が開始されます。中断したい場合はこのウィンドウを閉じてください。" -ForegroundColor Yellow
     Start-Sleep -Seconds 10
-    # ログ記録を正常に終了させる。
     Stop-Transcript
-    # システムを強制的に再起動する。
     Restart-Computer -Force
 }
 #----------------------------------------------------------------------
@@ -389,8 +356,8 @@ else {
     Write-Host "-> 自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     # フェーズ1の失敗を、最後の結果まとめに一緒に表示する。
-    if (Test-Path $phase1FailuresPath) {
-        foreach ($phase1Failure in (Get-Content -Path $phase1FailuresPath -Encoding UTF8)) {
+    if (Test-Path -LiteralPath $phase1FailuresPath) {
+        foreach ($phase1Failure in (Get-Content -LiteralPath $phase1FailuresPath -Encoding UTF8)) {
             $script:failedItems.Add("フェーズ1 - $phase1Failure")
         }
     }
@@ -398,33 +365,26 @@ else {
     Write-Host "10秒後に自動でパッケージのインストールが開始されます。" -ForegroundColor Yellow
     Start-Sleep -Seconds 10
     # --- パッケージインストールの実行ループ ---
-    # recipe.yamlに'phase2.packageManagers'セクションが存在する場合にのみ実行する。
     if ($config.phase2.packageManagers) {
-        # 設定ファイルに記述された各パッケージマネージャー（npm, pipなど）をループ処理する。
         foreach ($manager in $config.phase2.packageManagers) {
             Write-Host "`n--- $($manager.managerName) パッケージのインストールを開始します ---`n" -ForegroundColor Green
-            # インストールすべきパッケージのリストが存在しない場合は、このマネージャーの処理をスキップする。
             if (-not $manager.packages) {
                 Write-Host "-> $($manager.managerName) でインストールするパッケージが定義されていないため、スキップします。`n" -ForegroundColor Yellow
                 continue
             }
-            # 各パッケージマネージャーのインストール対象パッケージを一つずつループ処理する。
             foreach ($package in $manager.packages) {
                 $packageName = $package.name
                 Write-Host "パッケージ [$($packageName)] の状態を確認しています..."
-                # 設定ファイルの'checkCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
                 $checkCommand = $manager.checkCommand -replace '\{package\}', $packageName
                 # 確認コマンドの失敗は「未インストール」という意味なので、警告にはせずインストールへ進む。
                 if (Invoke-RecipeCommand -Command $checkCommand) {
                     Write-Host "-> [$($packageName)] をインストールします..."
-                    # 設定ファイルの'installCommand'テンプレート内の'{package}'を実際のパッケージ名で置き換える。
                     $installCommand = $manager.installCommand -replace '\{package\}', $packageName
                     $failureReason = Invoke-RecipeCommand -Command $installCommand
                     if (-not $failureReason) {
                         Write-Host "-> [$($packageName)] のインストールに成功しました。`n" -ForegroundColor Green
                     }
                     else {
-                        # インストールに失敗した場合、どの処理で失敗したかを記録する。
                         Write-Warning "-> $failureReason"
                         $script:failedItems.Add("パッケージ処理失敗: $($manager.managerName) - $packageName")
                     }
@@ -438,7 +398,6 @@ else {
     }
     # --- フェーズ2の完了報告 ---
     Write-Host "`n==============================================="
-    # もし失敗リストに項目があれば、その内容を一覧表示する。
     if ($script:failedItems.Count -gt 0) {
         Write-Warning "一部の処理でエラーが発生しました。詳細は以下の通りです："
         foreach ($failedItem in $script:failedItems) {
@@ -453,12 +412,11 @@ else {
     }
     Write-Host "==============================================="
     # 結果まとめに表示し終えたので削除する。途中で止まった場合は、次にフェーズ2を手動実行したときに再表示される。
-    if (Test-Path $phase1FailuresPath) {
-        Remove-Item -Path $phase1FailuresPath
+    if (Test-Path -LiteralPath $phase1FailuresPath) {
+        Remove-Item -LiteralPath $phase1FailuresPath
     }
     # 実行結果をユーザーが確認できるよう、キー入力があるまでウィンドウを閉じずに待機する。
     Read-Host "Enterキーを押して、このウィンドウを閉じてください。"
-    # ログ記録を正常に終了させる。
     Stop-Transcript
     # 呼び出し元（タスクスケジューラの実行結果など）からも失敗が分かるよう、失敗があれば 1 を返す。
     if ($script:failedItems.Count -gt 0) {
