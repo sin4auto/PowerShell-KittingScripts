@@ -259,6 +259,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     # --- npm (グローバルNode.jsパッケージ) ---
     - managerName: 'npm'
       # 直接入れたものだけを見る。--depth=0 が無いと、ほかのパッケージの依存に入っているだけのものも「入っている」と判定してしまうため。
@@ -273,12 +282,3 @@ phase2:
           name: npm-check-updates
         - description: 'フォルダーをそのまま Web で見せる簡易サーバー（http-server）'
           name: http-server
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer

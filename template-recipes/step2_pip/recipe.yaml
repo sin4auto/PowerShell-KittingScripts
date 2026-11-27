@@ -259,6 +259,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     - managerName: 'pip'
       # 入れるときと同じ uv で確かめる。pip を使うと、PATH の並びによっては別の Python を見てしまうため。
       checkCommand: 'uv pip show {package} --system'
@@ -277,12 +286,3 @@ phase2:
         - description: 'Python スクリプトの出力を見やすくするライブラリ（rich）'
           name: rich
         # Web・データ分析・機械学習用のパッケージは、プロジェクトごとに入れる（環境を再現しやすくするため）
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer

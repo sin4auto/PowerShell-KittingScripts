@@ -259,6 +259,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+  # --- PowerShell モジュール（PowerShell Gallery） ---
+  - managerName: 'psgallery'
+    # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+    checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+    installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+    packages:
+      - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+        name: PSScriptAnalyzer
+
   # --- rustup (ツールチェーン) ---
   - managerName: 'rustup-toolchain'
     checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
@@ -341,12 +350,3 @@ phase2:
     packages:
       - description: '使っていない依存関係の検出（nightly 版が必要）'
         name: cargo-udeps
-
-  # --- PowerShell モジュール（PowerShell Gallery） ---
-  - managerName: 'psgallery'
-    # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-    checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-    installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-    packages:
-      - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-        name: PSScriptAnalyzer

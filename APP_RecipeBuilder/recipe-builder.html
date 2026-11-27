@@ -1286,6 +1286,15 @@ phase1:
 
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     # --- rustup (ツールチェーン) ---
     - managerName: 'rustup-toolchain'
       checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
@@ -1515,15 +1524,6 @@ phase2:
           name: DavidAnson.vscode-markdownlint
         - description: '印刷（コードや Markdown をブラウザー経由で印刷・PDF 化）'
           name: pdconsec.vscode-print
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer
 
     # --- cargo (CLIツール / stable) ---
     - managerName: 'cargo-stable'
@@ -1828,6 +1828,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     # --- go ---
     - managerName: 'go'
       # {package} の末尾（@ より前）と同じ名前のコマンドがあれば、入っているとみなす。例：…/cmd/dlv@latest → dlv
@@ -1852,15 +1861,6 @@ phase2:
           name: golang.org/x/tools/cmd/stringer@latest
         - description: 'テスト関数のひな形を作る（gotests）'
           name: github.com/cweill/gotests/gotests@latest
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer
 </script>
 <script type="text/plain" class="recipe-template" data-name="step2_Haskell" data-path="template-recipes/step2_Haskell/recipe.yaml">
 # ================================================================
@@ -2131,6 +2131,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     # --- ghcup: GHC と開発ツール（cabal・stack・hls） ---
     # name に「ツール名 バージョン」を書き、そのまま ghcup に渡す。バージョンの代わりに recommended（GHCup のおすすめ版）も書ける。
     # --set で、入れたものを既定にする。付けないと、GHC は GHCup の導入時に入った版が既定のまま残り、cabal もそちらでビルドする。
@@ -2163,15 +2172,6 @@ phase2:
           name: weeder
         - description: '静的解析（hlint）'
           name: hlint
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer
 </script>
 <script type="text/plain" class="recipe-template" data-name="step2_npm" data-path="template-recipes/step2_npm/recipe.yaml">
 # ================================================================
@@ -2435,6 +2435,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     # --- npm (グローバルNode.jsパッケージ) ---
     - managerName: 'npm'
       # 直接入れたものだけを見る。--depth=0 が無いと、ほかのパッケージの依存に入っているだけのものも「入っている」と判定してしまうため。
@@ -2449,15 +2458,6 @@ phase2:
           name: npm-check-updates
         - description: 'フォルダーをそのまま Web で見せる簡易サーバー（http-server）'
           name: http-server
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer
 </script>
 <script type="text/plain" class="recipe-template" data-name="step2_pip" data-path="template-recipes/step2_pip/recipe.yaml">
 # ================================================================
@@ -2721,6 +2721,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     - managerName: 'pip'
       # 入れるときと同じ uv で確かめる。pip を使うと、PATH の並びによっては別の Python を見てしまうため。
       checkCommand: 'uv pip show {package} --system'
@@ -2739,15 +2748,6 @@ phase2:
         - description: 'Python スクリプトの出力を見やすくするライブラリ（rich）'
           name: rich
         # Web・データ分析・機械学習用のパッケージは、プロジェクトごとに入れる（環境を再現しやすくするため）
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer
 </script>
 <script type="text/plain" class="recipe-template" data-name="step2_Rust" data-path="template-recipes/step2_Rust/recipe.yaml">
 # ================================================================
@@ -3011,6 +3011,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+  # --- PowerShell モジュール（PowerShell Gallery） ---
+  - managerName: 'psgallery'
+    # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+    checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+    installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+    packages:
+      - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+        name: PSScriptAnalyzer
+
   # --- rustup (ツールチェーン) ---
   - managerName: 'rustup-toolchain'
     checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
@@ -3093,15 +3102,6 @@ phase2:
     packages:
       - description: '使っていない依存関係の検出（nightly 版が必要）'
         name: cargo-udeps
-
-  # --- PowerShell モジュール（PowerShell Gallery） ---
-  - managerName: 'psgallery'
-    # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-    checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-    installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-    packages:
-      - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-        name: PSScriptAnalyzer
 </script>
 <script type="text/plain" class="recipe-template" data-name="step2_VSCode" data-path="template-recipes/step2_VSCode/recipe.yaml">
 # ================================================================
@@ -3365,6 +3365,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     - managerName: 'vscode'
       # 1行に ID が1つずつ出るので、行全体で比べる（大文字・小文字は区別しない）。部分一致だと、ms-toolsai.jupyter を ms-toolsai.jupyter-keymap と取り違えるため。
       checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
@@ -3459,15 +3468,6 @@ phase2:
           name: DavidAnson.vscode-markdownlint
         - description: '印刷（コードや Markdown をブラウザー経由で印刷・PDF 化）'
           name: pdconsec.vscode-print
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer
 </script>
 <!-- END TEMPLATES -->
 

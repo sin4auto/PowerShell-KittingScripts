@@ -259,6 +259,15 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
     # --- go ---
     - managerName: 'go'
       # {package} の末尾（@ より前）と同じ名前のコマンドがあれば、入っているとみなす。例：…/cmd/dlv@latest → dlv
@@ -283,12 +292,3 @@ phase2:
           name: golang.org/x/tools/cmd/stringer@latest
         - description: 'テスト関数のひな形を作る（gotests）'
           name: github.com/cweill/gotests/gotests@latest
-
-    # --- PowerShell モジュール（PowerShell Gallery） ---
-    - managerName: 'psgallery'
-      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-      packages:
-        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-          name: PSScriptAnalyzer
