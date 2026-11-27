@@ -197,7 +197,7 @@ phase2:
 （パスは、リポジトリを置いた場所に読み替えてください。）
 
 ### `powershell-yaml` モジュールを準備できない
-- インターネット接続を確認し、PowerShell で `Install-Module -Name powershell-yaml -Scope CurrentUser` を手動で実行してください。
+- インターネット接続を確認し、管理者の PowerShell で `Install-Module -Name powershell-yaml -Scope AllUsers` を手動で実行してください。
 
 ## Winget Configuration との違い
 
@@ -419,7 +419,7 @@ If any items fail, they are listed at the end of the run.
 (Replace the path with where you placed the repository.)
 
 ### The `powershell-yaml` module cannot be prepared
-- Check your internet connection and run `Install-Module -Name powershell-yaml -Scope CurrentUser` manually in PowerShell.
+- Check your internet connection and run `Install-Module -Name powershell-yaml -Scope AllUsers` manually in PowerShell as an administrator.
 
 ## How This Differs from Winget Configuration
 

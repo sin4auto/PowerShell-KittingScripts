@@ -122,8 +122,8 @@ try {
     if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
         Write-Host "YAMLモジュールが見つかりません。インストールを試みます..." -ForegroundColor Yellow
         # モジュールが存在しない場合、PowerShell公式リポジトリから自動的にインストールする。
-        # -Scope CurrentUserで現在のユーザーのみにインストールし、管理者権限のエラーを避ける。
-        Install-Module -Name powershell-yaml -Scope CurrentUser -Repository PSGallery -Force -AllowClobber -ErrorAction Stop
+        # PC 全体（AllUsers）に入れる。今のユーザーに入れると 5.1 と 7 で置き場所が分かれ、フェーズ2の 7 から見えずに入れ直しになるため。
+        Install-Module -Name powershell-yaml -Scope AllUsers -Repository PSGallery -Force -AllowClobber -ErrorAction Stop
         Write-Host "YAMLモジュールのインストールが完了しました。" -ForegroundColor Green
     }
     # 準備したモジュールを現在のPowerShellセッションで利用可能にする。
@@ -131,9 +131,9 @@ try {
 }
 catch {
     # モジュールのインストールまたはインポートに失敗した場合、エラーメッセージを表示してスクリプトを停止する。
-    # 原因が分かるよう、元のエラーの内容も表示する。導入先は上と同じ「今のユーザー」にそろえて案内する。
+    # 原因が分かるよう、元のエラーの内容も表示する。導入先は上と同じ「PC 全体」にそろえて案内する。
     Write-Error "YAMLモジュールの準備に失敗しました: $($_.Exception.Message)"
-    Write-Error "インターネット接続を確認し、PowerShellで「Install-Module -Name powershell-yaml -Scope CurrentUser」を手動で実行してください。"
+    Write-Error "インターネット接続を確認し、管理者のPowerShellで「Install-Module -Name powershell-yaml -Scope AllUsers」を手動で実行してください。"
     Read-Host "Enterキーを押して終了します。"
     Stop-Transcript
     exit 1
