@@ -54,11 +54,12 @@ function Invoke-RecipeCommand {
     # この関数の中だけで有効。エラーを例外に変えて、下の catch で受け取る。
     $ErrorActionPreference = 'Stop'
     try {
-        # 出力を画面へ送る。戻り値に混ざると、失敗の理由と区別できなくなるため。
+        # 今動いている PowerShell が 7 以上なら
         if ($PSVersionTable.PSVersion.Major -ge 7) {
-            # 外部コマンドのエラー出力（stderr）はトランスクリプトに残らず、失敗の原因がログから分からなくなるため、通常の出力にまとめて記録する。
-            # 5.1 では、まとめた stderr の行が 'Stop' によって最初の1行で例外になり、成功したコマンドまで失敗になるため、7 だけで行う。
-            Invoke-Expression -Command $Command 2>&1 | ForEach-Object {
+            # エラー出力（stderr）は、そのままだとログに残らないため、普通の出力にまとめて記録する。
+            # 5.1 でまとめると、stderr の1行目で失敗扱いになるため、7 だけで行う（5.1 は下の else）。
+            # Invoke-Expression だと stderr が消えて cargo の進み具合などが出ないため、スクリプトブロックにして「.」で動かす。
+            . ([scriptblock]::Create($Command)) 2>&1 | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.ToString() } else { $_ }
             } | Out-Host
         }
