@@ -183,6 +183,9 @@ phase1:
       id: Rustlang.Rustup
     - description: 'Go（Go 言語のツールチェーン）'
       id: GoLang.Go
+    - description: 'golangci-lint（Go の書き方チェックをまとめて動かす）'
+      id: GolangCI.golangci-lint
+      options: '--scope machine'
     - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
       id: EclipseAdoptium.Temurin.25.JDK
     # [コマンドラインツール]
