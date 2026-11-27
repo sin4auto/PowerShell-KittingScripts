@@ -103,6 +103,31 @@ if (($PSVersionTable.PSVersion.Major -lt 6) -and (Test-Path -LiteralPath $logFil
 # フェーズ1とフェーズ2の実行記録を一つのファイルにまとめる。
 Start-Transcript -Path $logFilePath -Append
 #=============================================================================
+# ■ 簡易編集モードの無効化
+#=============================================================================
+# 簡易編集モードのままだと、画面をクリックしただけで「選択」状態になる。
+# この状態でスクリプトが画面に文字を書くと処理が止まり、Esc を押すまで進まなくなるため、このウィンドウでは切っておく。
+Add-Type -Namespace AutoSetup -Name ConsoleMode -MemberDefinition @'
+[DllImport("kernel32.dll", SetLastError = true)]
+public static extern IntPtr GetStdHandle(int nStdHandle);
+[DllImport("kernel32.dll", SetLastError = true)]
+public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+[DllImport("kernel32.dll", SetLastError = true)]
+public static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+'@
+$stdInputHandle = [AutoSetup.ConsoleMode]::GetStdHandle(-10)  # STD_INPUT_HANDLE
+$consoleMode = [uint32]0
+if ([AutoSetup.ConsoleMode]::GetConsoleMode($stdInputHandle, [ref]$consoleMode)) {
+    # ENABLE_QUICK_EDIT_MODE(0x40) を外す。この変更を反映させるには ENABLE_EXTENDED_FLAGS(0x80) が必要。
+    $newConsoleMode = ($consoleMode -band (-bnot [uint32]0x40)) -bor [uint32]0x80
+    if (-not [AutoSetup.ConsoleMode]::SetConsoleMode($stdInputHandle, $newConsoleMode)) {
+        Write-Warning "簡易編集モードを切れませんでした。実行中は画面をクリックしないでください（止まったら Esc で再開します）。"
+    }
+}
+else {
+    Write-Warning "コンソールの設定を読めなかったため、簡易編集モードを切れませんでした。実行中は画面をクリックしないでください（止まったら Esc で再開します）。"
+}
+#=============================================================================
 # ■ 実行前準備 (環境チェックと設定ファイルの読み込み)
 #=============================================================================
 # --- 管理者権限の確認 ---
