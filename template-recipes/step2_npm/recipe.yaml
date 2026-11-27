@@ -268,8 +268,6 @@ phase2:
         # [コマンドで使うツール]
         - description: 'package.json の依存の新しい版を調べる（npm-check-updates）'
           name: npm-check-updates
-        - description: 'フォルダーをまとめて消すコマンド（rimraf）'
-          name: rimraf
         - description: 'フォルダーをそのまま Web で見せる簡易サーバー（http-server）'
           name: http-server
 
