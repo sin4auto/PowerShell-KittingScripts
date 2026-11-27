@@ -263,45 +263,25 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
-    # --- ghcup: Haskell コンパイラ (GHC) ---
-    # --set を付けないと、GHCup の導入時に入るおすすめ版が既定のまま残り、cabal もそちらでビルドする。
-    # 複数のバージョンを並べた場合は、最後に入れたものが既定になる。
-    - managerName: 'ghcup-ghc'
-      checkCommand: 'ghcup whereis ghc {package}'
-      installCommand: 'ghcup install ghc --set {package}'
+    # --- ghcup: GHC と開発ツール（cabal・stack・hls） ---
+    # name に「ツール名 バージョン」を書き、そのまま ghcup に渡す。バージョンの代わりに recommended（GHCup のおすすめ版）も書ける。
+    # --set で、入れたものを既定にする。付けないと、GHC は GHCup の導入時に入った版が既定のまま残り、cabal もそちらでビルドする。
+    # latest（最新版）は使わない。新しい版が出るたびに「未インストール」と判定され、入れ直しになるため。
+    - managerName: 'ghcup'
+      checkCommand: 'ghcup whereis {package}'
+      installCommand: 'ghcup install {package} --set'
       packages:
-        - description: 'GHC 9.14 系（長期サポート版・最新）'
-          name: 9.14.1
-        #- description: 'GHC 9.10 系（GHCup のおすすめ版）'
-        #  name: 9.10.3
-
-    # --- ghcup: Cabal CLI ---
-    - managerName: 'ghcup-cabal'
-      checkCommand: 'cabal --version'
-      installCommand: 'ghcup install cabal latest'
-      packages:
+        - description: 'GHC 9.10 系（GHCup のおすすめ版。HLS と hlint が対応している）'
+          name: 'ghc 9.10.3'
         - description: 'Cabal（公式ビルドシステム）'
-          name: latest
-
-    # --- ghcup: Stack CLI ---
-    - managerName: 'ghcup-stack'
-      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
-      checkCommand: 'if (-not (Get-Command ''stack'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
-      installCommand: 'ghcup install stack latest'
-      packages:
+          name: 'cabal recommended'
         - description: 'Stack（プロジェクト管理・ビルドツール）'
-          name: latest
-
-    # --- ghcup: Haskell Language Server ---
-    - managerName: 'ghcup-hls'
-      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
-      checkCommand: 'if (-not (Get-Command ''haskell-language-server-wrapper'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
-      installCommand: 'ghcup install hls latest'
-      packages:
+          name: 'stack recommended'
         - description: 'Haskell Language Server（言語サーバー）'
-          name: latest
+          name: 'hls recommended'
 
     # --- cabal: グローバルCLIユーティリティ ---
+    # 既定の GHC（上の ghcup で --set したもの）でビルドする。weeder は、調べるプロジェクトと同じ GHC でビルドしたものでないと動かない。
     - managerName: 'cabal-global'
       # PATH ではなく、--installdir で決めた置き場所のファイルで調べる。PATH にある同じ名前の別のツールと取り違えず、PATH の反映前でも判定できるようにするため。
       checkCommand: 'if (-not (Test-Path "$env:APPDATA\cabal\bin\{package}.exe")) { throw ''未インストール'' }'
@@ -313,16 +293,7 @@ phase2:
           name: hoogle
         - description: '使っていないコードの検出（weeder）'
           name: weeder
-
-    # --- cabal: GHC 9.14 でまだビルドできないツール ---
-    # hlint 3.10 が使う ghc-lib-parser 9.12 は base < 4.22 が条件で、GHC 9.14（base 4.22）では依存関係を解決できない。
-    # 既定の GHC（ghcup-ghc で --set したもの）は変えずに 9.10.3 を入れ、そちらでビルドする。hlint が GHC 9.14 に対応したら cabal-global に戻す。
-    - managerName: 'cabal-global-ghc910'
-      # PATH ではなく、--installdir で決めた置き場所のファイルで調べる。PATH にある同じ名前の別のツールと取り違えず、PATH の反映前でも判定できるようにするため。
-      checkCommand: 'if (-not (Test-Path "$env:APPDATA\cabal\bin\{package}.exe")) { throw ''未インストール'' }'
-      installCommand: 'ghcup install ghc 9.10.3; cabal update; cabal install -w ghc-9.10.3 --installdir=$env:APPDATA\cabal\bin --overwrite-policy=always {package}'
-      packages:
-        - description: '静的解析（hlint。GHC 9.10.3 でビルド）'
+        - description: '静的解析（hlint）'
           name: hlint
 
     # --- PowerShell モジュール（PowerShell Gallery） ---

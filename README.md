@@ -154,7 +154,7 @@ phase2:
 - `step1_only_dev/`: フェーズ 1 が中心で、開発用のアプリも入れる構成です。フェーズ 2 では、PSScriptAnalyzer（PowerShell の書き方チェック）だけを入れます。
 - `step2_VSCode/`・`step2_npm/`・`step2_pip/`・`step2_Rust/`・`step2_Go/`・`step2_Haskell/`: フェーズ 2 で、それぞれのツールや言語のパッケージを入れる構成です。
 - `step2_all/`: 上のフェーズ 2 をすべてまとめた、全部入りの構成です。
-- `step2_Haskell/` と `step2_all/` は、GHC 9.14.1 を既定にします。hlint は GHC 9.14 にまだ対応していないため、既定は変えずに GHC 9.10.3 も入れ、hlint だけそちらでビルドします。
+- `step2_Haskell/` と `step2_all/` は、GHC 9.10.3（GHCup のおすすめ版）を既定にします。cabal・stack・HLS は、GHCup のおすすめ版を入れます。
 - `step1_only_basic/` 以外のテンプレートは、フェーズ 2 で PSScriptAnalyzer を PowerShell 7 に入れます。
 
 ## ログと結果の確認
@@ -381,7 +381,7 @@ phase2:
 - `step1_only_dev/`: Mainly phase 1, also installing development apps. Phase 2 installs only PSScriptAnalyzer (a PowerShell style checker).
 - `step2_VSCode/`, `step2_npm/`, `step2_pip/`, `step2_Rust/`, `step2_Go/`, `step2_Haskell/`: Install packages for each tool or language in phase 2.
 - `step2_all/`: All-in-one setup that combines all of the phase 2 sets above.
-- `step2_Haskell/` and `step2_all/` make GHC 9.14.1 the default. Because hlint does not support GHC 9.14 yet, they also install GHC 9.10.3 without changing the default and build only hlint with it.
+- `step2_Haskell/` and `step2_all/` make GHC 9.10.3 (the GHCup recommended version) the default. They install the GHCup recommended versions of cabal, stack, and HLS.
 - All templates except `step1_only_basic/` install PSScriptAnalyzer into PowerShell 7 in phase 2.
 
 ## Logs and Results
