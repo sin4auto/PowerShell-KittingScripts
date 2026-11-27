@@ -116,7 +116,7 @@ phase1:
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
       command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
 
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'

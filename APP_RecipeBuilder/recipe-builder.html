@@ -1369,6 +1369,7 @@ phase2:
         - description: 'フォルダーをそのまま Web で見せる簡易サーバー（http-server）'
           name: http-server
 
+    # --- pip（Python のツール） ---
     - managerName: 'pip'
       # 入れるときと同じ uv で確かめる。pip を使うと、PATH の並びによっては別の Python を見てしまうため。
       checkCommand: 'uv pip show {package} --system'
@@ -1388,7 +1389,7 @@ phase2:
           name: rich
         # Web・データ分析・機械学習用のパッケージは、プロジェクトごとに入れる（環境を再現しやすくするため）
 
-    # --- go ---
+    # --- go（Go のツール） ---
     - managerName: 'go'
       # {package} の末尾（@ より前）と同じ名前のコマンドがあれば、入っているとみなす。例：…/cmd/dlv@latest → dlv
       checkCommand: 'if (-not (Get-Command ((''{package}''.Split(''/'')[-1]).Split(''@'')[0]) -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
@@ -1430,6 +1431,7 @@ phase2:
         - description: 'Haskell Language Server（言語サーバー）'
           name: 'hls recommended'
 
+    # --- VS Code 拡張機能 ---
     - managerName: 'vscode'
       # 1行に ID が1つずつ出るので、行全体で比べる（大文字・小文字は区別しない）。部分一致だと、ms-toolsai.jupyter を ms-toolsai.jupyter-keymap と取り違えるため。
       checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
@@ -1685,7 +1687,7 @@ phase1:
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
       command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
 
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
@@ -1837,7 +1839,7 @@ phase2:
         - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
           name: PSScriptAnalyzer
 
-    # --- go ---
+    # --- go（Go のツール） ---
     - managerName: 'go'
       # {package} の末尾（@ より前）と同じ名前のコマンドがあれば、入っているとみなす。例：…/cmd/dlv@latest → dlv
       checkCommand: 'if (-not (Get-Command ((''{package}''.Split(''/'')[-1]).Split(''@'')[0]) -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
@@ -1988,7 +1990,7 @@ phase1:
       # 値は %APPDATA% のまま足し、比べるのも展開しない値どうしで行う。ほかの項目の %...% を展開した値で上書きしないよう、レジストリを直接読み書きする。
       command: '$p = (Get-Item ''HKCU:\Environment'').GetValue(''Path'', '''', ''DoNotExpandEnvironmentNames'').TrimEnd('';''); if (($p -split '';'') -notcontains ''%APPDATA%\cabal\bin'') { Set-ItemProperty -Path ''HKCU:\Environment'' -Name ''Path'' -Type ExpandString -Value ((@($p, ''%APPDATA%\cabal\bin'') -ne '''') -join '';'') }'
 
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
@@ -2292,7 +2294,7 @@ phase1:
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
       command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
 
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
@@ -2578,7 +2580,7 @@ phase1:
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
       command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
 
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
@@ -2730,6 +2732,7 @@ phase2:
         - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
           name: PSScriptAnalyzer
 
+    # --- pip（Python のツール） ---
     - managerName: 'pip'
       # 入れるときと同じ uv で確かめる。pip を使うと、PATH の並びによっては別の Python を見てしまうため。
       checkCommand: 'uv pip show {package} --system'
@@ -2868,361 +2871,7 @@ phase1:
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
       command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
 
-# --- Winget (基本アプリケーションのインストール) ---
-  wingetInstall:
-    # [基本アプリ]
-    - description: 'PowerShell 7（最新版の PowerShell）'
-      id: Microsoft.PowerShell
-    - description: 'Google Chrome（定番の Web ブラウザー）'
-      id: Google.Chrome
-    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
-      id: 7zip.7zip
-    - description: 'VLC（多機能なメディア プレーヤー）'
-      id: VideoLAN.VLC
-    - description: 'PowerToys（Windows を便利にする公式ツール群）'
-      id: Microsoft.PowerToys
-    - description: 'Zoom Workplace（オンライン会議ツール）'
-      id: Zoom.Zoom
-    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
-      id: Adobe.Acrobat.Reader.64-bit
-      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
-    # [開発の基本]
-    - description: 'Git（バージョン管理システム）'
-      id: Git.Git
-    - description: 'GitHub Desktop（GitHub をマウスで操作できる Git の画面）'
-      id: GitHub.GitHubDesktop
-    - description: 'GitHub CLI（GitHub をコマンドで操作する gh）'
-      id: GitHub.cli
-    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
-      id: OpenJS.NodeJS.LTS
-    - description: 'Python 3.14（プログラミング言語）'
-      id: Python.Python.3.14
-    - description: 'uv（高速な Python パッケージインストーラー）'
-      id: astral-sh.uv
-      options: '--scope machine'
-    - description: 'Visual Studio Code（高機能なコード エディター）'
-      id: Microsoft.VisualStudioCode
-      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
-    # [ターミナル・コンテナ]
-    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
-      id: Microsoft.WindowsTerminal
-    - description: 'Docker Desktop（コンテナの実行環境）'
-      id: Docker.DockerDesktop
-    # [ビルドツール]
-    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
-      id: Kitware.CMake
-    - description: 'Ninja（高速なビルドツール）'
-      id: Ninja-build.Ninja
-      options: '--scope machine'
-    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
-      id: LLVM.LLVM
-    - description: 'Visual Studio 2026 Build Tools（MSVC と Windows SDK のビルド環境）'
-      id: Microsoft.VisualStudio.BuildTools
-      options: '--custom "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"'
-    # [言語・SDK]
-    - description: 'Visual C++ 再頒布可能パッケージ（多くのアプリが動くのに必要な部品）'
-      id: Microsoft.VCRedist.2015+.x64
-    - description: '.NET SDK（.NET の開発キット）'
-      id: Microsoft.DotNet.SDK.10
-    - description: 'rustup（Rust の導入・切り替えツール）'
-      id: Rustlang.Rustup
-    - description: 'Go（Go 言語のツールチェーン）'
-      id: GoLang.Go
-    - description: 'golangci-lint（Go の書き方チェックをまとめて動かす）'
-      id: GolangCI.golangci-lint
-      options: '--scope machine'
-    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
-      id: EclipseAdoptium.Temurin.25.JDK
-    # [コマンドラインツール]
-    - description: 'ripgrep（高速な grep の代わり）'
-      id: BurntSushi.ripgrep.MSVC
-      options: '--scope machine'
-    - description: 'fd（使いやすい find の代わり）'
-      id: sharkdp.fd
-      options: '--scope machine'
-    - description: 'fzf（あいまい検索ツール）'
-      id: junegunn.fzf
-    - description: 'bat（色付きで表示できる cat の代わり）'
-      id: sharkdp.bat
-      options: '--scope machine'
-    - description: 'eza（見やすい ls の代わり）'
-      id: eza-community.eza
-      options: '--scope machine'
-    - description: 'jq（JSON を加工するツール）'
-      id: jqlang.jq
-      options: '--scope machine'
-    # [開発支援ツール]
-    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
-      id: WinMerge.WinMerge
-    - description: 'サクラエディタ（日本製の定番テキスト エディター）'
-      id: sakura-editor.sakura
-    - description: 'Obsidian（Markdown で書くノートアプリ）'
-      id: Obsidian.Obsidian
-    # [システムユーティリティ]
-    - description: 'Everything（高速なファイル名検索）'
-      id: voidtools.Everything
-    - description: 'ShareX（スクリーンショットと画面録画）'
-      id: ShareX.ShareX
-
-  # --- Appx (不要なプリインストールアプリの削除) ---
-  appxRemove:
-    # [基本機能・情報]
-    - description: 'Cortana（AI アシスタント）'
-      name: "*Cortana*"
-    - description: 'ニュース'
-      name: "*Microsoft.BingNews*"
-    - description: '天気'
-      name: "*Microsoft.BingWeather*"
-    - description: 'マップ'
-      name: "*Microsoft.WindowsMaps*"
-    - description: 'ヒント'
-      name: "*Microsoft.Getstarted*"
-    - description: 'フィードバック Hub'
-      name: "*Microsoft.WindowsFeedbackHub*"
-    - description: 'スマートフォン連携'
-      name: "*Microsoft.YourPhone*"
-    # [生産性・ユーティリティ]
-    - description: 'OneNote（ストア アプリ版）'
-      name: "*Microsoft.Office.OneNote*"
-    - description: 'メールとカレンダー'
-      name: "*microsoft.windowscommunicationsapps*"
-    - description: 'People（連絡先）'
-      name: "*Microsoft.People*"
-    # [エンターテイメント・メディア]
-    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
-      name: "*Microsoft.ZuneMusic*"
-    - description: '映画 & テレビ'
-      name: "*Microsoft.ZuneVideo*"
-    # - description: '問い合わせ（Get Help）'
-    #   name: "*Microsoft.GetHelp*"
-    # - description: 'フォト'
-    #   name: "*Microsoft.Windows.Photos*"
-    # - description: 'ペイント 3D'
-    #   name: "*Microsoft.MSPaint*"
-    # - description: 'Clipchamp（動画編集）'
-    #   name: "*Clipchamp.Clipchamp*"
-    # - description: '複合現実ポータル'
-    #   name: "*Microsoft.MixedReality.Portal*"
-    # - description: 'Solitaire & Casual Games（ソリティアなどのゲーム）'
-    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
-
-# ----------------------------------------------------------------
-# ■ フェーズ2 開発環境のセットアップ
-# ----------------------------------------------------------------
-phase2:
-  packageManagers:
-  # --- PowerShell モジュール（PowerShell Gallery） ---
-  - managerName: 'psgallery'
-    # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-    checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-    installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-    packages:
-      - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-        name: PSScriptAnalyzer
-
-  # --- rustup (ツールチェーン) ---
-  - managerName: 'rustup-toolchain'
-    checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
-    installCommand: 'rustup toolchain install {package}'
-    packages:
-      - description: 'Rust 安定版ツールチェーン'
-        name: stable
-      - description: 'Rust ナイトリー版ツールチェーン'
-        name: nightly
-  # --- rustup (コンポーネント / stable) ---
-  - managerName: 'rustup-component-stable'
-    checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
-    installCommand: 'rustup component add {package} --toolchain stable'
-    packages:
-      - description: 'コード整形（rustfmt）'
-        name: rustfmt
-      - description: '静的解析（clippy）'
-        name: clippy
-      - description: '標準ライブラリのソース'
-        name: rust-src
-      - description: 'LLVM ツール群（カバレッジなど）'
-        name: llvm-tools
-  # --- rustup (コンポーネント / nightly：Miri) ---
-  - managerName: 'rustup-component-nightly'
-    checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
-    installCommand: 'rustup component add {package} --toolchain nightly'
-    packages:
-      - description: '未定義動作の検査（Miri 本体）'
-        name: miri
-      - description: '標準ライブラリのソース（Miri 用）'
-        name: rust-src
-  # --- rustup (ターゲット追加 / cross & WASM) ---
-  - managerName: 'rustup-target'
-    # 1行に名前だけが出るので、行全体で比べる。先頭だけで比べると、wasm32-wasip1-threads を wasm32-wasip1 と取り違えるため。
-    # findstr /x は使わない。rustup の改行は LF だけで、PowerShell 7 はそのまま findstr に渡すため、/x が一致しない。
-    checkCommand: 'if (-not (rustup target list --installed | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
-    installCommand: 'rustup target add {package}'
-    packages:
-      - description: 'WebAssembly 向けビルド（ブラウザー用）'
-        name: wasm32-unknown-unknown
-      - description: 'WebAssembly 向けビルド（WASI。サーバー用）'
-        name: wasm32-wasip1
-      - description: 'Linux 向けクロスビルド'
-        name: x86_64-unknown-linux-gnu
-      - description: 'AArch64 Linux 向けクロスビルド（ARMv8、64 ビット版 Raspberry Pi など）'
-        name: aarch64-unknown-linux-gnu
-      - description: 'ARMv7 Linux 向けクロスビルド（Raspberry Pi など）'
-        name: armv7-unknown-linux-gnueabihf
-      - description: 'Windows 向けクロスビルド（GNU）'
-        name: x86_64-pc-windows-gnu
-      - description: 'macOS 向けクロスビルド（Intel Mac）'
-        name: x86_64-apple-darwin
-      - description: 'macOS 向けクロスビルド（Apple Silicon）'
-        name: aarch64-apple-darwin
-      - description: 'Android ARMv7 向けクロスビルド'
-        name: armv7-linux-androideabi
-      - description: 'Android AArch64 向けクロスビルド'
-        name: aarch64-linux-android
-  # --- cargo (CLIツール / stable) ---
-  - managerName: 'cargo-stable'
-    checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
-    installCommand: 'cargo install --locked {package}'
-    packages:
-      - description: '依存関係の版の一括更新（cargo-edit の cargo upgrade。cargo add・rm は cargo 本体にある）'
-        name: cargo-edit
-      - description: '依存関係の更新状況の確認'
-        name: cargo-outdated
-      - description: '脆弱性の監査（RustSec）'
-        name: cargo-audit
-      - description: '高速なテスト実行'
-        name: cargo-nextest
-      - description: 'カバレッジの計測（llvm-cov）'
-        name: cargo-llvm-cov
-      - description: 'ファイルの変更を監視して、チェックやテストを再実行（bacon。開発が終わった cargo-watch の代わり）'
-        name: bacon
-  # --- cargo (CLIツール / nightly専用) ---
-  - managerName: 'cargo-nightly'
-    checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
-    installCommand: 'cargo +nightly install --locked {package}'
-    packages:
-      - description: '使っていない依存関係の検出（nightly 版が必要）'
-        name: cargo-udeps
-</script>
-<script type="text/plain" class="recipe-template" data-name="step2_VSCode" data-path="template-recipes/step2_VSCode/recipe.yaml">
-# ================================================================
-# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
-# ================================================================
-# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
-# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
-# ----------------------------------------------------------------
-# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
-# ----------------------------------------------------------------
-phase1:
-  # --- Windows の設定変更（レジストリ・電源・Defender など） ---
-  windowsSettings:
-    # [Windows Update]
-    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
-      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
-    # [エクスプローラー]
-    - description: 'エクスプローラーでファイルの拡張子を表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
-    - description: 'エクスプローラーで隠しファイルを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
-    - description: 'エクスプローラーのアドレスバーに完全なパスを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
-    - description: 'エクスプローラーを開いたときに「PC」を表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
-    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
-    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
-    # [デスクトップ]
-    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{20D04FE0-3AEA-1069-A2D8-08002B30309D}" /t REG_DWORD /d 0 /f'
-    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{59031a47-3f72-44a7-89c5-5595fe6b30ee}" /t REG_DWORD /d 0 /f'
-    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}" /t REG_DWORD /d 0 /f'
-    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{645FF040-5081-101B-9F08-00AA002F954E}" /t REG_DWORD /d 0 /f'
-    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}" /t REG_DWORD /d 0 /f'
-    # [自動再生]
-    - description: 'すべてのメディアとデバイスで自動再生を使う'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
-    - description: 'リムーバブル ドライブをつないだら、フォルダーを開いてファイルを表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
-    # [通知・おすすめ・広告]
-    - description: 'サインイン時に「ようこそ」画面やヒントを表示しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
-    - description: 'デバイスの設定の完了を促す通知を表示しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
-    - description: 'Windows の使い方のヒントや提案を通知しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
-    - description: '診断データに基づく個人向けのおすすめを表示しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
-    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
-    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
-    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
-    - description: '広告 ID を無効にする'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
-    - description: 'おすすめのアプリを自動でインストールしない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
-    # [プライバシー（診断・履歴）]
-    - description: '送信する診断データを必須のものだけにする'
-      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
-    - description: '手書き入力とタイプ入力のデータを Microsoft に送らない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
-    - description: 'アクティビティの履歴を記録しない'
-      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
-    - description: 'アクティビティの履歴を Microsoft に送らない'
-      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
-    - description: 'Windows がフィードバックを求めないようにする'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
-    # [検索]
-    - description: '検索履歴をこの PC に保存しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
-    - description: 'スタート メニューの検索に Web（Bing）の結果を表示しない'
-      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
-    - description: '検索で Microsoft アカウントのクラウドの内容を探さない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
-    - description: '検索で職場または学校アカウントのクラウドの内容を探さない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
-    - description: '検索で Azure AD アカウントのクラウドの内容を探さない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
-    - description: '検索ボックスに「検索のハイライト」を表示しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
-    # [スタート・タスクバー]
-    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
-    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
-    # [セキュリティ]
-    - description: 'コア分離の「メモリ整合性」を有効にする'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
-    - description: 'コア分離の「カーネル モード ハードウェア強制スタック保護」を有効にする'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
-    - description: '「ローカル セキュリティ機関（LSA）の保護」を有効にする'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
-    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
-      command: 'Set-MpPreference -PUAProtection Enabled'
-    # [電源]
-    - description: '電源につないでいる間はスリープしない'
-      command: "powercfg.exe /change standby-timeout-ac 0"
-    - description: '休止状態を無効にする（高速スタートアップも使えなくなる）'
-      command: "powercfg.exe /hibernate off"
-    # [便利機能]
-    - description: 'クリップボードの履歴（Windows + V）を有効にする'
-      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
-    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
-      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
-    # [開発者向け]
-    - description: '260 文字を超える長いパスを使えるようにする'
-      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
-    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
-      # PowerShell 7 で AutoSetup を動かしても Windows PowerShell（5.1）の設定を変えるよう、powershell.exe を呼ぶ（5.1 と 7 は設定の保存先が別）。
-      # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
-      command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
-
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
@@ -3374,6 +3023,361 @@ phase2:
         - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
           name: PSScriptAnalyzer
 
+    # --- rustup (ツールチェーン) ---
+    - managerName: 'rustup-toolchain'
+      checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
+      installCommand: 'rustup toolchain install {package}'
+      packages:
+        - description: 'Rust 安定版ツールチェーン'
+          name: stable
+        - description: 'Rust ナイトリー版ツールチェーン'
+          name: nightly
+    # --- rustup (コンポーネント / stable) ---
+    - managerName: 'rustup-component-stable'
+      checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
+      installCommand: 'rustup component add {package} --toolchain stable'
+      packages:
+        - description: 'コード整形（rustfmt）'
+          name: rustfmt
+        - description: '静的解析（clippy）'
+          name: clippy
+        - description: '標準ライブラリのソース'
+          name: rust-src
+        - description: 'LLVM ツール群（カバレッジなど）'
+          name: llvm-tools
+    # --- rustup (コンポーネント / nightly：Miri) ---
+    - managerName: 'rustup-component-nightly'
+      checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
+      installCommand: 'rustup component add {package} --toolchain nightly'
+      packages:
+        - description: '未定義動作の検査（Miri 本体）'
+          name: miri
+        - description: '標準ライブラリのソース（Miri 用）'
+          name: rust-src
+    # --- rustup (ターゲット追加 / cross & WASM) ---
+    - managerName: 'rustup-target'
+      # 1行に名前だけが出るので、行全体で比べる。先頭だけで比べると、wasm32-wasip1-threads を wasm32-wasip1 と取り違えるため。
+      # findstr /x は使わない。rustup の改行は LF だけで、PowerShell 7 はそのまま findstr に渡すため、/x が一致しない。
+      checkCommand: 'if (-not (rustup target list --installed | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
+      installCommand: 'rustup target add {package}'
+      packages:
+        - description: 'WebAssembly 向けビルド（ブラウザー用）'
+          name: wasm32-unknown-unknown
+        - description: 'WebAssembly 向けビルド（WASI。サーバー用）'
+          name: wasm32-wasip1
+        - description: 'Linux 向けクロスビルド'
+          name: x86_64-unknown-linux-gnu
+        - description: 'AArch64 Linux 向けクロスビルド（ARMv8、64 ビット版 Raspberry Pi など）'
+          name: aarch64-unknown-linux-gnu
+        - description: 'ARMv7 Linux 向けクロスビルド（Raspberry Pi など）'
+          name: armv7-unknown-linux-gnueabihf
+        - description: 'Windows 向けクロスビルド（GNU）'
+          name: x86_64-pc-windows-gnu
+        - description: 'macOS 向けクロスビルド（Intel Mac）'
+          name: x86_64-apple-darwin
+        - description: 'macOS 向けクロスビルド（Apple Silicon）'
+          name: aarch64-apple-darwin
+        - description: 'Android ARMv7 向けクロスビルド'
+          name: armv7-linux-androideabi
+        - description: 'Android AArch64 向けクロスビルド'
+          name: aarch64-linux-android
+    # --- cargo (CLIツール / stable) ---
+    - managerName: 'cargo-stable'
+      checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
+      installCommand: 'cargo install --locked {package}'
+      packages:
+        - description: '依存関係の版の一括更新（cargo-edit の cargo upgrade。cargo add・rm は cargo 本体にある）'
+          name: cargo-edit
+        - description: '依存関係の更新状況の確認'
+          name: cargo-outdated
+        - description: '脆弱性の監査（RustSec）'
+          name: cargo-audit
+        - description: '高速なテスト実行'
+          name: cargo-nextest
+        - description: 'カバレッジの計測（llvm-cov）'
+          name: cargo-llvm-cov
+        - description: 'ファイルの変更を監視して、チェックやテストを再実行（bacon。開発が終わった cargo-watch の代わり）'
+          name: bacon
+    # --- cargo (CLIツール / nightly専用) ---
+    - managerName: 'cargo-nightly'
+      checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
+      installCommand: 'cargo +nightly install --locked {package}'
+      packages:
+        - description: '使っていない依存関係の検出（nightly 版が必要）'
+          name: cargo-udeps
+</script>
+<script type="text/plain" class="recipe-template" data-name="step2_VSCode" data-path="template-recipes/step2_VSCode/recipe.yaml">
+# ================================================================
+# Windows環境 初期設定自動化スクリプト (AutoSetup) 設定ファイル
+# ================================================================
+# このファイルは、新しいWindows環境の構築を自動化するためのタスクを定義します。
+# 実行したくない項目は、行を削除するか行頭に「#」を付けてコメントアウトしてください。
+# ----------------------------------------------------------------
+# ■ フェーズ1 OSの基本設定と必須アプリケーションの導入
+# ----------------------------------------------------------------
+phase1:
+  # --- Windows の設定変更（レジストリ・電源・Defender など） ---
+  windowsSettings:
+    # [Windows Update]
+    - description: 'Windows Update で、ほかの Microsoft 製品（Office など）も更新する'
+      command: '(New-Object -ComObject Microsoft.Update.ServiceManager).AddService2(''7971f918-a847-4430-9279-4a52d1efe18d'', 7, '''') | Out-Null'
+    # [エクスプローラー]
+    - description: 'エクスプローラーでファイルの拡張子を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーで隠しファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーのアドレスバーに完全なパスを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPathAddress /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーを開いたときに「PC」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f'
+    - description: 'エクスプローラーの「ホーム」に最近使ったファイルを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowRecent /t REG_DWORD /d 0 /f'
+    - description: 'エクスプローラーの「ホーム」によく使うフォルダーを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f'
+    # [デスクトップ]
+    - description: 'デスクトップに「コンピューター」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{20D04FE0-3AEA-1069-A2D8-08002B30309D}" /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ユーザーのファイル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{59031a47-3f72-44a7-89c5-5595fe6b30ee}" /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ネットワーク」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}" /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「ごみ箱」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{645FF040-5081-101B-9F08-00AA002F954E}" /t REG_DWORD /d 0 /f'
+    - description: 'デスクトップに「コントロール パネル」のアイコンを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}" /t REG_DWORD /d 0 /f'
+    # [自動再生]
+    - description: 'すべてのメディアとデバイスで自動再生を使う'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" /v DisableAutoplay /t REG_DWORD /d 0 /f'
+    - description: 'リムーバブル ドライブをつないだら、フォルダーを開いてファイルを表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\UserChosenExecuteHandlers\StorageOnArrival" /ve /t REG_SZ /d "MSOpenFolder" /f'
+    # [通知・おすすめ・広告]
+    - description: 'サインイン時に「ようこそ」画面やヒントを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-310093Enabled /t REG_DWORD /d 0 /f'
+    - description: 'デバイスの設定の完了を促す通知を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f'
+    - description: 'Windows の使い方のヒントや提案を通知しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f'
+    - description: '診断データに基づく個人向けのおすすめを表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Privacy" /v TailoredExperiencesWithDiagnosticDataEnabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（1/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338393Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（2/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353694Enabled /t REG_DWORD /d 0 /f'
+    - description: '設定アプリにおすすめのコンテンツを表示しない（3/3）'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-353696Enabled /t REG_DWORD /d 0 /f'
+    - description: '広告 ID を無効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'おすすめのアプリを自動でインストールしない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f'
+    # [プライバシー（診断・履歴）]
+    - description: '送信する診断データを必須のものだけにする'
+      command: 'reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v AllowTelemetry /t REG_DWORD /d 1 /f'
+    - description: '手書き入力とタイプ入力のデータを Microsoft に送らない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Input\TIPC" /v Enabled /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を記録しない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v PublishUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'アクティビティの履歴を Microsoft に送らない'
+      command: 'reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v UploadUserActivities /t REG_DWORD /d 0 /f'
+    - description: 'Windows がフィードバックを求めないようにする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Siuf\Rules" /v NumberOfSIUFInPeriod /t REG_DWORD /d 0 /f'
+    # [検索]
+    - description: '検索履歴をこの PC に保存しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDeviceSearchHistoryEnabled /t REG_DWORD /d 0 /f'
+    - description: 'スタート メニューの検索に Web（Bing）の結果を表示しない'
+      command: 'reg.exe add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f'
+    - description: '検索で Microsoft アカウントのクラウドの内容を探さない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsMSACloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索で職場または学校アカウントのクラウドの内容を探さない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsBusinessCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索で Azure AD アカウントのクラウドの内容を探さない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsAADCloudSearchEnabled /t REG_DWORD /d 0 /f'
+    - description: '検索ボックスに「検索のハイライト」を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v IsDynamicSearchBoxEnabled /t REG_DWORD /d 0 /f'
+    # [スタート・タスクバー]
+    - description: 'スタートのおすすめやジャンプリストに、最近開いた項目を表示しない'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackDocs /t REG_DWORD /d 0 /f'
+    - description: 'タスクバーの右クリックメニューに「タスクの終了」を表示する'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings" /v TaskbarEndTask /t REG_DWORD /d 1 /f'
+    # [セキュリティ]
+    - description: 'コア分離の「メモリ整合性」を有効にする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: 'コア分離の「カーネル モード ハードウェア強制スタック保護」を有効にする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" /v Enabled /t REG_DWORD /d 1 /f'
+    - description: '「ローカル セキュリティ機関（LSA）の保護」を有効にする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v RunAsPPL /t REG_DWORD /d 1 /f'
+    - description: 'Microsoft Defender で望ましくない可能性のあるアプリ（PUA）をブロックする'
+      command: 'Set-MpPreference -PUAProtection Enabled'
+    # [電源]
+    - description: '電源につないでいる間はスリープしない'
+      command: "powercfg.exe /change standby-timeout-ac 0"
+    - description: '休止状態を無効にする（高速スタートアップも使えなくなる）'
+      command: "powercfg.exe /hibernate off"
+    # [便利機能]
+    - description: 'クリップボードの履歴（Windows + V）を有効にする'
+      command: 'reg.exe add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f'
+    - description: 'Shift キーを 5 回押したときの固定キーの確認を表示しない'
+      command: 'reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f'
+    # [開発者向け]
+    - description: '260 文字を超える長いパスを使えるようにする'
+      command: 'reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f'
+    - description: 'Windows PowerShell の実行ポリシーを RemoteSigned にする（今のユーザー）'
+      # PowerShell 7 で AutoSetup を動かしても Windows PowerShell（5.1）の設定を変えるよう、powershell.exe を呼ぶ（5.1 と 7 は設定の保存先が別）。
+      # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
+      command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
+
+  # --- Winget (基本アプリケーションのインストール) ---
+  wingetInstall:
+    # [基本アプリ]
+    - description: 'PowerShell 7（最新版の PowerShell）'
+      id: Microsoft.PowerShell
+    - description: 'Google Chrome（定番の Web ブラウザー）'
+      id: Google.Chrome
+    - description: '7-Zip（高機能なファイル圧縮・解凍ソフト）'
+      id: 7zip.7zip
+    - description: 'VLC（多機能なメディア プレーヤー）'
+      id: VideoLAN.VLC
+    - description: 'PowerToys（Windows を便利にする公式ツール群）'
+      id: Microsoft.PowerToys
+    - description: 'Zoom Workplace（オンライン会議ツール）'
+      id: Zoom.Zoom
+    - description: 'Adobe Acrobat Reader（PDF 閲覧ソフト）'
+      id: Adobe.Acrobat.Reader.64-bit
+      options: '--override "/sAll /rs /rps /msi EULA_ACCEPT=YES"'
+    # [開発の基本]
+    - description: 'Git（バージョン管理システム）'
+      id: Git.Git
+    - description: 'GitHub Desktop（GitHub をマウスで操作できる Git の画面）'
+      id: GitHub.GitHubDesktop
+    - description: 'GitHub CLI（GitHub をコマンドで操作する gh）'
+      id: GitHub.cli
+    - description: 'Node.js LTS（JavaScript 実行環境の長期安定版）'
+      id: OpenJS.NodeJS.LTS
+    - description: 'Python 3.14（プログラミング言語）'
+      id: Python.Python.3.14
+    - description: 'uv（高速な Python パッケージインストーラー）'
+      id: astral-sh.uv
+      options: '--scope machine'
+    - description: 'Visual Studio Code（高機能なコード エディター）'
+      id: Microsoft.VisualStudioCode
+      options: '--override "/SILENT /NORESTART /MERGETASKS=!runcode,desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
+    # [ターミナル・コンテナ]
+    - description: 'Windows Terminal（タブやペインを使える新しいターミナル）'
+      id: Microsoft.WindowsTerminal
+    - description: 'Docker Desktop（コンテナの実行環境）'
+      id: Docker.DockerDesktop
+    # [ビルドツール]
+    - description: 'CMake（C/C++ の定番ビルド生成ツール）'
+      id: Kitware.CMake
+    - description: 'Ninja（高速なビルドツール）'
+      id: Ninja-build.Ninja
+      options: '--scope machine'
+    - description: 'LLVM/Clang（C/C++ のコンパイラー群）'
+      id: LLVM.LLVM
+    - description: 'Visual Studio 2026 Build Tools（MSVC と Windows SDK のビルド環境）'
+      id: Microsoft.VisualStudio.BuildTools
+      options: '--custom "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"'
+    # [言語・SDK]
+    - description: 'Visual C++ 再頒布可能パッケージ（多くのアプリが動くのに必要な部品）'
+      id: Microsoft.VCRedist.2015+.x64
+    - description: '.NET SDK（.NET の開発キット）'
+      id: Microsoft.DotNet.SDK.10
+    - description: 'rustup（Rust の導入・切り替えツール）'
+      id: Rustlang.Rustup
+    - description: 'Go（Go 言語のツールチェーン）'
+      id: GoLang.Go
+    - description: 'golangci-lint（Go の書き方チェックをまとめて動かす）'
+      id: GolangCI.golangci-lint
+      options: '--scope machine'
+    - description: 'OpenJDK 25（Temurin 版の Java 開発キット・長期サポート版）'
+      id: EclipseAdoptium.Temurin.25.JDK
+    # [コマンドラインツール]
+    - description: 'ripgrep（高速な grep の代わり）'
+      id: BurntSushi.ripgrep.MSVC
+      options: '--scope machine'
+    - description: 'fd（使いやすい find の代わり）'
+      id: sharkdp.fd
+      options: '--scope machine'
+    - description: 'fzf（あいまい検索ツール）'
+      id: junegunn.fzf
+    - description: 'bat（色付きで表示できる cat の代わり）'
+      id: sharkdp.bat
+      options: '--scope machine'
+    - description: 'eza（見やすい ls の代わり）'
+      id: eza-community.eza
+      options: '--scope machine'
+    - description: 'jq（JSON を加工するツール）'
+      id: jqlang.jq
+      options: '--scope machine'
+    # [開発支援ツール]
+    - description: 'WinMerge（ファイルとフォルダーの差分比較）'
+      id: WinMerge.WinMerge
+    - description: 'サクラエディタ（日本製の定番テキスト エディター）'
+      id: sakura-editor.sakura
+    - description: 'Obsidian（Markdown で書くノートアプリ）'
+      id: Obsidian.Obsidian
+    # [システムユーティリティ]
+    - description: 'Everything（高速なファイル名検索）'
+      id: voidtools.Everything
+    - description: 'ShareX（スクリーンショットと画面録画）'
+      id: ShareX.ShareX
+
+  # --- Appx (不要なプリインストールアプリの削除) ---
+  appxRemove:
+    # [基本機能・情報]
+    - description: 'Cortana（AI アシスタント）'
+      name: "*Cortana*"
+    - description: 'ニュース'
+      name: "*Microsoft.BingNews*"
+    - description: '天気'
+      name: "*Microsoft.BingWeather*"
+    - description: 'マップ'
+      name: "*Microsoft.WindowsMaps*"
+    - description: 'ヒント'
+      name: "*Microsoft.Getstarted*"
+    - description: 'フィードバック Hub'
+      name: "*Microsoft.WindowsFeedbackHub*"
+    - description: 'スマートフォン連携'
+      name: "*Microsoft.YourPhone*"
+    # [生産性・ユーティリティ]
+    - description: 'OneNote（ストア アプリ版）'
+      name: "*Microsoft.Office.OneNote*"
+    - description: 'メールとカレンダー'
+      name: "*microsoft.windowscommunicationsapps*"
+    - description: 'People（連絡先）'
+      name: "*Microsoft.People*"
+    # [エンターテイメント・メディア]
+    - description: 'メディア プレーヤー（標準の音楽・動画プレーヤー。VLC で代わりができます）'
+      name: "*Microsoft.ZuneMusic*"
+    - description: '映画 & テレビ'
+      name: "*Microsoft.ZuneVideo*"
+    # - description: '問い合わせ（Get Help）'
+    #   name: "*Microsoft.GetHelp*"
+    # - description: 'フォト'
+    #   name: "*Microsoft.Windows.Photos*"
+    # - description: 'ペイント 3D'
+    #   name: "*Microsoft.MSPaint*"
+    # - description: 'Clipchamp（動画編集）'
+    #   name: "*Clipchamp.Clipchamp*"
+    # - description: '複合現実ポータル'
+    #   name: "*Microsoft.MixedReality.Portal*"
+    # - description: 'Solitaire & Casual Games（ソリティアなどのゲーム）'
+    #   name: "*Microsoft.MicrosoftSolitaireCollection*"
+
+# ----------------------------------------------------------------
+# ■ フェーズ2 開発環境のセットアップ
+# ----------------------------------------------------------------
+phase2:
+  packageManagers:
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
+
+    # --- VS Code 拡張機能 ---
     - managerName: 'vscode'
       # 1行に ID が1つずつ出るので、行全体で比べる（大文字・小文字は区別しない）。部分一致だと、ms-toolsai.jupyter を ms-toolsai.jupyter-keymap と取り違えるため。
       checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'

@@ -350,6 +350,7 @@ phase2:
         - description: 'フォルダーをそのまま Web で見せる簡易サーバー（http-server）'
           name: http-server
 
+    # --- pip（Python のツール） ---
     - managerName: 'pip'
       # 入れるときと同じ uv で確かめる。pip を使うと、PATH の並びによっては別の Python を見てしまうため。
       checkCommand: 'uv pip show {package} --system'
@@ -369,7 +370,7 @@ phase2:
           name: rich
         # Web・データ分析・機械学習用のパッケージは、プロジェクトごとに入れる（環境を再現しやすくするため）
 
-    # --- go ---
+    # --- go（Go のツール） ---
     - managerName: 'go'
       # {package} の末尾（@ より前）と同じ名前のコマンドがあれば、入っているとみなす。例：…/cmd/dlv@latest → dlv
       checkCommand: 'if (-not (Get-Command ((''{package}''.Split(''/'')[-1]).Split(''@'')[0]) -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
@@ -411,6 +412,7 @@ phase2:
         - description: 'Haskell Language Server（言語サーバー）'
           name: 'hls recommended'
 
+    # --- VS Code 拡張機能 ---
     - managerName: 'vscode'
       # 1行に ID が1つずつ出るので、行全体で比べる（大文字・小文字は区別しない）。部分一致だと、ms-toolsai.jupyter を ms-toolsai.jupyter-keymap と取り違えるため。
       checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'

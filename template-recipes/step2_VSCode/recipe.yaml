@@ -116,7 +116,7 @@ phase1:
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
       command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
 
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
@@ -268,6 +268,7 @@ phase2:
         - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
           name: PSScriptAnalyzer
 
+    # --- VS Code 拡張機能 ---
     - managerName: 'vscode'
       # 1行に ID が1つずつ出るので、行全体で比べる（大文字・小文字は区別しない）。部分一致だと、ms-toolsai.jupyter を ms-toolsai.jupyter-keymap と取り違えるため。
       checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'

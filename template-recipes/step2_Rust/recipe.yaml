@@ -116,7 +116,7 @@ phase1:
       # AutoSetup は -ExecutionPolicy Bypass で動くため、設定できても「Bypass が優先される」というエラーが出る。成否はエラーではなく、設定後の値で判断する。
       command: 'powershell.exe -NoProfile -Command "try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }; if ((Get-ExecutionPolicy -Scope CurrentUser) -ne ''RemoteSigned'') { Write-Host ''実行ポリシーを RemoteSigned にできませんでした''; exit 1 }"'
 
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
@@ -259,94 +259,94 @@ phase1:
 # ----------------------------------------------------------------
 phase2:
   packageManagers:
-  # --- PowerShell モジュール（PowerShell Gallery） ---
-  - managerName: 'psgallery'
-    # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
-    checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
-    installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
-    packages:
-      - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
-        name: PSScriptAnalyzer
+    # --- PowerShell モジュール（PowerShell Gallery） ---
+    - managerName: 'psgallery'
+      # Windows PowerShell 5.1 は非推奨のため、フェーズ1で入る PowerShell 7 にモジュールを入れる。AutoSetup が 5.1 で動いていても 7 に入るよう、pwsh を呼ぶ。
+      checkCommand: 'pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable -Name ''{package}'')) { exit 1 }"'
+      installCommand: 'pwsh -NoProfile -Command "Install-Module -Name ''{package}'' -Scope AllUsers -Repository PSGallery -Force -ErrorAction Stop"'
+      packages:
+        - description: 'PowerShell の書き方チェック（PSScriptAnalyzer）'
+          name: PSScriptAnalyzer
 
-  # --- rustup (ツールチェーン) ---
-  - managerName: 'rustup-toolchain'
-    checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
-    installCommand: 'rustup toolchain install {package}'
-    packages:
-      - description: 'Rust 安定版ツールチェーン'
-        name: stable
-      - description: 'Rust ナイトリー版ツールチェーン'
-        name: nightly
-  # --- rustup (コンポーネント / stable) ---
-  - managerName: 'rustup-component-stable'
-    checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
-    installCommand: 'rustup component add {package} --toolchain stable'
-    packages:
-      - description: 'コード整形（rustfmt）'
-        name: rustfmt
-      - description: '静的解析（clippy）'
-        name: clippy
-      - description: '標準ライブラリのソース'
-        name: rust-src
-      - description: 'LLVM ツール群（カバレッジなど）'
-        name: llvm-tools
-  # --- rustup (コンポーネント / nightly：Miri) ---
-  - managerName: 'rustup-component-nightly'
-    checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
-    installCommand: 'rustup component add {package} --toolchain nightly'
-    packages:
-      - description: '未定義動作の検査（Miri 本体）'
-        name: miri
-      - description: '標準ライブラリのソース（Miri 用）'
-        name: rust-src
-  # --- rustup (ターゲット追加 / cross & WASM) ---
-  - managerName: 'rustup-target'
-    # 1行に名前だけが出るので、行全体で比べる。先頭だけで比べると、wasm32-wasip1-threads を wasm32-wasip1 と取り違えるため。
-    # findstr /x は使わない。rustup の改行は LF だけで、PowerShell 7 はそのまま findstr に渡すため、/x が一致しない。
-    checkCommand: 'if (-not (rustup target list --installed | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
-    installCommand: 'rustup target add {package}'
-    packages:
-      - description: 'WebAssembly 向けビルド（ブラウザー用）'
-        name: wasm32-unknown-unknown
-      - description: 'WebAssembly 向けビルド（WASI。サーバー用）'
-        name: wasm32-wasip1
-      - description: 'Linux 向けクロスビルド'
-        name: x86_64-unknown-linux-gnu
-      - description: 'AArch64 Linux 向けクロスビルド（ARMv8、64 ビット版 Raspberry Pi など）'
-        name: aarch64-unknown-linux-gnu
-      - description: 'ARMv7 Linux 向けクロスビルド（Raspberry Pi など）'
-        name: armv7-unknown-linux-gnueabihf
-      - description: 'Windows 向けクロスビルド（GNU）'
-        name: x86_64-pc-windows-gnu
-      - description: 'macOS 向けクロスビルド（Intel Mac）'
-        name: x86_64-apple-darwin
-      - description: 'macOS 向けクロスビルド（Apple Silicon）'
-        name: aarch64-apple-darwin
-      - description: 'Android ARMv7 向けクロスビルド'
-        name: armv7-linux-androideabi
-      - description: 'Android AArch64 向けクロスビルド'
-        name: aarch64-linux-android
-  # --- cargo (CLIツール / stable) ---
-  - managerName: 'cargo-stable'
-    checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
-    installCommand: 'cargo install --locked {package}'
-    packages:
-      - description: '依存関係の版の一括更新（cargo-edit の cargo upgrade。cargo add・rm は cargo 本体にある）'
-        name: cargo-edit
-      - description: '依存関係の更新状況の確認'
-        name: cargo-outdated
-      - description: '脆弱性の監査（RustSec）'
-        name: cargo-audit
-      - description: '高速なテスト実行'
-        name: cargo-nextest
-      - description: 'カバレッジの計測（llvm-cov）'
-        name: cargo-llvm-cov
-      - description: 'ファイルの変更を監視して、チェックやテストを再実行（bacon。開発が終わった cargo-watch の代わり）'
-        name: bacon
-  # --- cargo (CLIツール / nightly専用) ---
-  - managerName: 'cargo-nightly'
-    checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
-    installCommand: 'cargo +nightly install --locked {package}'
-    packages:
-      - description: '使っていない依存関係の検出（nightly 版が必要）'
-        name: cargo-udeps
+    # --- rustup (ツールチェーン) ---
+    - managerName: 'rustup-toolchain'
+      checkCommand: "rustup toolchain list | findstr /b /i \"{package}-\""
+      installCommand: 'rustup toolchain install {package}'
+      packages:
+        - description: 'Rust 安定版ツールチェーン'
+          name: stable
+        - description: 'Rust ナイトリー版ツールチェーン'
+          name: nightly
+    # --- rustup (コンポーネント / stable) ---
+    - managerName: 'rustup-component-stable'
+      checkCommand: "rustup component list --installed --toolchain stable | findstr /b /i \"{package}\""
+      installCommand: 'rustup component add {package} --toolchain stable'
+      packages:
+        - description: 'コード整形（rustfmt）'
+          name: rustfmt
+        - description: '静的解析（clippy）'
+          name: clippy
+        - description: '標準ライブラリのソース'
+          name: rust-src
+        - description: 'LLVM ツール群（カバレッジなど）'
+          name: llvm-tools
+    # --- rustup (コンポーネント / nightly：Miri) ---
+    - managerName: 'rustup-component-nightly'
+      checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
+      installCommand: 'rustup component add {package} --toolchain nightly'
+      packages:
+        - description: '未定義動作の検査（Miri 本体）'
+          name: miri
+        - description: '標準ライブラリのソース（Miri 用）'
+          name: rust-src
+    # --- rustup (ターゲット追加 / cross & WASM) ---
+    - managerName: 'rustup-target'
+      # 1行に名前だけが出るので、行全体で比べる。先頭だけで比べると、wasm32-wasip1-threads を wasm32-wasip1 と取り違えるため。
+      # findstr /x は使わない。rustup の改行は LF だけで、PowerShell 7 はそのまま findstr に渡すため、/x が一致しない。
+      checkCommand: 'if (-not (rustup target list --installed | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
+      installCommand: 'rustup target add {package}'
+      packages:
+        - description: 'WebAssembly 向けビルド（ブラウザー用）'
+          name: wasm32-unknown-unknown
+        - description: 'WebAssembly 向けビルド（WASI。サーバー用）'
+          name: wasm32-wasip1
+        - description: 'Linux 向けクロスビルド'
+          name: x86_64-unknown-linux-gnu
+        - description: 'AArch64 Linux 向けクロスビルド（ARMv8、64 ビット版 Raspberry Pi など）'
+          name: aarch64-unknown-linux-gnu
+        - description: 'ARMv7 Linux 向けクロスビルド（Raspberry Pi など）'
+          name: armv7-unknown-linux-gnueabihf
+        - description: 'Windows 向けクロスビルド（GNU）'
+          name: x86_64-pc-windows-gnu
+        - description: 'macOS 向けクロスビルド（Intel Mac）'
+          name: x86_64-apple-darwin
+        - description: 'macOS 向けクロスビルド（Apple Silicon）'
+          name: aarch64-apple-darwin
+        - description: 'Android ARMv7 向けクロスビルド'
+          name: armv7-linux-androideabi
+        - description: 'Android AArch64 向けクロスビルド'
+          name: aarch64-linux-android
+    # --- cargo (CLIツール / stable) ---
+    - managerName: 'cargo-stable'
+      checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
+      installCommand: 'cargo install --locked {package}'
+      packages:
+        - description: '依存関係の版の一括更新（cargo-edit の cargo upgrade。cargo add・rm は cargo 本体にある）'
+          name: cargo-edit
+        - description: '依存関係の更新状況の確認'
+          name: cargo-outdated
+        - description: '脆弱性の監査（RustSec）'
+          name: cargo-audit
+        - description: '高速なテスト実行'
+          name: cargo-nextest
+        - description: 'カバレッジの計測（llvm-cov）'
+          name: cargo-llvm-cov
+        - description: 'ファイルの変更を監視して、チェックやテストを再実行（bacon。開発が終わった cargo-watch の代わり）'
+          name: bacon
+    # --- cargo (CLIツール / nightly専用) ---
+    - managerName: 'cargo-nightly'
+      checkCommand: "cargo +nightly install --list | findstr /b /i /c:\"{package} v\""
+      installCommand: 'cargo +nightly install --locked {package}'
+      packages:
+        - description: '使っていない依存関係の検出（nightly 版が必要）'
+          name: cargo-udeps

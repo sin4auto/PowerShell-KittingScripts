@@ -123,7 +123,7 @@ phase1:
       # 値は %APPDATA% のまま足し、比べるのも展開しない値どうしで行う。ほかの項目の %...% を展開した値で上書きしないよう、レジストリを直接読み書きする。
       command: '$p = (Get-Item ''HKCU:\Environment'').GetValue(''Path'', '''', ''DoNotExpandEnvironmentNames'').TrimEnd('';''); if (($p -split '';'') -notcontains ''%APPDATA%\cabal\bin'') { Set-ItemProperty -Path ''HKCU:\Environment'' -Name ''Path'' -Type ExpandString -Value ((@($p, ''%APPDATA%\cabal\bin'') -ne '''') -join '';'') }'
 
-# --- Winget (基本アプリケーションのインストール) ---
+  # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
     # [基本アプリ]
     - description: 'PowerShell 7（最新版の PowerShell）'
