@@ -141,17 +141,10 @@ catch {
 try {
     # スクリプトと同じディレクトリに'recipe.yaml'が存在するか確認する。
     $configFilePath = Join-Path $PSScriptRoot "recipe.yaml"
-    # 'recipe.yaml'が見つからない場合、代替として'recipe.yml'を探す。
     if (-not (Test-Path $configFilePath)) {
-        $configFilePath = Join-Path $PSScriptRoot "recipe.yml"
+        throw "設定ファイル 'recipe.yaml' が見つかりません。"
     }
-    # どちらのファイルも見つからない場合は、エラーを発生させる。
-    if (-not (Test-Path $configFilePath)) {
-        throw "設定ファイル 'recipe.yaml' または 'recipe.yml' が見つかりません。"
-    }
-    # 読み込むファイル名を取得して表示する。
-    $configFileName = Split-Path -Leaf $configFilePath
-    Write-Host "設定ファイル '$configFileName' を読み込んでいます..."
+    Write-Host "設定ファイル 'recipe.yaml' を読み込んでいます..."
     # 設定ファイルの内容をUTF-8として読み込み、YAMLパーサーでPowerShellオブジェクトに変換する。
     $config = Get-Content -Path $configFilePath -Encoding UTF8 -Raw | ConvertFrom-Yaml
 }
