@@ -120,8 +120,8 @@ phase1:
       command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
     - description: 'cabal で入れるツールの置き場所（AppData\Roaming\cabal\bin）を PATH に足す（今のユーザー）'
       # GHCup の導入では PATH に入らず、cabal-global のツールをコマンド名で呼べなかったため。すでに入っていれば何もしない。
-      # 値は %APPDATA% のまま足す。ほかの項目の %...% を展開した値で上書きしないよう、レジストリを直接読み書きする。
-      command: '$cabalBin = Join-Path $env:APPDATA ''cabal\bin''; if (([Environment]::GetEnvironmentVariable(''Path'', ''User'') -split '';'') -notcontains $cabalBin) { $rawPath = (Get-Item ''HKCU:\Environment'').GetValue(''Path'', '''', ''DoNotExpandEnvironmentNames''); Set-ItemProperty -Path ''HKCU:\Environment'' -Name ''Path'' -Type ExpandString -Value ((@($rawPath -split '';'' | Where-Object { $_ }) + ''%APPDATA%\cabal\bin'') -join '';'') }'
+      # 値は %APPDATA% のまま足し、比べるのも展開しない値どうしで行う。ほかの項目の %...% を展開した値で上書きしないよう、レジストリを直接読み書きする。
+      command: '$p = (Get-Item ''HKCU:\Environment'').GetValue(''Path'', '''', ''DoNotExpandEnvironmentNames'').TrimEnd('';''); if (($p -split '';'') -notcontains ''%APPDATA%\cabal\bin'') { Set-ItemProperty -Path ''HKCU:\Environment'' -Name ''Path'' -Type ExpandString -Value ((@($p, ''%APPDATA%\cabal\bin'') -ne '''') -join '';'') }'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
