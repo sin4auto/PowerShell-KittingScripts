@@ -277,7 +277,7 @@ phase2:
       - description: '標準ライブラリのソース'
         name: rust-src
       - description: 'LLVM ツール群（カバレッジなど）'
-        name: llvm-tools-preview
+        name: llvm-tools
   # --- rustup (ターゲット追加 / cross & WASM) ---
   - managerName: 'rustup-target'
     checkCommand: 'rustup target list --installed | findstr /b /i {package}'
