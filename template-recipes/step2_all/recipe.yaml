@@ -288,7 +288,9 @@ phase2:
           name: llvm-tools
     # --- rustup (ターゲット追加 / cross & WASM) ---
     - managerName: 'rustup-target'
-      checkCommand: 'rustup target list --installed | findstr /b /i {package}'
+      # 1行に名前だけが出るので、行全体で比べる。先頭だけで比べると、wasm32-wasip1-threads を wasm32-wasip1 と取り違えるため。
+      # findstr /x は使わない。rustup の改行は LF だけで、PowerShell 7 はそのまま findstr に渡すため、/x が一致しない。
+      checkCommand: 'if (-not (rustup target list --installed | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
       installCommand: 'rustup target add {package}'
       packages:
         - description: 'WebAssembly 向けビルド（ブラウザー用）'
@@ -301,8 +303,6 @@ phase2:
           name: x86_64-apple-darwin
         - description: 'macOS 向けクロスビルド（Apple Silicon）'
           name: aarch64-apple-darwin
-        - description: 'Windows 向けクロスビルド（MSVC）'
-          name: x86_64-pc-windows-msvc
         - description: 'Windows 向けクロスビルド（GNU）'
           name: x86_64-pc-windows-gnu
         - description: 'ARMv7 Linux 向けクロスビルド（Raspberry Pi など）'
@@ -318,7 +318,7 @@ phase2:
       checkCommand: "cargo install --list | findstr /b /i /c:\"{package} v\""
       installCommand: 'cargo install --locked {package}'
       packages:
-        - description: '依存関係の追加・更新（cargo-edit）'
+        - description: '依存関係の版の一括更新（cargo-edit の cargo upgrade。cargo add・rm は cargo 本体にある）'
           name: cargo-edit
         - description: '脆弱性の監査（RustSec）'
           name: cargo-audit
@@ -328,8 +328,8 @@ phase2:
           name: cargo-nextest
         - description: 'カバレッジの計測（llvm-cov）'
           name: cargo-llvm-cov
-        - description: 'ファイルの変更を監視して再実行'
-          name: cargo-watch
+        - description: 'ファイルの変更を監視して、チェックやテストを再実行（bacon。開発が終わった cargo-watch の代わり）'
+          name: bacon
     # --- rustup (コンポーネント / nightly：Miri) ---
     - managerName: 'rustup-component-nightly'
       checkCommand: "rustup component list --installed --toolchain nightly | findstr /b /i \"{package}\""
