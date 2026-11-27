@@ -56,11 +56,9 @@ function Invoke-RecipeCommand {
     try {
         # 今動いている PowerShell が 7 以上なら
         if ($PSVersionTable.PSVersion.Major -ge 7) {
-            # エラー出力（stderr）は、そのままだとログに残らないため、普通の出力にまとめて記録する。
-            # 5.1 でまとめると、stderr の1行目で失敗扱いになるため、7 だけで行う（5.1 は下の else）。
-            # Invoke-Expression だと stderr が消えて cargo の進み具合などが出ないため、スクリプトブロックにして「.」で動かす。
-            # スクリプトブロックに 2>&1 を付けると、stderr の行はその時点でトランスクリプトに1回記録される。
-            # Out-Host に流すとログに2回書かれるため、stderr の行はトランスクリプトを通らない [Console]::Error で画面にだけ出す。
+            # stderr もログに残すため 2>&1 でまとめる（5.1 は1行目で失敗扱いになるので 7 だけ）。Invoke-Expression だと stderr が消えるため「.」で動かす。
+            # 2>&1 を付けた時点で stderr はログに1回記録されるので、Out-Host には流さない。
+            # 画面にだけ出すため、トランスクリプトを通らない [Console]::Error を使う。
             . ([scriptblock]::Create($Command)) 2>&1 | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) { [System.Console]::Error.WriteLine($_.ToString()) } else { $_ }
             } | Out-Host
