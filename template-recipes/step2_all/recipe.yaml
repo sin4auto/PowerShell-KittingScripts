@@ -340,19 +340,21 @@ phase2:
           name: http-server
 
     - managerName: 'pip'
-      checkCommand: 'pip show {package}'
+      # 入れるときと同じ uv で確かめる。pip を使うと、PATH の並びによっては別の Python を見てしまうため。
+      checkCommand: 'uv pip show {package} --system'
       installCommand: 'uv pip install {package} --system'
       packages:
-        # [CLIツール群：どのプロジェクトでも使う]
-        - description: 'リンター・フォーマッター（超高速）'
+        # [コマンドで使うツール：どのプロジェクトでも使う]
+        - description: 'Python の書き方チェックと整形（Ruff）'
           name: ruff
-        - description: '型チェック'
+        - description: 'Python の型チェック（mypy）'
           name: mypy
-        - description: 'テスト実行'
+        - description: 'テストの実行（pytest）'
           name: pytest
-        - description: 'テストカバレッジの計測'
+        - description: 'テストで実行された行の計測（カバレッジ）'
           name: coverage
-        - description: 'ターミナルの見やすい出力'
+        # [スクリプトで使うライブラリ]
+        - description: 'Python スクリプトの出力を見やすくするライブラリ（rich）'
           name: rich
         # Web・データ分析・機械学習用のパッケージは、プロジェクトごとに入れる（環境を再現しやすくするため）
 
