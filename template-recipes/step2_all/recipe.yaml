@@ -362,28 +362,27 @@ phase2:
 
     # --- go ---
     - managerName: 'go'
-      # PATHに<leaf>があればOK（<leaf>は {package} の末尾名。@latest は除去）
-      # 別の powershell を起動して "…$cmd…" と書くと、$cmd が先に空へ展開されて、いつも「インストール済み」になるため、同じ PowerShell の中で調べる。
+      # {package} の末尾（@ より前）と同じ名前のコマンドがあれば、入っているとみなす。例：…/cmd/dlv@latest → dlv
       checkCommand: 'if (-not (Get-Command ((''{package}''.Split(''/'')[-1]).Split(''@'')[0]) -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
       installCommand: 'go install {package}'
       packages:
-        - description: 'Go の言語サーバー'
+        - description: 'Go の入力補完やエラー表示（gopls。VS Code の Go 拡張が使う）'
           name: golang.org/x/tools/gopls@latest
-        - description: 'import の自動整形'
+        - description: 'import 文の追加・削除と整形（goimports）'
           name: golang.org/x/tools/cmd/goimports@latest
-        - description: '厳しめのコード整形（gofumpt）'
+        - description: 'gofmt より厳しいコード整形（gofumpt）'
           name: mvdan.cc/gofumpt@latest
-        - description: '静的解析（Staticcheck）'
+        - description: 'バグや不要なコードを見つける静的解析（Staticcheck）'
           name: honnef.co/go/tools/cmd/staticcheck@latest
-        - description: '脆弱性の検出（公式）'
+        - description: '依存パッケージの既知の脆弱性を調べる（govulncheck。Go 公式）'
           name: golang.org/x/vuln/cmd/govulncheck@latest
         - description: 'デバッガー（Delve）'
           name: github.com/go-delve/delve/cmd/dlv@latest
-        - description: 'モックの生成（uber/mock）'
+        - description: 'テスト用のモック（偽物の部品）の生成（mockgen）'
           name: go.uber.org/mock/mockgen@latest
-        - description: 'iota 定数の String メソッドの生成'
+        - description: '連番の定数に、名前を返すメソッドを作る（stringer）'
           name: golang.org/x/tools/cmd/stringer@latest
-        - description: 'テストのひな形の生成'
+        - description: 'テスト関数のひな形を作る（gotests）'
           name: github.com/cweill/gotests/gotests@latest
 
     # --- ghcup: GHC と開発ツール（cabal・stack・hls） ---
