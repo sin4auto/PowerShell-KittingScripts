@@ -59,8 +59,10 @@ function Invoke-RecipeCommand {
             # エラー出力（stderr）は、そのままだとログに残らないため、普通の出力にまとめて記録する。
             # 5.1 でまとめると、stderr の1行目で失敗扱いになるため、7 だけで行う（5.1 は下の else）。
             # Invoke-Expression だと stderr が消えて cargo の進み具合などが出ないため、スクリプトブロックにして「.」で動かす。
+            # スクリプトブロックに 2>&1 を付けると、stderr の行はその時点でトランスクリプトに1回記録される。
+            # Out-Host に流すとログに2回書かれるため、stderr の行はトランスクリプトを通らない [Console]::Error で画面にだけ出す。
             . ([scriptblock]::Create($Command)) 2>&1 | ForEach-Object {
-                if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.ToString() } else { $_ }
+                if ($_ -is [System.Management.Automation.ErrorRecord]) { [System.Console]::Error.WriteLine($_.ToString()) } else { $_ }
             } | Out-Host
         }
         else {
