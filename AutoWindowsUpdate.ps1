@@ -49,7 +49,6 @@ $transcriptStarted = $false
 # 中断するときは exit ではなく throw を使い、終了コード・タスク削除・ログ停止を下の catch と finally にまとめる。
 try {
     # --- フェーズ0: 初期化処理 ---
-    # スクリプトが.ps1ファイルとして保存・実行されているかを確認する。
     # PowerShell 5.1 ではファイル以外から実行すると $PSScriptRoot が空文字になるため、$null だけでなく空文字も調べる。
     if ([string]::IsNullOrEmpty($PSScriptRoot)) {
         # ファイルではない場合、パスが取得できず後続処理が失敗するため、エラーを発生させる。
@@ -57,9 +56,7 @@ try {
     }
     # スクリプトの安定した動作のため、カレントディレクトリをスクリプト自身の場所に設定する。
     Set-Location -Path $PSScriptRoot
-    # 実行ログを記録するファイルパスを定義する。
     $LogFile = Join-Path $PSScriptRoot "AutoWindowsUpdate.log"
-    # ログ記録（トランスクリプト）を開始する。-Appendで既存ファイルに追記する。
     try {
         Start-Transcript -Path $LogFile -Append -ErrorAction Stop
         $transcriptStarted = $true
@@ -68,10 +65,8 @@ try {
         Write-Warning "トランスクリプトの開始に失敗しました。ログは記録されません。エラー: $($_.Exception.Message)"
     }
     # --- フェーズ1: 実行前チェック ---
-    # スクリプトの実行に必要な管理者権限があるかを確認する。
     # 下のタスク削除にも管理者権限が要るため、それより先に確かめる。
-    if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        # 管理者権限がない場合は、処理を中断する。
+    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         throw "管理者権限がありません。管理者としてPowerShellを再実行してください。"
     }
     # 過去の実行で残存している可能性のある自動実行タスクを、安全のために削除する。
@@ -82,11 +77,9 @@ try {
     # 1回のスクリプト実行の中では一度読み込めば足りるため、周回のループに入る前に1回だけ行う。
     Write-Host "----------------------------------------------------"
     Write-Host "[準備] 依存モジュール(PSWindowsUpdate)のセットアップ" -ForegroundColor Cyan
-    # 'PSWindowsUpdate'モジュールがインストール済みかを確認する。
     if (Get-Module -ListAvailable -Name PSWindowsUpdate) {
         Write-Host "-> 依存モジュールはインストール済み。" -ForegroundColor Green
     } else {
-        # 未インストールの場合、依存関係にあるNuGetプロバイダーを準備する。
         Write-Host "-> 依存モジュールをインストールします..." -ForegroundColor Yellow
         # 失敗したまま進むと「インストール完了」と誤って表示されるため、失敗したらここで中断する。
         try {
@@ -95,14 +88,12 @@ try {
             if (-not $nugetProvider) {
                 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction Stop
             }
-            # 'PSWindowsUpdate'モジュールを全ユーザー向けにインストールする。
             Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers -ErrorAction Stop
         } catch {
             throw "依存モジュール(PSWindowsUpdate)のインストールに失敗しました。インターネット接続を確認してください: $($_.Exception.Message)"
         }
         Write-Host "-> インストール完了。" -ForegroundColor Green
     }
-    # モジュールを現在のセッションにインポートして利用可能な状態にする。
     Import-Module PSWindowsUpdate -Force -ErrorAction Stop
 
     # --- フェーズ2: Windows Update メインループ ---
@@ -120,28 +111,22 @@ try {
         # --- [1/5] 更新プログラムのスキャン ---
         Write-Host "----------------------------------------------------"
         Write-Host "`n[1/5] 更新プログラムをスキャン中..." -ForegroundColor Cyan
-        # Microsoft Updateサーバーに接続し、利用可能な更新プログラムを取得する。
         $updates = Get-WindowsUpdate -MicrosoftUpdate -ErrorAction Stop
 
         # --- 更新が存在しない場合の処理 ---
-        # 利用可能な更新プログラムが一つもなかった場合の処理。
         if (-not $updates) {
             Write-Host "`n>> 更新プログラムは検出されませんでした。システムは最新です。" -ForegroundColor Green
             Write-Host ">> すべての処理が正常に終わりました。"
-            # ループを脱出し、スクリプトを正常終了させる。
             break
         }
 
         # --- [2/5] 検出された更新プログラムのリスト表示 ---
-        # 見つかった更新の数を表示し、その一覧を表形式で出力する。
         Write-Host ("`n[2/5] {0}個の更新を検出。" -f $updates.Count) -ForegroundColor Yellow
         $updates | Select-Object Title, KB, Size | Format-Table
 
         # --- [3/5] 再起動後の自動実行設定 ---
         Write-Host "`n[3/5] 再起動後にスクリプトを管理者権限で自動実行するよう設定..." -ForegroundColor Cyan
-        # タスクスケジューラの登録処理でエラーが発生した場合に備える。
         try {
-            # タスクとして実行するアクション（このスクリプト自身）を定義する。
             # 5.1 は非推奨のため、PowerShell 7 が入っていれば、再起動のあとは 7 で動かす。
             # 7 を入れた直後は、今動いている PowerShell の PATH に反映されていないため、標準のインストール先も調べる。
             $powerShellExe = Join-Path $PSHOME 'powershell.exe'
@@ -154,13 +139,9 @@ try {
             }
             Write-Host "-> 再起動のあとは次の PowerShell で動かします: $powerShellExe" -ForegroundColor DarkGray
             $taskAction = New-ScheduledTaskAction -Execute $powerShellExe -Argument "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -Round $($Round + 1)"
-            # タスクを実行するトリガー（ユーザーのログオン時）を定義する。
             $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
-            # スクリプトを実行している現在のユーザーのIDを確実に取得する。
             $currentUserId = ([System.Security.Principal.WindowsIdentity]::GetCurrent()).Name
-            # タスクの実行者情報と権限レベル（最高の権限）を定義する。
             $taskPrincipal = New-ScheduledTaskPrincipal -UserId $currentUserId -LogonType Interactive -RunLevel Highest
-            # 上記で定義したアクション、トリガー、プリンシパルを組み合わせてタスクをOSに登録する。
             Register-ScheduledTask -TaskName $TaskName -Action $taskAction -Trigger $taskTrigger -Principal $taskPrincipal -Force -ErrorAction Stop
             Write-Host "-> タスクスケジューラに '$TaskName' を登録しました。" -ForegroundColor Green
         } catch {
@@ -203,23 +184,17 @@ try {
         # 再起動しなかったので、次のループのために登録した自動実行タスクは不要なため削除する。
         Write-Host "-> 自動実行タスクをクリーンアップします..." -ForegroundColor DarkGray
         Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
-        # 次のスキャンに移る前に短い待機時間を設ける。
         Write-Host "-> 5秒後に次のスキャンを開始します..."
         Start-Sleep -Seconds 5
         $Round++
-        # continueキーワードでwhileループの先頭に戻り、再度更新スキャンから処理を始める。
-        continue
     }
 
     # --- フェーズ3: 正常終了時のクリーンアップ ---
     # whileループが正常にbreakされた（更新がなくなった）場合に実行される。
     Write-Host "`nすべての処理が完了しました。"
-    # 念のため、残存している可能性のある自動実行タスクを削除する。
-    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
 
 } catch {
     # --- フェーズ4: 例外処理 ---
-    # スクリプト全体のtryブロック内で発生した、捕捉可能な全てのエラーをここで処理する。
     $exitCode = 1
     Write-Host "`n致命的なエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
     if ($transcriptStarted) {
@@ -236,7 +211,6 @@ try {
 
 } finally {
     # --- フェーズ5: 最終処理 ---
-    # 処理が正常に終了しても、エラーで中断しても、必ずこのブロックが最後に実行される。
     # ログ記録（トランスクリプト）が実行中の場合、確実に停止させてファイルを閉じる。
     if ($transcriptStarted) {
         Stop-Transcript
