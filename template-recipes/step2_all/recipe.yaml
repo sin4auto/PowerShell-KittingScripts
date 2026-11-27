@@ -406,84 +406,95 @@ phase2:
       checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
       installCommand: 'code --install-extension {package}'
       packages:
-        # [UI / 表示]
+        # 拡張パックに入っている拡張でも、使うものは1つずつ書く。パックの中身は作者の都合で変わることがあるため。
+        # [表示]
         - description: '画面の日本語化'
           name: ms-ceintl.vscode-language-pack-ja
-        - description: 'インデントの色分け'
+        - description: 'インデントの深さ別の色分け'
           name: oderwat.indent-rainbow
         - description: '全角スペースの強調表示'
           name: mosapride.zenkaku
-        - description: 'コメントの種類別の色分け'
+        - description: 'コメントの種類別の色分け（TODO・注意など）'
           name: aaron-bond.better-comments
-        - description: 'エラー・警告の行内表示'
+        - description: 'エラー・警告を行の横に表示'
           name: usernamehw.errorlens
-        - description: 'EditorConfig（書式の統一）'
+        # [編集の補助]
+        - description: 'EditorConfig（インデントや改行の書式をファイルでそろえる）'
           name: EditorConfig.EditorConfig
-        # [ユーティリティ / Markdown]
-        - description: '印刷（コードや Markdown をブラウザー経由で印刷・PDF 化）'
-          name: pdconsec.vscode-print
-        - description: 'Markdown の編集支援'
-          name: yzhang.markdown-all-in-one
-        - description: 'TODO コメントの一覧表示'
-          name: gruntfuggly.todo-tree
         - description: 'ファイル パスの入力補完'
           name: christian-kohler.path-intellisense
-        - description: 'dotenv ファイルの編集支援'
-          name: mikestead.dotenv
-        # [バージョン管理 / コラボ / CI]
-        - description: 'Git 機能の強化'
+        - description: 'TODO コメントの一覧表示'
+          name: gruntfuggly.todo-tree
+        # [Git / GitHub]
+        - description: 'Git の履歴や、行ごとの変更者の表示（GitLens）'
           name: eamodio.gitlens
-        - description: 'Git のブランチ ツリーの表示'
+        - description: 'Git のコミット履歴をグラフで表示'
           name: mhutchie.git-graph
-        - description: 'GitHub のプル リクエストのレビュー'
+        - description: 'GitHub のプル リクエストと Issue の操作'
           name: GitHub.vscode-pull-request-github
-        - description: 'GitHub Actions の編集支援'
+        - description: 'GitHub Actions（CI）のワークフローの編集支援'
           name: github.vscode-github-actions
-        - description: 'Live Share（共同編集）'
-          name: MS-vsliveshare.vsliveshare
-        # [リモート / コンテナ / Docker]
+        # [リモート / コンテナ / 共同編集]
         - description: 'WSL 上のプロジェクトの直接編集'
           name: ms-vscode-remote.remote-wsl
-        - description: 'Remote SSH（リモート開発）'
+        - description: 'SSH 接続先のプロジェクトの直接編集（Remote - SSH）'
           name: ms-vscode-remote.remote-ssh
-        - description: 'Dev Containers（コンテナ内開発）'
+        - description: 'コンテナ内のプロジェクトの直接編集（Dev Containers）'
           name: ms-vscode-remote.remote-containers
-        - description: 'コンテナ操作（Container Tools。旧 Docker 拡張）'
+        - description: 'コンテナの操作（Container Tools。旧 Docker 拡張）'
           name: ms-azuretools.vscode-containers
-        # [デバッグ / ビルド / カバレッジ]
-        - description: 'CMake との連携'
-          name: ms-vscode.cmake-tools
-        - description: 'Makefile の編集支援'
-          name: ms-vscode.makefile-tools
-        - description: 'LLDB デバッガー（Rust・C・C++）'
-          name: vadimcn.vscode-lldb
-        - description: 'テストカバレッジの表示'
-          name: ryanluker.vscode-coverage-gutters
-        # [言語サポート]
+        - description: '複数人での同時編集（Live Share）'
+          name: MS-vsliveshare.vsliveshare
+        # [Python]
         - description: 'Python の言語サポート'
           name: ms-python.python
-        - description: 'Python の型解析（Pylance）'
+        - description: 'Python の入力補完と型チェック（Pylance）'
           name: ms-python.vscode-pylance
+        - description: 'Python の書き方チェックと整形（Ruff）'
+          name: charliermarsh.ruff
         - description: 'Jupyter ノートブック'
           name: ms-toolsai.jupyter
+        # [C / C++]
         - description: 'C・C++ の言語サポート（拡張パック）'
           name: ms-vscode.cpptools-extension-pack
+        - description: 'CMake（C・C++ のビルド設定ツール）との連携'
+          name: ms-vscode.cmake-tools
+        - description: 'Makefile の編集とビルドの支援'
+          name: ms-vscode.makefile-tools
+        # [ほかの言語]
         - description: 'Rust の言語サポート（rust-analyzer）'
           name: rust-lang.rust-analyzer
-        - description: 'Haskell の言語サポート'
-          name: haskell.haskell
         - description: 'Go の言語サポート'
           name: golang.Go
+        - description: 'Haskell の言語サポート'
+          name: haskell.haskell
         - description: 'C# の言語サポート'
           name: ms-dotnettools.csharp
         - description: 'Java の言語サポート'
           name: redhat.java
         - description: 'PowerShell の言語サポート'
           name: ms-vscode.powershell
+        # [デバッグ / テスト]
+        - description: 'Rust・C・C++ のデバッガー（LLDB）'
+          name: vadimcn.vscode-lldb
+        - description: 'テストで実行された行の表示（カバレッジ）'
+          name: ryanluker.vscode-coverage-gutters
+        # [シェル / 設定ファイル]
+        - description: 'シェルスクリプトの書き方チェック（ShellCheck。Windows 用の本体は拡張に入っている）'
+          name: timonwong.shellcheck
         - description: 'YAML の言語サポート'
           name: redhat.vscode-yaml
-        - description: 'TOML の言語サポート（Cargo や設定ファイル）'
+        - description: 'TOML の言語サポート（Cargo.toml など）'
           name: tamasfe.even-better-toml
+        - description: '.env ファイルの色分け表示'
+          name: mikestead.dotenv
+        # [Markdown / 印刷]
+        - description: 'Markdown の編集支援（目次・ショートカットなど）'
+          name: yzhang.markdown-all-in-one
+        - description: 'Markdown の書き方チェック（markdownlint）'
+          name: DavidAnson.vscode-markdownlint
+        - description: '印刷（コードや Markdown をブラウザー経由で印刷・PDF 化）'
+          name: pdconsec.vscode-print
 
     # --- PowerShell モジュール（PowerShell Gallery） ---
     - managerName: 'psgallery'

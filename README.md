@@ -120,30 +120,25 @@ phase2:
       checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
       installCommand: 'code --install-extension {package}'
       packages:
-        # [UI / 表示]
+        # 拡張パックに入っている拡張でも、使うものは1つずつ書く。パックの中身は作者の都合で変わることがあるため。
+        # [表示]
         - description: '画面の日本語化'
           name: ms-ceintl.vscode-language-pack-ja
-        - description: 'インデントの色分け'
+        - description: 'インデントの深さ別の色分け'
           name: oderwat.indent-rainbow
         - description: '全角スペースの強調表示'
           name: mosapride.zenkaku
-        - description: 'コメントの種類別の色分け'
+        - description: 'コメントの種類別の色分け（TODO・注意など）'
           name: aaron-bond.better-comments
-        - description: 'エラー・警告の行内表示'
+        - description: 'エラー・警告を行の横に表示'
           name: usernamehw.errorlens
-        - description: 'EditorConfig（書式の統一）'
+        # [編集の補助]
+        - description: 'EditorConfig（インデントや改行の書式をファイルでそろえる）'
           name: EditorConfig.EditorConfig
-        # [ユーティリティ / Markdown]
-        - description: '印刷（コードや Markdown をブラウザー経由で印刷・PDF 化）'
-          name: pdconsec.vscode-print
-        - description: 'Markdown の編集支援'
-          name: yzhang.markdown-all-in-one
-        - description: 'TODO コメントの一覧表示'
-          name: gruntfuggly.todo-tree
         - description: 'ファイル パスの入力補完'
           name: christian-kohler.path-intellisense
-        - description: 'dotenv ファイルの編集支援'
-          name: mikestead.dotenv
+        - description: 'TODO コメントの一覧表示'
+          name: gruntfuggly.todo-tree
 ```
 
 ## テンプレートレシピの活用
@@ -347,30 +342,25 @@ phase2:
       checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
       installCommand: 'code --install-extension {package}'
       packages:
-        # [UI / Display]
+        # List each extension you use, even if an extension pack includes it, because a pack's contents can change.
+        # [Display]
         - description: 'Japanese UI localization'
           name: ms-ceintl.vscode-language-pack-ja
-        - description: 'Color-coded indentation'
+        - description: 'Indentation colored by depth'
           name: oderwat.indent-rainbow
         - description: 'Highlighted full-width spaces'
           name: mosapride.zenkaku
-        - description: 'Color-coded comments by type'
+        - description: 'Comments colored by type (TODO, warnings, and so on)'
           name: aaron-bond.better-comments
-        - description: 'Inline errors and warnings'
+        - description: 'Errors and warnings shown next to the line'
           name: usernamehw.errorlens
-        - description: 'EditorConfig (consistent formatting)'
+        # [Editing aids]
+        - description: 'EditorConfig (keeps indentation and line endings consistent through a file)'
           name: EditorConfig.EditorConfig
-        # [Utilities / Markdown]
-        - description: 'Printing (print code or Markdown via a browser, or save as PDF)'
-          name: pdconsec.vscode-print
-        - description: 'Markdown editing support'
-          name: yzhang.markdown-all-in-one
-        - description: 'List of TODO comments'
-          name: gruntfuggly.todo-tree
         - description: 'File path completion'
           name: christian-kohler.path-intellisense
-        - description: 'dotenv file editing support'
-          name: mikestead.dotenv
+        - description: 'List of TODO comments'
+          name: gruntfuggly.todo-tree
 ```
 
 ## Using Template Recipes
