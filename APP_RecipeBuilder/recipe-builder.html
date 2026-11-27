@@ -1418,8 +1418,8 @@ phase2:
           name: 'hls recommended'
 
     - managerName: 'vscode'
-      # 終了コードだけで判定するため、findstr が見つけた行はログに出さない。
-      checkCommand: 'code --list-extensions | findstr /i /c:"{package}" > $null'
+      # 1行に ID が1つずつ出るので、行全体で比べる（大文字・小文字は区別しない）。部分一致だと、ms-toolsai.jupyter を ms-toolsai.jupyter-keymap と取り違えるため。
+      checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
       installCommand: 'code --install-extension {package}'
       packages:
         # [UI / 表示]
@@ -3335,8 +3335,8 @@ phase1:
 phase2:
   packageManagers:
     - managerName: 'vscode'
-      # 終了コードだけで判定するため、findstr が見つけた行はログに出さない。
-      checkCommand: 'code --list-extensions | findstr /i /c:"{package}" > $null'
+      # 1行に ID が1つずつ出るので、行全体で比べる（大文字・小文字は区別しない）。部分一致だと、ms-toolsai.jupyter を ms-toolsai.jupyter-keymap と取り違えるため。
+      checkCommand: 'if (-not (code --list-extensions | Where-Object { $_ -eq ''{package}'' })) { throw ''未インストール'' }'
       installCommand: 'code --install-extension {package}'
       packages:
         # [UI / 表示]
