@@ -1134,6 +1134,10 @@ phase1:
     # [開発環境の準備]
     - description: 'Haskell ツールチェーン（GHCup）を公式スクリプトでインストールする'
       command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
+    - description: 'cabal で入れるツールの置き場所（AppData\Roaming\cabal\bin）を PATH に足す（今のユーザー）'
+      # GHCup の導入では PATH に入らず、cabal-global のツールをコマンド名で呼べなかったため。すでに入っていれば何もしない。
+      # 値は %APPDATA% のまま足す。ほかの項目の %...% を展開した値で上書きしないよう、レジストリを直接読み書きする。
+      command: '$cabalBin = Join-Path $env:APPDATA ''cabal\bin''; if (([Environment]::GetEnvironmentVariable(''Path'', ''User'') -split '';'') -notcontains $cabalBin) { $rawPath = (Get-Item ''HKCU:\Environment'').GetValue(''Path'', '''', ''DoNotExpandEnvironmentNames''); Set-ItemProperty -Path ''HKCU:\Environment'' -Name ''Path'' -Type ExpandString -Value ((@($rawPath -split '';'' | Where-Object { $_ }) + ''%APPDATA%\cabal\bin'') -join '';'') }'
 
   # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -1460,9 +1464,9 @@ phase2:
 
     # --- cabal: グローバルCLIユーティリティ ---
     - managerName: 'cabal-global'
-      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
-      checkCommand: 'if (-not (Get-Command ''{package}'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
-      installCommand: 'cabal update; cabal install --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      # PATH ではなく、--installdir で決めた置き場所のファイルで調べる。PATH にある同じ名前の別のツールと取り違えず、PATH の反映前でも判定できるようにするため。
+      checkCommand: 'if (-not (Test-Path "$env:APPDATA\cabal\bin\{package}.exe")) { throw ''未インストール'' }'
+      installCommand: 'cabal update; cabal install --installdir=$env:APPDATA\cabal\bin --overwrite-policy=always {package}'
       packages:
         - description: 'コード整形（fourmolu）'
           name: fourmolu
@@ -1475,9 +1479,9 @@ phase2:
     # hlint 3.10 が使う ghc-lib-parser 9.12 は base < 4.22 が条件で、GHC 9.14（base 4.22）では依存関係を解決できない。
     # 既定の GHC（ghcup-ghc で --set したもの）は変えずに 9.10.3 を入れ、そちらでビルドする。hlint が GHC 9.14 に対応したら cabal-global に戻す。
     - managerName: 'cabal-global-ghc910'
-      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
-      checkCommand: 'if (-not (Get-Command ''{package}'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
-      installCommand: 'ghcup install ghc 9.10.3; cabal update; cabal install -w ghc-9.10.3 --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      # PATH ではなく、--installdir で決めた置き場所のファイルで調べる。PATH にある同じ名前の別のツールと取り違えず、PATH の反映前でも判定できるようにするため。
+      checkCommand: 'if (-not (Test-Path "$env:APPDATA\cabal\bin\{package}.exe")) { throw ''未インストール'' }'
+      installCommand: 'ghcup install ghc 9.10.3; cabal update; cabal install -w ghc-9.10.3 --installdir=$env:APPDATA\cabal\bin --overwrite-policy=always {package}'
       packages:
         - description: '静的解析（hlint。GHC 9.10.3 でビルド）'
           name: hlint
@@ -1992,6 +1996,10 @@ phase1:
     # [開発環境の準備]
     - description: 'Haskell ツールチェーン（GHCup）を公式スクリプトでインストールする'
       command: '$env:BOOTSTRAP_HASKELL_NONINTERACTIVE=1; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1''))'
+    - description: 'cabal で入れるツールの置き場所（AppData\Roaming\cabal\bin）を PATH に足す（今のユーザー）'
+      # GHCup の導入では PATH に入らず、cabal-global のツールをコマンド名で呼べなかったため。すでに入っていれば何もしない。
+      # 値は %APPDATA% のまま足す。ほかの項目の %...% を展開した値で上書きしないよう、レジストリを直接読み書きする。
+      command: '$cabalBin = Join-Path $env:APPDATA ''cabal\bin''; if (([Environment]::GetEnvironmentVariable(''Path'', ''User'') -split '';'') -notcontains $cabalBin) { $rawPath = (Get-Item ''HKCU:\Environment'').GetValue(''Path'', '''', ''DoNotExpandEnvironmentNames''); Set-ItemProperty -Path ''HKCU:\Environment'' -Name ''Path'' -Type ExpandString -Value ((@($rawPath -split '';'' | Where-Object { $_ }) + ''%APPDATA%\cabal\bin'') -join '';'') }'
 
 # --- Winget (基本アプリケーションのインストール) ---
   wingetInstall:
@@ -2173,9 +2181,9 @@ phase2:
 
     # --- cabal: グローバルCLIユーティリティ ---
     - managerName: 'cabal-global'
-      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
-      checkCommand: 'if (-not (Get-Command ''{package}'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
-      installCommand: 'cabal update; cabal install --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      # PATH ではなく、--installdir で決めた置き場所のファイルで調べる。PATH にある同じ名前の別のツールと取り違えず、PATH の反映前でも判定できるようにするため。
+      checkCommand: 'if (-not (Test-Path "$env:APPDATA\cabal\bin\{package}.exe")) { throw ''未インストール'' }'
+      installCommand: 'cabal update; cabal install --installdir=$env:APPDATA\cabal\bin --overwrite-policy=always {package}'
       packages:
         - description: 'コード整形（fourmolu）'
           name: fourmolu
@@ -2188,9 +2196,9 @@ phase2:
     # hlint 3.10 が使う ghc-lib-parser 9.12 は base < 4.22 が条件で、GHC 9.14（base 4.22）では依存関係を解決できない。
     # 既定の GHC（ghcup-ghc で --set したもの）は変えずに 9.10.3 を入れ、そちらでビルドする。hlint が GHC 9.14 に対応したら cabal-global に戻す。
     - managerName: 'cabal-global-ghc910'
-      # 別の PowerShell を起動せず、同じ PowerShell の中で調べる。5.1 が入っていない将来の Windows でも動くようにするため。
-      checkCommand: 'if (-not (Get-Command ''{package}'' -ErrorAction SilentlyContinue)) { throw ''未インストール'' }'
-      installCommand: 'ghcup install ghc 9.10.3; cabal update; cabal install -w ghc-9.10.3 --installdir=%APPDATA%\cabal\bin --overwrite-policy=always {package}'
+      # PATH ではなく、--installdir で決めた置き場所のファイルで調べる。PATH にある同じ名前の別のツールと取り違えず、PATH の反映前でも判定できるようにするため。
+      checkCommand: 'if (-not (Test-Path "$env:APPDATA\cabal\bin\{package}.exe")) { throw ''未インストール'' }'
+      installCommand: 'ghcup install ghc 9.10.3; cabal update; cabal install -w ghc-9.10.3 --installdir=$env:APPDATA\cabal\bin --overwrite-policy=always {package}'
       packages:
         - description: '静的解析（hlint。GHC 9.10.3 でビルド）'
           name: hlint
