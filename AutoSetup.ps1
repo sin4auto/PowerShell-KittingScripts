@@ -198,7 +198,9 @@ if ($setupPhase -ne '2') {
         # wingetのソースリポジトリをリセットし、潜在的な問題を解消する。
         # winget 自体が見つからない場合に前の終了コードを成功と取り違えないよう、「未判定」に戻す。
         $global:LASTEXITCODE = $null
-        winget source reset --force
+        # winget が画面に直接書くと、トランスクリプトは全角文字を2回ずつ記録するため、
+        # この先の winget はすべて Out-Host を通して、ログに正しく残す。
+        winget source reset --force | Out-Host
         if ($LASTEXITCODE -ne 0) {
             # ソースが壊れたままだと後のインストールがまとめて失敗するため、その原因として分かるように残す。
             Write-Warning "-> wingetのソースのリセットに失敗しました。終了コード: $LASTEXITCODE"
@@ -210,7 +212,7 @@ if ($setupPhase -ne '2') {
             $global:LASTEXITCODE = $null
             # ソースを winget に固定する。msstore が証明書エラー(0x8a15005e)などで使えないと、
             # ソース未指定の winget はインストール先を決められず、全アプリの導入が失敗するため。
-            winget list --id $wingetApp.id -e --source winget --accept-source-agreements --disable-interactivity
+            winget list --id $wingetApp.id -e --source winget --accept-source-agreements --disable-interactivity | Out-Host
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "-> [$($wingetApp.id)] をインストールします..."
                 $wingetArgs = @(
@@ -223,7 +225,7 @@ if ($setupPhase -ne '2') {
                     $wingetArgs += @([regex]::Matches($wingetApp.options, '"[^"]*"|\S+') | ForEach-Object { $_.Value.Trim('"') })
                     Write-Host "-> 個別オプション ($($wingetApp.options)) を適用します。" -ForegroundColor Yellow
                 }
-                winget @wingetArgs
+                winget @wingetArgs | Out-Host
                 if ($LASTEXITCODE -eq 0) {
                     Write-Host "-> [$($wingetApp.id)] のインストールに成功しました。`n" -ForegroundColor Green
                 }
@@ -273,7 +275,8 @@ if ($setupPhase -ne '2') {
     # winget 自体が見つからない場合に前の終了コードを成功と取り違えないよう、「未判定」に戻す。
     $global:LASTEXITCODE = $null
     # msstore ソースは証明書エラーや利用規約の表示で止まることがあるため、install・list と同じく winget ソースに限る。
-    winget upgrade --all --source winget --silent --accept-package-agreements --accept-source-agreements
+    # 全角文字がログで2回ずつにならないよう、ほかの winget と同じく Out-Host を通す。
+    winget upgrade --all --source winget --silent --accept-package-agreements --accept-source-agreements | Out-Host
     # 再起動で仕上がる更新は、このあとの再起動で完了するため失敗にしない。
     if (($LASTEXITCODE -ne 0) -and ($LASTEXITCODE -ne $wingetRebootRequiredToFinish)) {
         Write-Warning "-> アプリ全体の更新プロセス中にエラーが報告されました。終了コード: $LASTEXITCODE"
