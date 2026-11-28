@@ -114,7 +114,7 @@ foreach ($file in $Path) {
     $problemCountBefore = $problems.Count
     try {
         # AutoSetup.ps1 は UTF-8 として読むため、別の文字コードで保存されていたら文字化けする前にここで止める。
-        $text = [System.Text.UTF8Encoding]::new($false, $true).GetString([System.IO.File]::ReadAllBytes($file)).TrimStart([char]0xFEFF)
+        $text = [System.Text.UTF8Encoding]::new($false, $true).GetString([System.IO.File]::ReadAllBytes($fullPath)).TrimStart([char]0xFEFF)
     }
     catch {
         Add-Problem "UTF-8 として読めません。UTF-8 で保存し直してください。"
