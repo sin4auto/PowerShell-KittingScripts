@@ -4,6 +4,10 @@
       "type": "stdio",
       "command": "cmd",
       "args": ["/c", "npx", "-y", "@upstash/context7-mcp@latest"]
+    },
+    "microsoft-learn": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
     }
   }
 }
