@@ -4,7 +4,7 @@
 # 使い方: bash setup-Rust-Go-Haskell.sh   または   curl -fsSL <raw URL> | bash
 set -euo pipefail
 
-GO_VERSION="1.22.5"
+GO_VERSION="1.27.4"
 GO_INSTALL_DIR="/usr/local"
 GO_BIN="${GO_INSTALL_DIR}/go/bin"
 CARGO_BIN="$HOME/.cargo/bin"
@@ -71,7 +71,7 @@ install_rust() {
 
 install_go() {
   path_append "$GO_BIN"
-  # 出力例: "go version go1.22.5 linux/amd64"。1.22.50 などを誤って一致させないよう、前後の区切りまで比べる
+  # 出力例: "go version go1.27.4 linux/amd64"。1.27.40 などを誤って一致させないよう、前後の区切りまで比べる
   if has go && [[ "$(go version)" == *" go${GO_VERSION} "* ]]; then
     log "Go ${GO_VERSION} is already installed."
   else

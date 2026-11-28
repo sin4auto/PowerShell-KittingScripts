@@ -4,8 +4,8 @@
 # 使い方: bash setup-wsl.sh   または   curl -fsSL <raw URL> | bash
 set -euo pipefail
 
-NVM_INSTALL_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh"
-PYTHON_VERSION="3.12.4"
+NVM_INSTALL_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.41.0/install.sh"
+PYTHON_VERSION="3.14.10"
 PYENV_INSTALL_URL="https://pyenv.run"
 UV_INSTALL_URL="https://astral.sh/uv/install.sh"
 CHROME_DEB_URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
