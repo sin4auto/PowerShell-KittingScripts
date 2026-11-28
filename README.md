@@ -189,7 +189,7 @@ phase2:
 - 手動で PC を再起動したあと、管理者の PowerShell で次のコマンドを実行すると、フェーズ 2 を始められます。
 
 ```powershell
-& "C:\Work\PowerShell-KittingScripts\AutoSetup.ps1" -setupPhase 2
+& "C:\Users\PowerShell-KittingScripts\AutoSetup.ps1" -setupPhase 2
 ```
 
 （パスは、リポジトリを置いた場所に読み替えてください。）
@@ -409,7 +409,7 @@ If any items fail, they are listed at the end of the run.
 - Restart the PC manually, then run the following command in an administrator PowerShell to start phase 2.
 
 ```powershell
-& "C:\Work\PowerShell-KittingScripts\AutoSetup.ps1" -setupPhase 2
+& "C:\Users\PowerShell-KittingScripts\AutoSetup.ps1" -setupPhase 2
 ```
 
 (Replace the path with where you placed the repository.)
