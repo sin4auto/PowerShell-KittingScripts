@@ -11,12 +11,12 @@ Windows 11 PC のキッティング（初期セットアップ）から開発環
 ## 主な機能
 
 - **Windows Update の全自動化**: 更新がなくなるまで、確認・インストール・再起動を無人で繰り返します。失敗し続ける更新があっても、上限の周回数で止まります。
-- **アプリの一括インストールと削除**: `winget` で、`recipe.yaml` に書いたアプリをまとめてインストールし、不要なプリインストールアプリを削除します。最後に、インストール済みのアプリをすべて更新します。
 - **Windows の設定変更**: エクスプローラーで拡張子を表示するなどの設定を `recipe.yaml` に書くだけで、スクリプトを編集せずに変えられます。
-- **開発環境の自動構築**: VS Code 拡張機能、`npm`、`pip` などのパッケージマネージャーを通じて、開発用のパッケージをまとめてインストールします。
+- **アプリの一括インストールと削除**: `winget` で、`recipe.yaml` に書いたアプリをまとめてインストールし、不要なプリインストールアプリを削除します。最後に、インストール済みのアプリをすべて更新します。
 - **再起動を挟んだ 2 フェーズ実行**: アプリのインストール（フェーズ 1）と、PATH 環境変数を使う開発ツールの導入（フェーズ 2）の間に再起動を挟みます。インストールしたばかりのコマンドが見つからない、という失敗を防ぎます。
-- **レシピ作成アプリ**: YAML を手で書かなくても、ブラウザーでチェックを付けるだけで `recipe.yaml` を作れます。
+- **開発環境の自動構築**: VS Code 拡張機能、`npm`、`pip` などのパッケージマネージャーを通じて、開発用のパッケージをまとめてインストールします。
 - **失敗を見逃さない結果表示**: 失敗した項目は最後に一覧で表示し、ログファイルにも残します。
+- **レシピ作成アプリ**: YAML を手で書かなくても、ブラウザーでチェックを付けるだけで `recipe.yaml` を作れます。
 
 ## 動作環境
 
@@ -234,12 +234,12 @@ Write what you want in **`recipe.yaml`** and run **`Start-Admin.bat`** as admini
 ## Key Features
 
 - **Fully automated Windows Update**: Checks, installs, and reboots unattended until no updates remain. Even if an update keeps failing, it stops at the round limit.
-- **Batch app installation and removal**: Uses `winget` to install the apps listed in `recipe.yaml` and remove unwanted preinstalled apps. At the end, it updates all installed apps.
 - **Windows settings changes**: Write settings such as showing file extensions in File Explorer in `recipe.yaml`, and change them without editing the scripts.
-- **Automated development environment setup**: Installs development packages at once through package managers such as VS Code extensions, `npm`, and `pip`.
+- **Batch app installation and removal**: Uses `winget` to install the apps listed in `recipe.yaml` and remove unwanted preinstalled apps. At the end, it updates all installed apps.
 - **Two-phase execution with a reboot in between**: Inserts a reboot between app installation (phase 1) and development tools that rely on the PATH environment variable (phase 2). This prevents failures where newly installed commands cannot be found.
-- **Recipe builder app**: Create `recipe.yaml` by ticking checkboxes in a browser, without writing YAML by hand.
+- **Automated development environment setup**: Installs development packages at once through package managers such as VS Code extensions, `npm`, and `pip`.
 - **Results that do not hide failures**: Failed items are listed at the end and also recorded in log files.
+- **Recipe builder app**: Create `recipe.yaml` by ticking checkboxes in a browser, without writing YAML by hand.
 
 ## Requirements
 
