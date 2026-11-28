@@ -25,7 +25,6 @@
 | `.html` | UTF-8 | CRLF | `Update-RecipeBuilder.ps1` も CRLF で書き出す |
 
 - Git Bash の `sed -i` は CRLF を LF に変えるので、使うなら `sed -b -i` にする
-- 変更後は `git ls-files --eol` で確かめる
 
 ## 書き方と確かめ方
 - PowerShell 5.1 でも動くようにする。7 専用の書き方（`&&`、`??`、三項演算子など）は使わない
@@ -35,6 +34,9 @@
   $errors = $null; [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'AutoSetup.ps1'), [ref]$null, [ref]$errors) | Out-Null; $errors.Count
   ```
 - 可能なら PSScriptAnalyzer（PowerShell の書き方チェックツール）でも確かめる
+- 文字コードと改行は `.\.github\scripts\Test-Encoding.ps1` で、上の表どおりかを確かめる（実行しても PC の設定は変わらない）。改行だけなら `git ls-files --eol` でも見られる
+- `recipe.yaml` と `template-recipes/` の書式は `.\.github\scripts\Test-Recipe.ps1` で確かめる（実行しても PC の設定は変わらない。`powershell-yaml` が必要）
+- `recipe.yaml` か `template-recipes/` を変えたら、`.\APP_RecipeBuilder\Update-RecipeBuilder.ps1` を実行して `recipe-builder.html` に埋め込み直す。忘れると CI が失敗する
 
 ## 方針
 - 個人用ツールなので、必要以上に作り込まない
