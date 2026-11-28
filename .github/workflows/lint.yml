@@ -50,6 +50,7 @@ jobs:
       - name: Install powershell-yaml
         shell: pwsh
         # AutoSetup.ps1 と同じ YAML 読み込みモジュールを使い、実行時と同じ読み方で確かめる。
+        # 版は AutoSetup.ps1 の $yamlModuleVersion と同じにする。変えるときは両方を直す。
         run: Install-Module -Name powershell-yaml -RequiredVersion 0.4.12 -Scope CurrentUser -Force
       - name: Check recipe.yaml and templates
         shell: pwsh
