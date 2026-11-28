@@ -74,6 +74,16 @@ jobs:
             exit 1
           }
 
+  encoding:
+    name: Encoding and line endings
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check encoding and line endings
+        shell: pwsh
+        # 文字コードや改行のずれは、実行するまで気づけない文字化けや動作不良の原因になるため、決まりどおりかを確かめる。
+        run: ./.github/scripts/Test-Encoding.ps1
+
   analyze:
     name: PSScriptAnalyzer
     runs-on: windows-latest

@@ -60,8 +60,9 @@ Windows 11 PC のキッティング（初期セットアップ）から開発環
 | `APP_RecipeBuilder/images/` | レシピ作成アプリの「画面を見る」で表示する、Windows の設定画面の画像です。 |
 | `キッティング手順.pdf` | キッティング全体の手順書です。図と画面写真で、再インストールから最終確認までを説明します。 |
 | `AutoSetup未対応の設定手順チートシート/` | スクリプトで自動化していない設定の手順書です（例: Hyper-V、WSL2 のセットアップ）。 |
-| `.github/workflows/lint.yml` | GitHub Actions の自動チェックです。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェック、レシピ作成アプリの埋め込みが最新かのチェックを行います。 |
+| `.github/workflows/lint.yml` | GitHub Actions の自動チェックです。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェック、レシピ作成アプリの埋め込みが最新かのチェック、文字コードと改行のチェックを行います。 |
 | `.github/scripts/Test-Recipe.ps1` | `recipe.yaml` と `template-recipes/` の書式チェックです。書き間違えたキーや、必須キーの抜けを見つけます。手元でも、`powershell-yaml` を入れた PowerShell で実行できます。 |
+| `.github/scripts/Test-Encoding.ps1` | 文字コードと改行のチェックです。`.ps1` は BOM 付き UTF-8 と CRLF、`.bat` は Shift-JIS と CRLF、`.sh` は BOM なし UTF-8 と LF になっているかなどを確かめます。手元でも実行できます。 |
 
 ## カスタマイズ
 
@@ -282,8 +283,9 @@ Write what you want in **`recipe.yaml`** and run **`Start-Admin.bat`** as admini
 | `APP_RecipeBuilder/images/` | Screenshots of Windows settings screens, shown by "画面を見る" (show the screen) in the recipe builder app. |
 | `キッティング手順.pdf` | Illustrated guide (in Japanese) to the whole kitting workflow, from reinstalling Windows to the final checks, with diagrams and screenshots. |
 | `AutoSetup未対応の設定手順チートシート/` | Guides for settings that the scripts do not automate (e.g., Hyper-V, WSL2 setup). |
-| `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7, coding style with PSScriptAnalyzer, the format of `recipe.yaml`, and whether the templates embedded in the recipe builder app are up to date. |
+| `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7, coding style with PSScriptAnalyzer, the format of `recipe.yaml`, whether the templates embedded in the recipe builder app are up to date, and file encodings and line endings. |
 | `.github/scripts/Test-Recipe.ps1` | Format check for `recipe.yaml` and `template-recipes/`. Finds misspelled keys and missing required keys. You can also run it locally in PowerShell with `powershell-yaml` installed. |
+| `.github/scripts/Test-Encoding.ps1` | Encoding and line-ending check. Confirms, for example, that `.ps1` files are UTF-8 with BOM and CRLF, `.bat` files are Shift-JIS and CRLF, and `.sh` files are UTF-8 without BOM and LF. You can also run it locally. |
 
 ## Customization
 
