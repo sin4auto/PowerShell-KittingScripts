@@ -1,3 +1,9 @@
 *.log
 note/
-.claude/
+
+# .claude/ は、個人用のファイル（settings.local.json や skills など）を公開しないよう無視する。
+# プロジェクトで共有する次の 3 つだけを管理する。
+.claude/*
+!.claude/CLAUDE.md
+!.claude/launch.json
+!.claude/settings.json
