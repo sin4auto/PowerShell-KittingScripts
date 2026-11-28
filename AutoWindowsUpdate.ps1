@@ -77,10 +77,12 @@ try {
     # 1回のスクリプト実行の中では一度読み込めば足りるため、周回のループに入る前に1回だけ行う。
     Write-Host "----------------------------------------------------"
     Write-Host "[準備] 依存モジュール(PSWindowsUpdate)のセットアップ" -ForegroundColor Cyan
-    if (Get-Module -ListAvailable -Name PSWindowsUpdate) {
-        Write-Host "-> 依存モジュールはインストール済み。" -ForegroundColor Green
+    # 新しい版で動きが変わって突然失敗しないよう、確かめた版に固定する。
+    $updateModuleVersion = '2.2.1.5'
+    if (Get-Module -ListAvailable -Name PSWindowsUpdate | Where-Object { $_.Version -eq [version]$updateModuleVersion }) {
+        Write-Host "-> 依存モジュール($updateModuleVersion)はインストール済み。" -ForegroundColor Green
     } else {
-        Write-Host "-> 依存モジュールをインストールします..." -ForegroundColor Yellow
+        Write-Host "-> 依存モジュール($updateModuleVersion)をインストールします..." -ForegroundColor Yellow
         # 失敗したまま進むと「インストール完了」と誤って表示されるため、失敗したらここで中断する。
         try {
             # PowerShell 7 には NuGet プロバイダーが最初から入っているため、足りないときだけ入れる。
@@ -88,13 +90,14 @@ try {
             if (-not $nugetProvider) {
                 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction Stop
             }
-            Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers -ErrorAction Stop
+            Install-Module -Name PSWindowsUpdate -RequiredVersion $updateModuleVersion -Force -SkipPublisherCheck -Confirm:$false -Scope AllUsers -ErrorAction Stop
         } catch {
             throw "依存モジュール(PSWindowsUpdate)のインストールに失敗しました。インターネット接続を確認してください: $($_.Exception.Message)"
         }
         Write-Host "-> インストール完了。" -ForegroundColor Green
     }
-    Import-Module PSWindowsUpdate -Force -ErrorAction Stop
+    # ほかの版も入っているときに、そちらを読み込まないよう版を指定する。
+    Import-Module PSWindowsUpdate -RequiredVersion $updateModuleVersion -Force -ErrorAction Stop
 
     # --- フェーズ2: Windows Update メインループ ---
     # 前の周で失敗した更新。一時的な失敗は次の周で直ることがあるため、1回目の失敗では止めずに覚えておく。
