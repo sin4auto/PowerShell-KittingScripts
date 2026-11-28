@@ -25,10 +25,8 @@ Windows 11 PC のキッティング（初期セットアップ）から開発環
   - `Start-Admin.bat` は、PowerShell 7（`pwsh.exe`）が入っていれば 7 で、なければ 5.1 でスクリプトを動かします。5.1 は非推奨になったため、7 を優先しています。
   - 5.1 で始めた場合も、再起動のときに 7 が入っていれば、再起動のあとは 7 で続けます（例：AutoSetup のフェーズ 1 で 7 を入れると、フェーズ 2 は 7 で動きます）。
 - 管理者権限
-  - 実際に PC を使うアカウントでサインインし、そのアカウントのまま「管理者として実行」してください。
-  - 一般ユーザーでサインインしたまま、別の管理者アカウントの名前とパスワードを入れて昇格すると、次の 2 つがその管理者アカウントの側に入ります。
-    - `HKCU`（今のユーザーのレジストリ）を変える設定（拡張子の表示など）
-    - フェーズ 2 を自動で始めるタスク（その管理者アカウントでサインインするまで、フェーズ 2 が始まりません）
+  - PC を使うアカウントでサインインし、そのまま「管理者として実行」してください。
+  - 別の管理者アカウントのパスワードを入れて実行すると、設定の一部がそのアカウントに入り、フェーズ 2 も自動で始まりません。
 - インターネット接続
 
 ## 推奨ワークフロー
@@ -249,10 +247,8 @@ Write what you want in **`recipe.yaml`** and run **`Start-Admin.bat`** as admini
   - `Start-Admin.bat` runs the scripts with PowerShell 7 (`pwsh.exe`) if it is installed, and with 5.1 otherwise. PowerShell 7 comes first because 5.1 is now deprecated.
   - Even if a run starts on 5.1, it continues on 7 after a restart when 7 is installed by then (for example, if AutoSetup installs 7 in phase 1, phase 2 runs on 7).
 - Administrator privileges
-  - Sign in with the account that will actually use the PC, and choose "Run as administrator" from that same account.
-  - If you stay signed in as a standard user and elevate by entering the name and password of a different administrator account, the following two go to that administrator account instead:
-    - Settings that change `HKCU` (the current user's registry), such as showing file extensions
-    - The task that starts phase 2 automatically (phase 2 does not start until you sign in with that administrator account)
+  - Sign in with the account that will use the PC, and choose "Run as administrator" from that account.
+  - If you enter a different administrator account's password instead, some settings go to that account, and phase 2 does not start automatically.
 - Internet connection
 
 ## Recommended Workflow
