@@ -19,7 +19,7 @@
 - `.bat`：Shift-JIS、改行 CRLF。UTF-8 にするとコマンドプロンプトで文字化けする。Edit/Write ツールでは編集できないので、文字コードを保つ方法で変更する
 - `.sh`：UTF-8、改行 LF（WSL で実行するため）
 - `recipe.yaml`：UTF-8、改行 CRLF
-- `.html`：UTF-8、改行 LF（`Update-RecipeBuilder.ps1` が LF で書き出すため）
+- `.html`：UTF-8、改行 CRLF（`Update-RecipeBuilder.ps1` も CRLF で書き出す）
 - 改行の扱いは `.gitattributes` で固定している。Git Bash の `sed -i` は CRLF を LF に変えてしまうので、使うなら `sed -b -i` にする。変更後は `git ls-files --eol` で確かめる
 
 ## 動作環境

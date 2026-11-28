@@ -22,8 +22,7 @@ $rules = @{
     # WSL で実行する。BOM があると 1 行目の「#!」が認識されず、CR があるとコマンド名の末尾に CR が付いて動かない。
     '.sh'   = @{ Encoding = 'Utf8NoBom'; Eol = 'LF' }
     '.yaml' = @{ Encoding = 'Utf8'; Eol = 'CRLF' }
-    # Update-RecipeBuilder.ps1 が LF で書き出すため。
-    '.html' = @{ Encoding = 'Utf8'; Eol = 'LF' }
+    '.html' = @{ Encoding = 'Utf8'; Eol = 'CRLF' }
 }
 
 # PowerShell 7 は、Shift-JIS などの古い文字コードを使う前に登録が要る。

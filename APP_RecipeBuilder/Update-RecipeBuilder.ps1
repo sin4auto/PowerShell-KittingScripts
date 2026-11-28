@@ -51,5 +51,6 @@ if ($begin -lt 0 -or $end -lt $begin) {
 }
 $afterBeginLine = $html.IndexOf("`n", $begin) + 1
 $newHtml = $html.Substring(0, $afterBeginLine) + ($blocks -join "`n") + "`n" + $html.Substring($end)
-[System.IO.File]::WriteAllText($htmlPath, $newHtml, $utf8)
+# 組み立ては LF で行い、書き出すときに、ほかの Windows 用ファイルと同じ CRLF にそろえる。
+[System.IO.File]::WriteAllText($htmlPath, ($newHtml -replace "`n", "`r`n"), $utf8)
 Write-Host "recipe-builder.html にテンプレートを $($sources.Count) 件埋め込みました。"

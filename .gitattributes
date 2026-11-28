@@ -12,8 +12,8 @@
 # WSL（Linux）で実行するシェルスクリプトは、常に LF
 *.sh   text eol=lf
 
-# レシピ作成アプリは LF で保存しているため、core.autocrlf=true の PC でも CRLF に変えさせない
-*.html text eol=lf
+# レシピ作成アプリも Windows で使うため、ほかの Windows 用ファイルと同じく CRLF で取り出す
+*.html text eol=crlf
 
 # バッチファイルは CRLF + Shift-JIS で保存しているため、Git に一切変換させない
 *.bat  -text
