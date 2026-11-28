@@ -60,7 +60,7 @@ Windows 11 PC のキッティング（初期セットアップ）から開発環
 | `APP_RecipeBuilder/images/` | レシピ作成アプリの「画面を見る」で表示する、Windows の設定画面の画像です。 |
 | `キッティング手順.pdf` | キッティング全体の手順書です。図と画面写真で、再インストールから最終確認までを説明します。 |
 | `AutoSetup未対応の設定手順チートシート/` | スクリプトで自動化していない設定の手順書です（例: Hyper-V、WSL2 のセットアップ）。 |
-| `.github/workflows/lint.yml` | GitHub Actions の自動チェックです。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェックを行います。 |
+| `.github/workflows/lint.yml` | GitHub Actions の自動チェックです。スクリプトは実行せず、PowerShell 5.1 / 7 での構文チェック、PSScriptAnalyzer による書き方チェック、`recipe.yaml` の書式チェック、レシピ作成アプリの埋め込みが最新かのチェックを行います。 |
 | `.github/scripts/Test-Recipe.ps1` | `recipe.yaml` と `template-recipes/` の書式チェックです。書き間違えたキーや、必須キーの抜けを見つけます。手元でも、`powershell-yaml` を入れた PowerShell で実行できます。 |
 
 ## カスタマイズ
@@ -282,7 +282,7 @@ Write what you want in **`recipe.yaml`** and run **`Start-Admin.bat`** as admini
 | `APP_RecipeBuilder/images/` | Screenshots of Windows settings screens, shown by "画面を見る" (show the screen) in the recipe builder app. |
 | `キッティング手順.pdf` | Illustrated guide (in Japanese) to the whole kitting workflow, from reinstalling Windows to the final checks, with diagrams and screenshots. |
 | `AutoSetup未対応の設定手順チートシート/` | Guides for settings that the scripts do not automate (e.g., Hyper-V, WSL2 setup). |
-| `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7, coding style with PSScriptAnalyzer, and the format of `recipe.yaml`. |
+| `.github/workflows/lint.yml` | GitHub Actions checks. Without running the scripts, it checks syntax on PowerShell 5.1 / 7, coding style with PSScriptAnalyzer, the format of `recipe.yaml`, and whether the templates embedded in the recipe builder app are up to date. |
 | `.github/scripts/Test-Recipe.ps1` | Format check for `recipe.yaml` and `template-recipes/`. Finds misspelled keys and missing required keys. You can also run it locally in PowerShell with `powershell-yaml` installed. |
 
 ## Customization

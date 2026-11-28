@@ -56,6 +56,24 @@ jobs:
         shell: pwsh
         run: ./.github/scripts/Test-Recipe.ps1
 
+  recipe-builder:
+    name: Recipe builder is up to date
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Re-embed templates
+        shell: pwsh
+        # レシピを直したのに埋め込み直すのを忘れると、レシピ作成アプリだけが古い中身のままになるため、作り直して比べる。
+        run: ./APP_RecipeBuilder/Update-RecipeBuilder.ps1
+      - name: Compare with the committed file
+        shell: pwsh
+        run: |
+          git diff --exit-code -- APP_RecipeBuilder/recipe-builder.html
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::error file=APP_RecipeBuilder/recipe-builder.html::埋め込まれたテンプレートが古いままです。APP_RecipeBuilder/Update-RecipeBuilder.ps1 を実行して、変わった recipe-builder.html もコミットしてください。"
+            exit 1
+          }
+
   analyze:
     name: PSScriptAnalyzer
     runs-on: windows-latest
