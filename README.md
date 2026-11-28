@@ -21,18 +21,16 @@ Windows 11 PC のキッティング（初期セットアップ）から開発環
 ## 動作環境
 
 - Windows 11
-- PowerShell 5.1（Windows に最初から入っているもの）または PowerShell 7
+- PowerShell 5.1 または PowerShell 7
   - `Start-Admin.bat` は、PowerShell 7（`pwsh.exe`）が入っていれば 7 で、なければ 5.1 でスクリプトを動かします。5.1 は非推奨になったため、7 を優先しています。
   - 5.1 で始めた場合も、再起動のときに 7 が入っていれば、再起動のあとは 7 で続けます（例：AutoSetup のフェーズ 1 で 7 を入れると、フェーズ 2 は 7 で動きます）。
 - 管理者権限
-- インターネット接続（`winget` でのインストールと、必要な PowerShell モジュールの自動インストールに使います）
-
-必要な PowerShell モジュール（`PSWindowsUpdate`、`powershell-yaml`）は、入っていなければスクリプトが自動でインストールします。
+- インターネット接続
 
 ## 推奨ワークフロー
 
 1. **OS のクリーンインストール**: Windows 11 をクリーンインストールします。
-2. **リポジトリの配置**: このリポジトリをダウンロードし、フォルダーを PC の好きな場所（例: `C:\Work`）に置きます。USB メモリや外付けストレージから実行しても、基本的には問題ありません（[実行場所ごとの注意点](#実行場所ごとの注意点) を参照）。
+2. **リポジトリの配置**: このリポジトリをダウンロードし、フォルダーを PC の好きな場所（例: `C:\Users`）に置きます。USB メモリや外付けストレージから実行しても、基本的には問題ありません（[実行場所ごとの注意点](#実行場所ごとの注意点) を参照）。
 3. **`recipe.yaml` の準備**: 次のどちらかの方法で、やりたいことを決めます。
    - [レシピ作成アプリ](#レシピ作成アプリ) でチェックを付けて保存し、リポジトリ直下の `recipe.yaml` と置き換えます。
    - `recipe.yaml` をテキストエディターで開き、不要な項目の行頭に `#` を付けてコメントアウトします。
@@ -243,18 +241,16 @@ Write what you want in **`recipe.yaml`** and run **`Start-Admin.bat`** as admini
 ## Requirements
 
 - Windows 11
-- PowerShell 5.1 (included with Windows) or PowerShell 7
+- PowerShell 5.1 or PowerShell 7
   - `Start-Admin.bat` runs the scripts with PowerShell 7 (`pwsh.exe`) if it is installed, and with 5.1 otherwise. PowerShell 7 comes first because 5.1 is now deprecated.
   - Even if a run starts on 5.1, it continues on 7 after a restart when 7 is installed by then (for example, if AutoSetup installs 7 in phase 1, phase 2 runs on 7).
 - Administrator privileges
-- Internet connection (used for `winget` installations and for installing the required PowerShell modules automatically)
-
-If the required PowerShell modules (`PSWindowsUpdate`, `powershell-yaml`) are missing, the scripts install them automatically.
+- Internet connection
 
 ## Recommended Workflow
 
 1. **Clean OS installation**: Install Windows 11 fresh.
-2. **Place the repository**: Download this repository and put the folder anywhere on the PC (e.g., `C:\Work`). Running it from a USB drive or other external storage is generally fine (see [Location-Specific Considerations](#location-specific-considerations)).
+2. **Place the repository**: Download this repository and put the folder anywhere on the PC (e.g., `C:\Users`). Running it from a USB drive or other external storage is generally fine (see [Location-Specific Considerations](#location-specific-considerations)).
 3. **Prepare `recipe.yaml`**: Decide what to do in one of these ways.
    - Tick items in the [recipe builder app](#recipe-builder-app), save, and replace `recipe.yaml` in the repository root.
    - Open `recipe.yaml` in a text editor and comment out unnecessary entries with `#` at the start of the line.
