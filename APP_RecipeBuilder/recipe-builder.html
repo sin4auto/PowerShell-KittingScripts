@@ -4722,7 +4722,8 @@ $('download-yaml').addEventListener('click', () => {
     toast('warn', 'まだ何も選ばれていません。', ['項目にチェックを付けるか、テンプレートから始めてください。']);
     return;
   }
-  const blob = new Blob([buildYaml()], { type: 'text/yaml;charset=utf-8' });
+  // 画面とコピーは LF のまま。保存するファイルだけ、リポジトリの recipe.yaml と同じ CRLF にそろえる。
+  const blob = new Blob([buildYaml().replace(/\n/g, '\r\n')], { type: 'text/yaml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = h('a', { href: url, download: 'recipe.yaml' });
   document.body.append(link);
